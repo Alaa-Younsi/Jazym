@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr" dir="ltr" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e0e12" media="(prefers-color-scheme: dark)" />
+
+    <!-- Pre-paint theme + language (see skill Phase 3 / 9.7).
+         script-src in vercel.json has NO 'unsafe-inline' — this runs on the
+         strength of a sha256 of its EXACT bytes. Editing it by one character
+         means recomputing that hash (see scripts/csp-hash.mjs) or dark mode
+         flashes on every load in production only. Keep the localStorage keys in
+         sync with ThemeProvider.tsx / LanguageProvider.tsx. -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("jazym-theme");
+          if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+          var l = localStorage.getItem("jazym-lang");
+          if (l === "ar" || l === "fr") {
+            document.documentElement.lang = l;
+            document.documentElement.dir = l === "ar" ? "rtl" : "ltr";
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/favicon.svg" color="#5b6fc7" />
+    <link rel="canonical" href="https://PLACEHOLDER-DOMAIN.tld/" />
+
+    <title>Jazym — Cahiers &amp; fournitures pédagogiques, paiement à la livraison</title>
+    <meta
+      name="description"
+      content="Jazym personnalise la vie de l'enseignant : cahiers journaliers, cahiers de fiches, registres d'appel, accessoires et kits de stratégies pédagogiques. Paiement à la livraison partout en Algérie."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Jazym" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Jazym" />
+    <meta property="og:title" content="Jazym — Cahiers &amp; fournitures pédagogiques" />
+    <meta
+      property="og:description"
+      content="Cahiers de l'enseignant, accessoires et kits de stratégies pédagogiques. Paiement à la livraison partout en Algérie."
+    />
+    <meta property="og:url" content="https://PLACEHOLDER-DOMAIN.tld/" />
+    <meta property="og:image" content="https://PLACEHOLDER-DOMAIN.tld/og-image.png" />
+    <meta property="og:image:secure_url" content="https://PLACEHOLDER-DOMAIN.tld/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Jazym — cahiers et fournitures pédagogiques" />
+    <meta property="og:locale" content="fr_DZ" />
+    <meta property="og:locale:alternate" content="ar_DZ" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Jazym — Cahiers &amp; fournitures pédagogiques" />
+    <meta
+      name="twitter:description"
+      content="Cahiers de l'enseignant, accessoires et kits de stratégies pédagogiques. Paiement à la livraison partout en Algérie."
+    />
+    <meta name="twitter:image" content="https://PLACEHOLDER-DOMAIN.tld/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "name": "Jazym",
+        "url": "https://PLACEHOLDER-DOMAIN.tld/",
+        "logo": "https://PLACEHOLDER-DOMAIN.tld/logo.webp",
+        "image": "https://PLACEHOLDER-DOMAIN.tld/og-image.png",
+        "description": "Cahiers de l'enseignant, accessoires et kits de stratégies pédagogiques en Algérie.",
+        "areaServed": "DZ",
+        "paymentAccepted": "Cash on delivery",
+        "currenciesAccepted": "DZD"
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <noscript>Jazym — activez JavaScript pour parcourir la boutique.</noscript>
+  </body>
+</html>
