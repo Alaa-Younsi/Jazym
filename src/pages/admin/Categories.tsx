@@ -14,6 +14,7 @@ import {
   type CategoryFormState,
 } from "@/hooks/useAdminData";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { responsiveSrcSet } from "@/lib/image";
 import { slugify } from "@/lib/utils";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { Category } from "@/types/db";
@@ -122,7 +123,15 @@ export default function Categories() {
             <AdminCard key={c.id} className="flex items-center gap-4">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-panel-2">
                 {c.image_url && (
-                  <img src={c.image_url} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={c.image_url}
+                    srcSet={responsiveSrcSet(c.image_url)}
+                    sizes="48px"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 )}
               </div>
               <div className="min-w-0 flex-1">

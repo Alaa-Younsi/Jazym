@@ -393,6 +393,18 @@ export default function Product() {
             </div>
           )}
 
+          {product.video_url && (
+            <video
+              controls
+              preload="none"
+              poster={image0 ?? undefined}
+              className="w-full rounded-card border border-line"
+              aria-label={t("productVideo")}
+            >
+              <source src={product.video_url} />
+            </video>
+          )}
+
           {!soldOut && (
             <InlineCheckout
               product={product}

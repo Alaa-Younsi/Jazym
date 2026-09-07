@@ -13,6 +13,7 @@ import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useReviews } from "@/hooks/useReviews";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { responsiveSrcSet } from "@/lib/image";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 import { pick } from "@/lib/utils";
 
@@ -106,7 +107,11 @@ export default function Landing() {
                 {c.image_url ? (
                   <img
                     src={c.image_url}
+                    srcSet={responsiveSrcSet(c.image_url)}
+                    sizes="(max-width: 640px) 100vw, 33vw"
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (

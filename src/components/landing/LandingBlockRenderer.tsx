@@ -8,6 +8,7 @@ import { SmartImage } from "@/components/ui/SmartImage";
 import { Stars } from "@/components/ui/Stars";
 import { useReviews } from "@/hooks/useReviews";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { responsiveSrcSet } from "@/lib/image";
 import type { LandingBlock, Product } from "@/types/db";
 import { list, localized, num, str } from "./blockData";
 
@@ -49,7 +50,14 @@ function HeroBlock({ data }: { data: Record<string, unknown> }) {
   return (
     <section className="relative overflow-hidden">
       {bg ? (
-        <img src={bg} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <img
+          src={bg}
+          srcSet={responsiveSrcSet(bg)}
+          sizes="100vw"
+          alt=""
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       ) : (
         <ProductPlaceholder
           name={localized(data, "title", lang) || "Jazym"}
