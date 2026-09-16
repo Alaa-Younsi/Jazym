@@ -12,37 +12,37 @@
 -- a plain text edit, nothing else depends on the wording.
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'langue-arabe', 'Langue arabe', 'اللغة العربية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Layla_and_Majnun2.jpg/960px-Layla_and_Majnun2.jpg',
+select 'langue-arabe', 'Langue arabe', 'اللغة العربية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Layla_and_Majnun2.jpg/960px-Layla_and_Majnun2.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'langue-arabe');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'langue-francaise', 'Langue française', 'اللغة الفرنسية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/French_language_and_conversation_%281891%29_%2814596463110%29.jpg/960px-French_language_and_conversation_%281891%29_%2814596463110%29.jpg',
+select 'langue-francaise', 'Langue française', 'اللغة الفرنسية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/French_language_and_conversation_%281891%29_%2814596463110%29.jpg/960px-French_language_and_conversation_%281891%29_%2814596463110%29.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'langue-francaise');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'langue-anglaise', 'Langue anglaise', 'اللغة الإنجليزية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/First_Grade_Classroom-Egypt-2018.jpg/960px-First_Grade_Classroom-Egypt-2018.jpg',
+select 'langue-anglaise', 'Langue anglaise', 'اللغة الإنجليزية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/First_Grade_Classroom-Egypt-2018.jpg/960px-First_Grade_Classroom-Egypt-2018.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'langue-anglaise');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'langue-internationale', 'Langue internationale', 'لغة عالمية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Gustave_Dor%C3%A9_-_Miguel_de_Cervantes_-_Don_Quixote_-_Part_1_-_Chapter_1_-_Plate_1_%22A_world_of_disorderly_notions%2C_picked_out_of_his_books%2C_crowded_into_his_imagination%22.jpg/960px-thumbnail.jpg',
+select 'langue-internationale', 'Langue internationale', 'لغة عالمية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Gustave_Dor%C3%A9_-_Miguel_de_Cervantes_-_Don_Quixote_-_Part_1_-_Chapter_1_-_Plate_1_%22A_world_of_disorderly_notions%2C_picked_out_of_his_books%2C_crowded_into_his_imagination%22.jpg/960px-thumbnail.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'langue-internationale');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'langue-de-base', 'Langue de base', 'اللغة الأساسية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Armenian_alphabet_on_the_wall_of_primary_school.jpg/960px-Armenian_alphabet_on_the_wall_of_primary_school.jpg',
+select 'langue-de-base', 'Langue de base', 'اللغة الأساسية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Armenian_alphabet_on_the_wall_of_primary_school.jpg/960px-Armenian_alphabet_on_the_wall_of_primary_school.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'langue-de-base');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'mathematiques', 'Mathématiques', 'الرياضيات', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Classroom_scene_in_Washington%2C_D.C._elementary_school_-_children_working_with_blocks_and_at_blackboard_in_mathematics_class_LCCN2001703711.jpg/960px-Classroom_scene_in_Washington%2C_D.C._elementary_school_-_children_working_with_blocks_and_at_blackboard_in_mathematics_class_LCCN2001703711.jpg',
+select 'mathematiques', 'Mathématiques', 'الرياضيات', 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Classroom_scene_in_Washington%2C_D.C._elementary_school_-_children_working_with_blocks_and_at_blackboard_in_mathematics_class_LCCN2001703711.jpg/960px-Classroom_scene_in_Washington%2C_D.C._elementary_school_-_children_working_with_blocks_and_at_blackboard_in_mathematics_class_LCCN2001703711.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'mathematiques');
@@ -54,13 +54,13 @@ select 'sciences-naturelles', 'Sciences naturelles et de la vie', 'علوم ال
 where not exists (select 1 from public.categories where slug = 'sciences-naturelles');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'education-scientifique', 'Éducation scientifique et technologique', 'التربية العلمية والتكنولوجية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Out_of_classroom_experiments.jpg/960px-Out_of_classroom_experiments.jpg',
+select 'education-scientifique', 'Éducation scientifique et technologique', 'التربية العلمية والتكنولوجية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Out_of_classroom_experiments.jpg/960px-Out_of_classroom_experiments.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'education-scientifique');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'sciences-sociales', 'Sciences sociales', 'الاجتماعيات', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Sias_Campus-_Classroom_Building_11_-_2007.jpg/960px-Sias_Campus-_Classroom_Building_11_-_2007.jpg',
+select 'sciences-sociales', 'Sciences sociales', 'الاجتماعيات', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Sias_Campus-_Classroom_Building_11_-_2007.jpg/960px-Sias_Campus-_Classroom_Building_11_-_2007.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'sciences-sociales');
@@ -78,13 +78,13 @@ select 'informatique', 'Informatique', 'المعلوماتية', 'https://upload
 where not exists (select 1 from public.categories where slug = 'informatique');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'education-artistique', 'Éducation artistique', 'التربية التشكيلية', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Art_classes_for_children_LCCN98509582.jpg/960px-Art_classes_for_children_LCCN98509582.jpg',
+select 'education-artistique', 'Éducation artistique', 'التربية التشكيلية', 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Art_classes_for_children_LCCN98509582.jpg/960px-Art_classes_for_children_LCCN98509582.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'education-artistique');
 
 insert into public.categories (slug, name_fr, name_ar, image_url, sort_order, parent_id)
-select 'sensibilisation-orientation', 'Sensibilisation et orientation', 'التحسيس والتوجيه', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Good_Counsel_College_1930s.jpg/960px-Good_Counsel_College_1930s.jpg',
+select 'sensibilisation-orientation', 'Sensibilisation et orientation', 'التحسيس والتوجيه', 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Good_Counsel_College_1930s.jpg/960px-Good_Counsel_College_1930s.jpg',
   (select coalesce(max(sort_order), 0) + 1 from public.categories where parent_id = (select id from public.categories where slug = 'cahiers')),
   (select id from public.categories where slug = 'cahiers')
 where not exists (select 1 from public.categories where slug = 'sensibilisation-orientation');
@@ -99,7 +99,7 @@ select 'cahier-journal-langue-arabe', 'Cahier journal — Langue arabe', 'الد
 where not exists (select 1 from public.products where slug = 'cahier-journal-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -127,7 +127,7 @@ select 'cahier-de-notes-langue-arabe', 'Cahier de notes — Langue arabe', 'دف
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -142,7 +142,7 @@ select 'cahier-de-formation-langue-arabe', 'Cahier de formation — Langue arabe
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -170,7 +170,7 @@ select 'cahier-de-seminaires-langue-arabe', 'Cahier de séminaires — Langue ar
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -198,7 +198,7 @@ select 'cahier-de-fiches-langue-arabe', 'Cahier de fiches (planning) — Langue 
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -226,7 +226,7 @@ select 'cahier-de-remediation-langue-arabe', 'Cahier de remédiation — Langue 
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -252,7 +252,7 @@ select 'registre-appel-langue-arabe', 'Registre d''appel — Langue arabe', 'د�
 where not exists (select 1 from public.products where slug = 'registre-appel-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -267,7 +267,7 @@ select 'cahier-de-roulement-langue-arabe', 'Cahier de roulement — Langue arabe
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-langue-arabe');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-langue-arabe'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -293,7 +293,7 @@ select 'cahier-journal-langue-francaise', 'Cahier journal — Langue française'
 where not exists (select 1 from public.products where slug = 'cahier-journal-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -321,7 +321,7 @@ select 'cahier-de-notes-langue-francaise', 'Cahier de notes — Langue français
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -336,7 +336,7 @@ select 'cahier-de-formation-langue-francaise', 'Cahier de formation — Langue f
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -364,7 +364,7 @@ select 'cahier-de-seminaires-langue-francaise', 'Cahier de séminaires — Langu
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -392,7 +392,7 @@ select 'cahier-de-fiches-langue-francaise', 'Cahier de fiches (planning) — Lan
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -420,7 +420,7 @@ select 'cahier-de-remediation-langue-francaise', 'Cahier de remédiation — Lan
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -446,7 +446,7 @@ select 'registre-appel-langue-francaise', 'Registre d''appel — Langue françai
 where not exists (select 1 from public.products where slug = 'registre-appel-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -461,7 +461,7 @@ select 'cahier-de-roulement-langue-francaise', 'Cahier de roulement — Langue f
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-langue-francaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-langue-francaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -487,7 +487,7 @@ select 'cahier-journal-langue-anglaise', 'Cahier journal — Langue anglaise', '
 where not exists (select 1 from public.products where slug = 'cahier-journal-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -515,7 +515,7 @@ select 'cahier-de-notes-langue-anglaise', 'Cahier de notes — Langue anglaise',
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -530,7 +530,7 @@ select 'cahier-de-formation-langue-anglaise', 'Cahier de formation — Langue an
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -558,7 +558,7 @@ select 'cahier-de-seminaires-langue-anglaise', 'Cahier de séminaires — Langue
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -586,7 +586,7 @@ select 'cahier-de-fiches-langue-anglaise', 'Cahier de fiches (planning) — Lang
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -614,7 +614,7 @@ select 'cahier-de-remediation-langue-anglaise', 'Cahier de remédiation — Lang
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -640,7 +640,7 @@ select 'registre-appel-langue-anglaise', 'Registre d''appel — Langue anglaise'
 where not exists (select 1 from public.products where slug = 'registre-appel-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -655,7 +655,7 @@ select 'cahier-de-roulement-langue-anglaise', 'Cahier de roulement — Langue an
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-langue-anglaise');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-langue-anglaise'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -681,7 +681,7 @@ select 'cahier-journal-langue-internationale', 'Cahier journal — Langue intern
 where not exists (select 1 from public.products where slug = 'cahier-journal-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -709,7 +709,7 @@ select 'cahier-de-notes-langue-internationale', 'Cahier de notes — Langue inte
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -724,7 +724,7 @@ select 'cahier-de-formation-langue-internationale', 'Cahier de formation — Lan
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -752,7 +752,7 @@ select 'cahier-de-seminaires-langue-internationale', 'Cahier de séminaires — 
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -780,7 +780,7 @@ select 'cahier-de-fiches-langue-internationale', 'Cahier de fiches (planning) �
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -808,7 +808,7 @@ select 'cahier-de-remediation-langue-internationale', 'Cahier de remédiation �
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -834,7 +834,7 @@ select 'registre-appel-langue-internationale', 'Registre d''appel — Langue int
 where not exists (select 1 from public.products where slug = 'registre-appel-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -849,7 +849,7 @@ select 'cahier-de-roulement-langue-internationale', 'Cahier de roulement — Lan
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-langue-internationale');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-langue-internationale'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -875,7 +875,7 @@ select 'cahier-journal-langue-de-base', 'Cahier journal — Langue de base', 'ا
 where not exists (select 1 from public.products where slug = 'cahier-journal-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -903,7 +903,7 @@ select 'cahier-de-notes-langue-de-base', 'Cahier de notes — Langue de base', '
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -918,7 +918,7 @@ select 'cahier-de-formation-langue-de-base', 'Cahier de formation — Langue de 
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -946,7 +946,7 @@ select 'cahier-de-seminaires-langue-de-base', 'Cahier de séminaires — Langue 
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -974,7 +974,7 @@ select 'cahier-de-fiches-langue-de-base', 'Cahier de fiches (planning) — Langu
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1002,7 +1002,7 @@ select 'cahier-de-remediation-langue-de-base', 'Cahier de remédiation — Langu
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1028,7 +1028,7 @@ select 'registre-appel-langue-de-base', 'Registre d''appel — Langue de base', 
 where not exists (select 1 from public.products where slug = 'registre-appel-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1043,7 +1043,7 @@ select 'cahier-de-roulement-langue-de-base', 'Cahier de roulement — Langue de 
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-langue-de-base');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-langue-de-base'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1069,7 +1069,7 @@ select 'cahier-journal-mathematiques', 'Cahier journal — Mathématiques', 'ا�
 where not exists (select 1 from public.products where slug = 'cahier-journal-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1097,7 +1097,7 @@ select 'cahier-de-notes-mathematiques', 'Cahier de notes — Mathématiques', '�
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1112,7 +1112,7 @@ select 'cahier-de-formation-mathematiques', 'Cahier de formation — Mathématiq
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1140,7 +1140,7 @@ select 'cahier-de-seminaires-mathematiques', 'Cahier de séminaires — Mathéma
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1168,7 +1168,7 @@ select 'cahier-de-fiches-mathematiques', 'Cahier de fiches (planning) — Mathé
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1196,7 +1196,7 @@ select 'cahier-de-remediation-mathematiques', 'Cahier de remédiation — Mathé
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1222,7 +1222,7 @@ select 'registre-appel-mathematiques', 'Registre d''appel — Mathématiques', '
 where not exists (select 1 from public.products where slug = 'registre-appel-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1237,7 +1237,7 @@ select 'cahier-de-roulement-mathematiques', 'Cahier de roulement — Mathématiq
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-mathematiques');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-mathematiques'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1263,7 +1263,7 @@ select 'cahier-journal-sciences-naturelles', 'Cahier journal — Sciences nature
 where not exists (select 1 from public.products where slug = 'cahier-journal-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1291,7 +1291,7 @@ select 'cahier-de-notes-sciences-naturelles', 'Cahier de notes — Sciences natu
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1306,7 +1306,7 @@ select 'cahier-de-formation-sciences-naturelles', 'Cahier de formation — Scien
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1334,7 +1334,7 @@ select 'cahier-de-seminaires-sciences-naturelles', 'Cahier de séminaires — Sc
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1362,7 +1362,7 @@ select 'cahier-de-fiches-sciences-naturelles', 'Cahier de fiches (planning) — 
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1390,7 +1390,7 @@ select 'cahier-de-remediation-sciences-naturelles', 'Cahier de remédiation — 
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1416,7 +1416,7 @@ select 'registre-appel-sciences-naturelles', 'Registre d''appel — Sciences nat
 where not exists (select 1 from public.products where slug = 'registre-appel-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1431,7 +1431,7 @@ select 'cahier-de-roulement-sciences-naturelles', 'Cahier de roulement — Scien
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-sciences-naturelles');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-sciences-naturelles'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1457,7 +1457,7 @@ select 'cahier-journal-education-scientifique', 'Cahier journal — Éducation s
 where not exists (select 1 from public.products where slug = 'cahier-journal-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1485,7 +1485,7 @@ select 'cahier-de-notes-education-scientifique', 'Cahier de notes — Éducation
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1500,7 +1500,7 @@ select 'cahier-de-formation-education-scientifique', 'Cahier de formation — É
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1528,7 +1528,7 @@ select 'cahier-de-seminaires-education-scientifique', 'Cahier de séminaires —
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1556,7 +1556,7 @@ select 'cahier-de-fiches-education-scientifique', 'Cahier de fiches (planning) �
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1584,7 +1584,7 @@ select 'cahier-de-remediation-education-scientifique', 'Cahier de remédiation �
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1610,7 +1610,7 @@ select 'registre-appel-education-scientifique', 'Registre d''appel — Éducatio
 where not exists (select 1 from public.products where slug = 'registre-appel-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1625,7 +1625,7 @@ select 'cahier-de-roulement-education-scientifique', 'Cahier de roulement — É
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-education-scientifique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-education-scientifique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1651,7 +1651,7 @@ select 'cahier-journal-sciences-sociales', 'Cahier journal — Sciences sociales
 where not exists (select 1 from public.products where slug = 'cahier-journal-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1679,7 +1679,7 @@ select 'cahier-de-notes-sciences-sociales', 'Cahier de notes — Sciences social
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1694,7 +1694,7 @@ select 'cahier-de-formation-sciences-sociales', 'Cahier de formation — Science
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1722,7 +1722,7 @@ select 'cahier-de-seminaires-sciences-sociales', 'Cahier de séminaires — Scie
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1750,7 +1750,7 @@ select 'cahier-de-fiches-sciences-sociales', 'Cahier de fiches (planning) — Sc
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1778,7 +1778,7 @@ select 'cahier-de-remediation-sciences-sociales', 'Cahier de remédiation — Sc
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1804,7 +1804,7 @@ select 'registre-appel-sciences-sociales', 'Registre d''appel — Sciences socia
 where not exists (select 1 from public.products where slug = 'registre-appel-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1819,7 +1819,7 @@ select 'cahier-de-roulement-sciences-sociales', 'Cahier de roulement — Science
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-sciences-sociales');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-sciences-sociales'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1845,7 +1845,7 @@ select 'cahier-journal-education-islamique', 'Cahier journal — Éducation isla
 where not exists (select 1 from public.products where slug = 'cahier-journal-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1873,7 +1873,7 @@ select 'cahier-de-notes-education-islamique', 'Cahier de notes — Éducation is
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1888,7 +1888,7 @@ select 'cahier-de-formation-education-islamique', 'Cahier de formation — Éduc
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1916,7 +1916,7 @@ select 'cahier-de-seminaires-education-islamique', 'Cahier de séminaires — É
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1944,7 +1944,7 @@ select 'cahier-de-fiches-education-islamique', 'Cahier de fiches (planning) — 
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1972,7 +1972,7 @@ select 'cahier-de-remediation-education-islamique', 'Cahier de remédiation — 
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -1998,7 +1998,7 @@ select 'registre-appel-education-islamique', 'Registre d''appel — Éducation i
 where not exists (select 1 from public.products where slug = 'registre-appel-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2013,7 +2013,7 @@ select 'cahier-de-roulement-education-islamique', 'Cahier de roulement — Éduc
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-education-islamique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-education-islamique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2039,7 +2039,7 @@ select 'cahier-journal-informatique', 'Cahier journal — Informatique', 'الد
 where not exists (select 1 from public.products where slug = 'cahier-journal-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2067,7 +2067,7 @@ select 'cahier-de-notes-informatique', 'Cahier de notes — Informatique', 'دف
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2082,7 +2082,7 @@ select 'cahier-de-formation-informatique', 'Cahier de formation — Informatique
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2110,7 +2110,7 @@ select 'cahier-de-seminaires-informatique', 'Cahier de séminaires — Informati
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2138,7 +2138,7 @@ select 'cahier-de-fiches-informatique', 'Cahier de fiches (planning) — Informa
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2166,7 +2166,7 @@ select 'cahier-de-remediation-informatique', 'Cahier de remédiation — Informa
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2192,7 +2192,7 @@ select 'registre-appel-informatique', 'Registre d''appel — Informatique', 'د�
 where not exists (select 1 from public.products where slug = 'registre-appel-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2207,7 +2207,7 @@ select 'cahier-de-roulement-informatique', 'Cahier de roulement — Informatique
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-informatique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-informatique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2233,7 +2233,7 @@ select 'cahier-journal-education-artistique', 'Cahier journal — Éducation art
 where not exists (select 1 from public.products where slug = 'cahier-journal-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2261,7 +2261,7 @@ select 'cahier-de-notes-education-artistique', 'Cahier de notes — Éducation a
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2276,7 +2276,7 @@ select 'cahier-de-formation-education-artistique', 'Cahier de formation — Édu
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2304,7 +2304,7 @@ select 'cahier-de-seminaires-education-artistique', 'Cahier de séminaires — �
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2332,7 +2332,7 @@ select 'cahier-de-fiches-education-artistique', 'Cahier de fiches (planning) —
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2360,7 +2360,7 @@ select 'cahier-de-remediation-education-artistique', 'Cahier de remédiation —
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2386,7 +2386,7 @@ select 'registre-appel-education-artistique', 'Registre d''appel — Éducation 
 where not exists (select 1 from public.products where slug = 'registre-appel-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2401,7 +2401,7 @@ select 'cahier-de-roulement-education-artistique', 'Cahier de roulement — Édu
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-education-artistique');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-education-artistique'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2427,7 +2427,7 @@ select 'cahier-journal-sensibilisation-orientation', 'Cahier journal — Sensibi
 where not exists (select 1 from public.products where slug = 'cahier-journal-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Wright_diary.jpg/960px-Wright_diary.jpg', 0
 from public.products p
 where p.slug = 'cahier-journal-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2455,7 +2455,7 @@ select 'cahier-de-notes-sensibilisation-orientation', 'Cahier de notes — Sensi
 where not exists (select 1 from public.products where slug = 'cahier-de-notes-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Russian_realschule_report_card_1908.jpg/960px-Russian_realschule_report_card_1908.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-notes-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2470,7 +2470,7 @@ select 'cahier-de-formation-sensibilisation-orientation', 'Cahier de formation �
 where not exists (select 1 from public.products where slug = 'cahier-de-formation-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg/960px-Teachers_in_Wikipedia_Workshop_Rajshahi_01.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-formation-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2498,7 +2498,7 @@ select 'cahier-de-seminaires-sensibilisation-orientation', 'Cahier de séminaire
 where not exists (select 1 from public.products where slug = 'cahier-de-seminaires-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg/960px-Supernova_Seminar_Room_%28upr_IMG_5587-CC%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-seminaires-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2526,7 +2526,7 @@ select 'cahier-de-fiches-sensibilisation-orientation', 'Cahier de fiches (planni
 where not exists (select 1 from public.products where slug = 'cahier-de-fiches-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg/960px-Working_on_a_planning_session_with_stationery_items%2C_notebook%2C_and_colorful_pencils_on_a_wooden_desk.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-fiches-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2554,7 +2554,7 @@ select 'cahier-de-remediation-sensibilisation-orientation', 'Cahier de remédiat
 where not exists (select 1 from public.products where slug = 'cahier-de-remediation-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Violinlesson.JPG/960px-Violinlesson.JPG', 0
 from public.products p
 where p.slug = 'cahier-de-remediation-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2580,7 +2580,7 @@ select 'registre-appel-sensibilisation-orientation', 'Registre d''appel — Sens
 where not exists (select 1 from public.products where slug = 'registre-appel-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/1964_Hammond_Slides_Student_Raising_Hand.jpg/960px-1964_Hammond_Slides_Student_Raising_Hand.jpg', 0
 from public.products p
 where p.slug = 'registre-appel-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);
@@ -2595,7 +2595,7 @@ select 'cahier-de-roulement-sensibilisation-orientation', 'Cahier de roulement �
 where not exists (select 1 from public.products where slug = 'cahier-de-roulement-sensibilisation-orientation');
 
 insert into public.product_images (product_id, url, sort_order)
-select p.id, 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
+select p.id, 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg/960px-Collecting_books_for_readers_in_the_reserve_stacks%2C_1964_%283925726691%29.jpg', 0
 from public.products p
 where p.slug = 'cahier-de-roulement-sensibilisation-orientation'
   and not exists (select 1 from public.product_images pi where pi.product_id = p.id);

@@ -5,6 +5,7 @@ import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { useCategories } from "@/hooks/useCategories";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { childrenOf } from "@/lib/categoryTree";
 import {
   CONTACT_EMAIL,
   CONTACT_EMAIL_HREF,
@@ -25,6 +26,7 @@ function TikTokIcon({ size = 18 }: { size?: number }) {
 export function Footer() {
   const { t, lang } = useI18n();
   const { data: categories = [] } = useCategories();
+  const topCategories = childrenOf(categories, null).slice(0, 4);
   const year = new Date().getFullYear();
 
   return (
@@ -48,7 +50,7 @@ export function Footer() {
 
         <FooterCol title={t("footerShop")}>
           <FooterLink to="/boutique">{t("navShop")}</FooterLink>
-          {categories.map((c) => (
+          {topCategories.map((c) => (
             <FooterLink key={c.id} to={`/boutique/${c.slug}`}>
               {pick(lang, c, "name")}
             </FooterLink>

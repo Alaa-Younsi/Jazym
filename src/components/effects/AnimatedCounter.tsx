@@ -1,10 +1,11 @@
 import { useInView } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 
 /** Counts up from 0 to `value` once it scrolls into view. Plain numeric ease
     via requestAnimationFrame — no framer-motion imperative API involved, so
-    it can't drift out of sync with a specific library version. */
+    it can't drift out of sync with a specific library version. Not gated by
+    prefers-reduced-motion: changing digits isn't the kind of motion that
+    setting targets. */
 export function AnimatedCounter({
   value,
   suffix = "",
@@ -18,11 +19,10 @@ export function AnimatedCounter({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-40px" });
-  const reduced = usePrefersReducedMotion();
-  const [display, setDisplay] = useState(reduced ? value : 0);
+  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (!isInView || reduced) return;
+    if (!isInView) return;
     let raf: number;
     const start = performance.now();
     const tick = (now: number) => {
@@ -33,7 +33,7 @@ export function AnimatedCounter({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [isInView, reduced, value, duration]);
+  }, [isInView, value, duration]);
 
   return (
     <span ref={ref} className={className}>

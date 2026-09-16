@@ -9,6 +9,7 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { useCategories } from "@/hooks/useCategories";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { childrenOf } from "@/lib/categoryTree";
 import { pick } from "@/lib/utils";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
@@ -37,9 +38,12 @@ export function Header() {
 
   const announcement = lang === "ar" ? settings?.announcement_ar : settings?.announcement_fr;
 
+  // Top-level categories only, capped — a deep matière/thème tree must never
+  // flood the main nav (that's what the shop page's own browsing is for).
+  const topCategories = childrenOf(categories, null).slice(0, 4);
   const navItems = [
     { to: "/boutique", label: t("navShop") },
-    ...categories.map((c) => ({
+    ...topCategories.map((c) => ({
       to: `/boutique/${c.slug}`,
       label: pick(lang, c, "name"),
     })),

@@ -23,6 +23,7 @@ import { Container, SectionHeading } from "@/components/ui/Container";
 import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Stars } from "@/components/ui/Stars";
 import { useCategories } from "@/hooks/useCategories";
+import { childrenOf } from "@/lib/categoryTree";
 import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useReviews } from "@/hooks/useReviews";
@@ -38,6 +39,9 @@ export default function Landing() {
   const { data: categories = [] } = useCategories();
   const { data: reviews = [] } = useReviews();
   const reducedMotion = usePrefersReducedMotion();
+  // Top-level only, capped — the homepage showcases the main lines, not the
+  // full matière/thème tree underneath "Cahiers de l'enseignant".
+  const topCategories = childrenOf(categories, null).slice(0, 6);
 
   useSeo({
     title: `${t("brandTagline")} — ${SITE_NAME}`,
@@ -69,17 +73,17 @@ export default function Landing() {
           ) : (
             <>
               <motion.div
-                className="absolute -top-24 -start-24 h-72 w-72 rounded-full bg-brand/25 blur-3xl"
+                className="absolute -top-24 -start-24 h-80 w-80 rounded-full bg-brand/40 blur-3xl"
                 animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
                 transition={{ duration: 18, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
               />
               <motion.div
-                className="absolute top-10 -end-20 h-80 w-80 rounded-full bg-violet/20 blur-3xl"
+                className="absolute top-10 -end-20 h-96 w-96 rounded-full bg-violet/35 blur-3xl"
                 animate={{ x: [0, -30, 0], y: [0, 40, 0] }}
                 transition={{ duration: 22, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
               />
               <motion.div
-                className="absolute bottom-0 start-1/3 h-64 w-64 rounded-full bg-gold/15 blur-3xl"
+                className="absolute bottom-0 start-1/3 h-72 w-72 rounded-full bg-gold/25 blur-3xl"
                 animate={{ x: [0, 25, 0], y: [0, -20, 0] }}
                 transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
               />
@@ -170,7 +174,7 @@ export default function Landing() {
           subtitle={t("categoriesSubtitle")}
         />
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
-          {categories.map((c, i) => (
+          {topCategories.map((c, i) => (
             <motion.div
               key={c.id}
               initial={{ y: 16 }}
