@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag } from "lucide-react";
+import { Menu, Search, ShoppingBag, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
@@ -57,8 +57,12 @@ export function Header() {
   return (
     <>
       {announcement && (
-        <div className="bg-ink text-center text-[0.72rem] tracking-wide text-bg">
-          <Container className="py-1.5">{announcement}</Container>
+        <div className="fx-glint relative overflow-hidden bg-gradient-to-r from-brand via-violet to-brand bg-[length:200%_100%] text-bg">
+          <Container className="flex items-center justify-center gap-2 py-2 text-[0.72rem] font-medium tracking-wide">
+            <Truck size={13} className="shrink-0 opacity-90" />
+            <span>{announcement}</span>
+            <FlowerMark className="h-3 w-3 shrink-0 text-gold" />
+          </Container>
         </div>
       )}
       <header

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
+  ChevronDown,
   MapPin,
   PackageCheck,
   Sparkles,
@@ -11,7 +12,9 @@ import {
 import { Link } from "react-router-dom";
 import { AnimatedCounter } from "@/components/effects/AnimatedCounter";
 import { HeroArt } from "@/components/effects/HeroArt";
+import { ParallaxTilt } from "@/components/effects/ParallaxTilt";
 import { Reveal } from "@/components/effects/Reveal";
+import { StaggerText } from "@/components/effects/StaggerText";
 import { PanelSlot } from "@/components/panels/PanelSlot";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductPlaceholder } from "@/components/product/ProductPlaceholder";
@@ -54,13 +57,35 @@ export default function Landing() {
     <>
       {/* ---------- hero ---------- */}
       <section className="relative overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(60% 50% at 100% 0%, rgb(var(--c-brand-soft) / 0.5) 0%, transparent 60%)",
-          }}
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {reducedMotion ? (
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(60% 50% at 100% 0%, rgb(var(--c-brand-soft) / 0.5) 0%, transparent 60%)",
+              }}
+            />
+          ) : (
+            <>
+              <motion.div
+                className="absolute -top-24 -start-24 h-72 w-72 rounded-full bg-brand/25 blur-3xl"
+                animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
+                transition={{ duration: 18, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute top-10 -end-20 h-80 w-80 rounded-full bg-violet/20 blur-3xl"
+                animate={{ x: [0, -30, 0], y: [0, 40, 0] }}
+                transition={{ duration: 22, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute bottom-0 start-1/3 h-64 w-64 rounded-full bg-gold/15 blur-3xl"
+                animate={{ x: [0, 25, 0], y: [0, -20, 0] }}
+                transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+              />
+            </>
+          )}
+        </div>
         <Container className="relative grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">
           <div className="flex flex-col gap-6">
             <Reveal>
@@ -72,11 +97,9 @@ export default function Landing() {
                 {t("heroKicker")}
               </span>
             </Reveal>
-            <Reveal delay={0.08}>
-              <h1 className="fx-display text-4xl text-ink sm:text-5xl lg:text-[3.4rem]">
-                {t("heroTitle")}
-              </h1>
-            </Reveal>
+            <h1 className="fx-display text-4xl text-ink sm:text-5xl lg:text-[3.4rem]">
+              <StaggerText text={t("heroTitle")} />
+            </h1>
             <Reveal delay={0.16}>
               <p className="max-w-lg text-base leading-relaxed text-muted">{t("heroSubtitle")}</p>
             </Reveal>
@@ -121,8 +144,18 @@ export default function Landing() {
               </dl>
             </Reveal>
           </div>
-          <HeroArt />
+          <ParallaxTilt>
+            <HeroArt />
+          </ParallaxTilt>
         </Container>
+
+        <motion.div
+          className="pointer-events-none absolute inset-x-0 bottom-4 hidden justify-center sm:flex"
+          animate={reducedMotion ? undefined : { y: [0, 6, 0] }}
+          transition={{ duration: 1.8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        >
+          <ChevronDown size={20} className="text-muted/60" />
+        </motion.div>
       </section>
 
       <Container className="pb-6">

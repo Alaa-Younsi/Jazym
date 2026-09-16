@@ -364,7 +364,11 @@ export const translations = {
     /* ---------- admin: categories ---------- */
     catListTitle: "Catégories",
     catNew: "Nouvelle catégorie",
+    catNewSubcategoryHere: "Nouvelle sous-catégorie ici",
     catNewSubcategoryOf: "Nouvelle sous-catégorie de « {name} »",
+    catAddSubcategory: "Ajouter une sous-catégorie ici",
+    catSaveBlockedNotLeaf:
+      "Cette catégorie a encore des produits placés directement dessus — la mise à jour de la base (migration 0013) doit être appliquée pour autoriser les sous-catégories ici. Sinon, déplacez d'abord ces produits.",
     catName: "Nom (FR)",
     catNameAr: "Nom (AR)",
     catImage: "Image",
@@ -900,7 +904,11 @@ export const translations = {
     /* ---------- admin: categories ---------- */
     catListTitle: "الفئات",
     catNew: "فئة جديدة",
+    catNewSubcategoryHere: "فئة فرعية جديدة هنا",
     catNewSubcategoryOf: "فئة فرعية جديدة تابعة لـ «{name}»",
+    catAddSubcategory: "إضافة فئة فرعية هنا",
+    catSaveBlockedNotLeaf:
+      "هذه الفئة لا تزال تحتوي على منتجات موضوعة مباشرة عليها — يجب تطبيق تحديث القاعدة (migration 0013) للسماح بإضافة فئات فرعية هنا. أو انقل هذه المنتجات أولاً.",
     catName: "الاسم (FR)",
     catNameAr: "الاسم (AR)",
     catImage: "الصورة",

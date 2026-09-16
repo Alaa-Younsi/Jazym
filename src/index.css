@@ -157,6 +157,43 @@ input[type="number"]::-webkit-inner-spin-button {
   .fx-shimmer:hover::after {
     animation: shimmer 0.9s ease;
   }
+
+  /* Slow-panning gradient + a periodic diagonal glint sweep — unlike
+     .fx-shimmer this runs continuously, no hover needed. Used by the
+     announcement bar. */
+  .fx-glint {
+    position: relative;
+    overflow: hidden;
+    animation: fx-gradient-pan 8s ease-in-out infinite;
+  }
+  .fx-glint::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.25), transparent);
+    animation: fx-glint-sweep 5s ease-in-out infinite;
+  }
+}
+
+@keyframes fx-gradient-pan {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@keyframes fx-glint-sweep {
+  0%,
+  30% {
+    transform: translateX(-100%);
+  }
+  70%,
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Utility: force LTR for numeric + unit runs inside an RTL layout.

@@ -67,8 +67,9 @@ export default function Categories() {
     ? (productCountByCategory.get(currentParentId) ?? 0) > 0
     : false;
 
-  function openNew() {
-    setForm(emptyForm(currentParentId, levelCategories.length + 1));
+  function openNew(parentId: string | null, siblingCount: number) {
+    setForm(emptyForm(parentId, siblingCount + 1));
+    setCurrentParentId(parentId);
     setCreating(true);
     setEditing(null);
   }
@@ -113,8 +114,13 @@ export default function Categories() {
       toast.success(t("adminSaved"));
       setCreating(false);
       setEditing(null);
-    } catch {
-      toast.error(t("adminSaveError"));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("ERR_CATEGORY_NOT_LEAF")) {
+        toast.error(t("catSaveBlockedNotLeaf"));
+      } else {
+        toast.error(message || t("adminSaveError"));
+      }
     }
   }
 
@@ -149,9 +155,9 @@ export default function Categories() {
                 {t("catManageProducts")}
               </ButtonLink>
             )}
-            <Button size="sm" onClick={openNew}>
+            <Button size="sm" onClick={() => openNew(currentParentId, levelCategories.length)}>
               <Plus size={15} />
-              {t("catNew")}
+              {currentNode ? t("catNewSubcategoryHere") : t("catNew")}
             </Button>
           </>
         }
@@ -221,6 +227,15 @@ export default function Categories() {
                     {childCount > 0 && ` · ${t("catSubcategoryCount", { count: childCount })}`}
                     {isLeaf && productCount === 0 && ` · ${t("catEmptyLevel")}`}
                   </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openNew(c.id, childCount)}
+                  className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
+                  aria-label={t("catAddSubcategory")}
+                  title={t("catAddSubcategory")}
+                >
+                  <Plus size={14} />
                 </button>
                 <button
                   type="button"

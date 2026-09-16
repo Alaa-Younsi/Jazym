@@ -3,6 +3,7 @@ import { useI18n } from "@/i18n/LanguageProvider";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { CartDrawer } from "./CartDrawer";
+import { WhatsAppButton } from "./WhatsAppButton";
 
 export function StoreLayout() {
   const { t } = useI18n();
@@ -20,6 +21,7 @@ export function StoreLayout() {
       </main>
       <Footer />
       <CartDrawer />
+      <WhatsAppButton />
     </div>
   );
 }
