@@ -87,6 +87,7 @@ export default function Checkout() {
       const orderNumber = await placeOrder.mutateAsync({
         items: lines.map((l) => ({
           product_id: l.productId,
+          variant_id: l.variantId,
           quantity: l.quantity,
           color: l.color,
           size: l.size,

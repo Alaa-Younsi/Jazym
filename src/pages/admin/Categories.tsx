@@ -1,50 +1,74 @@
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, FolderTree, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminCard, AdminPageHeader, EmptyState, LoadError } from "@/components/admin/AdminUI";
 import { SingleImageUpload } from "@/components/admin/ImageUploader";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Field, Input, Textarea } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageLoader } from "@/components/ui/Spinner";
 import {
   useAdminCategories,
+  useAdminProducts,
   useDeleteCategory,
   useSaveCategory,
   type CategoryFormState,
 } from "@/hooks/useAdminData";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { childrenOf, pathTo } from "@/lib/categoryTree";
 import { responsiveSrcSet } from "@/lib/image";
 import { slugify } from "@/lib/utils";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { Category } from "@/types/db";
 
-const EMPTY: CategoryFormState = {
-  slug: "",
-  name_fr: "",
-  name_ar: "",
-  description_fr: "",
-  description_ar: "",
-  image_url: null,
-  sort_order: 0,
-};
+function emptyForm(parentId: string | null, sortOrder: number): CategoryFormState {
+  return {
+    slug: "",
+    name_fr: "",
+    name_ar: "",
+    description_fr: "",
+    description_ar: "",
+    image_url: null,
+    sort_order: sortOrder,
+    parent_id: parentId,
+  };
+}
 
 export default function Categories() {
   const { t, lang } = useI18n();
   const toast = useAdminToast();
   const { data: categories, isLoading, isError } = useAdminCategories();
+  const { data: products = [] } = useAdminProducts();
   const save = useSaveCategory();
   const del = useDeleteCategory();
 
+  const [currentParentId, setCurrentParentId] = useState<string | null>(null);
   const [editing, setEditing] = useState<Category | null>(null);
   const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState<CategoryFormState>(EMPTY);
+  const [form, setForm] = useState<CategoryFormState>(emptyForm(null, 1));
+
+  const productCountByCategory = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of products) {
+      if (!p.category_id) continue;
+      map.set(p.category_id, (map.get(p.category_id) ?? 0) + 1);
+    }
+    return map;
+  }, [products]);
 
   if (isLoading) return <PageLoader />;
   if (isError || !categories) return <LoadError message={t("adminLoadError")} />;
 
+  const categoryList = categories;
+  const ancestors = pathTo(categoryList, currentParentId);
+  const currentNode = ancestors[ancestors.length - 1] ?? null;
+  const levelCategories = childrenOf(categoryList, currentParentId);
+  const currentHasProducts = currentParentId
+    ? (productCountByCategory.get(currentParentId) ?? 0) > 0
+    : false;
+
   function openNew() {
-    setForm({ ...EMPTY, sort_order: (categories?.length ?? 0) + 1 });
+    setForm(emptyForm(currentParentId, levelCategories.length + 1));
     setCreating(true);
     setEditing(null);
   }
@@ -58,6 +82,7 @@ export default function Categories() {
       description_ar: c.description_ar,
       image_url: c.image_url,
       sort_order: c.sort_order,
+      parent_id: c.parent_id,
     });
     setEditing(c);
     setCreating(false);
@@ -94,6 +119,16 @@ export default function Categories() {
   }
 
   async function onDelete(c: Category) {
+    const hasChildren = categoryList.some((child) => child.parent_id === c.id);
+    const hasProducts = (productCountByCategory.get(c.id) ?? 0) > 0;
+    if (hasChildren) {
+      toast.error(t("catDeleteBlockedChildren"));
+      return;
+    }
+    if (hasProducts) {
+      toast.error(t("catDeleteBlockedProducts"));
+      return;
+    }
     if (!window.confirm(t("lpDeleteConfirm"))) return;
     try {
       await del.mutateAsync(c.id);
@@ -108,54 +143,118 @@ export default function Categories() {
       <AdminPageHeader
         title={t("catListTitle")}
         actions={
-          <Button size="sm" onClick={openNew}>
-            <Plus size={15} />
-            {t("catNew")}
-          </Button>
+          currentHasProducts ? (
+            <ButtonLink size="sm" variant="secondary" to="/admin/products">
+              {t("catManageProducts")}
+            </ButtonLink>
+          ) : (
+            <Button size="sm" onClick={openNew}>
+              <Plus size={15} />
+              {t("catNew")}
+            </Button>
+          )
         }
       />
 
-      {categories.length === 0 ? (
-        <EmptyState title={t("catListTitle")} />
+      {/* breadcrumb */}
+      <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+        <button
+          type="button"
+          onClick={() => setCurrentParentId(null)}
+          className={currentParentId === null ? "font-medium text-ink" : "hover:text-brand"}
+        >
+          {t("catBreadcrumbRoot")}
+        </button>
+        {ancestors.map((a) => (
+          <span key={a.id} className="flex items-center gap-1.5">
+            <ChevronRight size={12} className="rtl:rotate-180" />
+            <button
+              type="button"
+              onClick={() => setCurrentParentId(a.id)}
+              className={a.id === currentParentId ? "font-medium text-ink" : "hover:text-brand"}
+            >
+              {lang === "ar" ? a.name_ar : a.name_fr}
+            </button>
+          </span>
+        ))}
+      </nav>
+
+      {currentHasProducts && (
+        <p className="mb-4 rounded-lg bg-brand-soft/50 px-3 py-2 text-sm text-brand">
+          {t("catHoldsProductsHint")}
+        </p>
+      )}
+
+      {levelCategories.length === 0 ? (
+        <EmptyState
+          title={t("catEmptyLevel")}
+          hint={currentHasProducts ? undefined : t("catEmptyLevelHint")}
+        />
       ) : (
         <div className="grid gap-3">
-          {categories.map((c) => (
-            <AdminCard key={c.id} className="flex items-center gap-4">
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-panel-2">
-                {c.image_url && (
-                  <img
-                    src={c.image_url}
-                    srcSet={responsiveSrcSet(c.image_url)}
-                    sizes="48px"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover"
-                  />
+          {levelCategories.map((c) => {
+            const childCount = categoryList.filter((child) => child.parent_id === c.id).length;
+            const productCount = productCountByCategory.get(c.id) ?? 0;
+            const isLeaf = childCount === 0;
+            return (
+              <AdminCard key={c.id} className="flex items-center gap-4">
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-panel-2">
+                  {c.image_url && (
+                    <img
+                      src={c.image_url}
+                      srcSet={responsiveSrcSet(c.image_url)}
+                      sizes="48px"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCurrentParentId(c.id)}
+                  className="min-w-0 flex-1 text-start"
+                >
+                  <p className="font-medium text-ink">{lang === "ar" ? c.name_ar : c.name_fr}</p>
+                  <p className="text-xs text-muted">
+                    /{c.slug}
+                    {isLeaf
+                      ? productCount > 0
+                        ? ` · ${t("catProductCount", { count: productCount })}`
+                        : ` · ${t("catEmptyLevel")}`
+                      : ` · ${t("catSubcategoryCount", { count: childCount })}`}
+                  </p>
+                </button>
+                {!isLeaf && (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentParentId(c.id)}
+                    className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
+                    aria-label={t("catBrowse")}
+                  >
+                    <FolderTree size={14} />
+                  </button>
                 )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-medium text-ink">{lang === "ar" ? c.name_ar : c.name_fr}</p>
-                <p className="text-xs text-muted">/{c.slug}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => openEdit(c)}
-                className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
-                aria-label={t("edit")}
-              >
-                <Pencil size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(c)}
-                className="rounded-full border border-line p-2 text-muted hover:border-danger hover:text-danger"
-                aria-label={t("delete")}
-              >
-                <Trash2 size={14} />
-              </button>
-            </AdminCard>
-          ))}
+                <button
+                  type="button"
+                  onClick={() => openEdit(c)}
+                  className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
+                  aria-label={t("edit")}
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(c)}
+                  className="rounded-full border border-line p-2 text-muted hover:border-danger hover:text-danger"
+                  aria-label={t("delete")}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </AdminCard>
+            );
+          })}
         </div>
       )}
 
@@ -165,7 +264,15 @@ export default function Categories() {
           setCreating(false);
           setEditing(null);
         }}
-        title={editing ? t("edit") : t("catNew")}
+        title={
+          editing
+            ? t("edit")
+            : currentNode
+              ? t("catNewSubcategoryOf", {
+                  name: lang === "ar" ? currentNode.name_ar : currentNode.name_fr,
+                })
+              : t("catNew")
+        }
       >
         <div className="flex flex-col gap-4">
           <div className="grid gap-4 sm:grid-cols-2">

@@ -1,5 +1,6 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PanelSlot } from "@/components/panels/PanelSlot";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { FlowerMark } from "@/components/ui/FlowerMark";
@@ -104,6 +105,10 @@ export function CartDrawer() {
               );
             })}
           </ul>
+
+          <div className="px-5 pt-3">
+            <PanelSlot slot="cart_drawer" />
+          </div>
 
           <div className="border-t border-line px-5 py-4">
             <div className="flex items-center justify-between text-sm text-muted">

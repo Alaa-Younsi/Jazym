@@ -22,6 +22,7 @@ const ALLOWED_SECTIONS = [
   "landing",
   "pixels",
   "policy",
+  "panels",
 ];
 
 function json(body: unknown, status = 200): Response {

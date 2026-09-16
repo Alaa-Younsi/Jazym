@@ -19,6 +19,7 @@ export const DEMO_CATEGORIES: Category[] = [
     description_ar: "الدفتر اليومي، المذكرات، التكوين، الندوات — مخصّصة باسمك.",
     image_url: null,
     sort_order: 1,
+    parent_id: null,
     created_at: now,
   },
   {
@@ -30,6 +31,7 @@ export const DEMO_CATEGORIES: Category[] = [
     description_ar: "منظّمات الملفات، حافظة المذكرة، منظّمة السبورة.",
     image_url: null,
     sort_order: 2,
+    parent_id: null,
     created_at: now,
   },
   {
@@ -42,6 +44,7 @@ export const DEMO_CATEGORIES: Category[] = [
     description_ar: "حقائب عملية لتنشيط القسم: الحمام الزاجل، قطار الكلمات، إبريق الشاي…",
     image_url: null,
     sort_order: 3,
+    parent_id: null,
     created_at: now,
   },
 ];

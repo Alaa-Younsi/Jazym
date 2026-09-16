@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Product } from "@/types/db";
-import { DEMO_PRODUCTS } from "@/data/demo";
+import type { Category, Product } from "@/types/db";
+import { DEMO_CATEGORIES, DEMO_PRODUCTS } from "@/data/demo";
+import { descendantIds } from "@/lib/categoryTree";
 import { normalizeProduct } from "@/lib/normalize";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { sanitizeSearchTerm } from "@/lib/utils";
 
-const SELECT = "*, category:categories(*), product_images(*)";
+const SELECT = "*, category:categories(*), product_images(*), product_variants(*)";
 
 export type ProductSort = "new" | "price-asc" | "price-desc";
 
@@ -18,7 +19,8 @@ export interface ProductFilters {
 function applyClientFilters(list: Product[], filters: ProductFilters): Product[] {
   let out = list.filter((p) => p.status === "active");
   if (filters.categorySlug) {
-    out = out.filter((p) => p.category?.slug === filters.categorySlug);
+    const ids = descendantIds(DEMO_CATEGORIES, filters.categorySlug);
+    out = out.filter((p) => p.category_id && ids.has(p.category_id));
   }
   const term = (filters.search ?? "").trim().toLowerCase();
   if (term) {
@@ -54,7 +56,12 @@ export function useProducts(filters: ProductFilters = {}) {
       let query = supabase.from("products").select(SELECT).eq("status", "active");
 
       if (filters.categorySlug) {
-        query = query.eq("categories.slug", filters.categorySlug);
+        const { data: cats, error: catErr } = await supabase
+          .from("categories")
+          .select("id,slug,parent_id");
+        if (catErr) throw catErr;
+        const ids = descendantIds((cats ?? []) as unknown as Category[], filters.categorySlug);
+        query = query.in("category_id", ids.size > 0 ? Array.from(ids) : ["__none__"]);
       }
       const term = sanitizeSearchTerm(filters.search ?? "");
       if (term) {
@@ -74,11 +81,7 @@ export function useProducts(filters: ProductFilters = {}) {
 
       const { data, error } = await query;
       if (error) throw error;
-      const rows = (data as Record<string, unknown>[]).map(normalizeProduct);
-      // Category filter via embedded relation can return nulls for non-matches.
-      return filters.categorySlug
-        ? rows.filter((p) => p.category?.slug === filters.categorySlug)
-        : rows;
+      return (data as Record<string, unknown>[]).map(normalizeProduct);
     },
   });
 }

@@ -13,6 +13,7 @@ export interface PlaceOrderItem {
   color?: string | null;
   size?: string | null;
   variants?: CartVariantPick[];
+  variant_id?: string | null;
 }
 
 export interface PlaceOrderCustomer {

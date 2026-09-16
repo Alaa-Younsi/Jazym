@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, BadgeCheck, PackageCheck, Truck, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HeroArt } from "@/components/effects/HeroArt";
+import { PanelSlot } from "@/components/panels/PanelSlot";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductPlaceholder } from "@/components/product/ProductPlaceholder";
 import { ButtonLink } from "@/components/ui/Button";
@@ -83,6 +84,10 @@ export default function Landing() {
           <HeroArt />
         </Container>
       </section>
+
+      <Container className="pb-6">
+        <PanelSlot slot="home_hero" />
+      </Container>
 
       {/* ---------- categories ---------- */}
       <Container as="section" className="py-16">
@@ -176,6 +181,10 @@ export default function Landing() {
             </div>
           ))}
         </div>
+      </Container>
+
+      <Container className="pb-16">
+        <PanelSlot slot="home_mid" />
       </Container>
 
       {/* ---------- features ---------- */}

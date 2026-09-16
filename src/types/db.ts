@@ -16,6 +16,9 @@ export interface Category {
   description_ar: string | null;
   image_url: string | null;
   sort_order: number;
+  /** null = top-level category. Categories nest arbitrarily deep; a category
+      may hold either subcategories or products, never both (enforced in SQL). */
+  parent_id: string | null;
   created_at: string;
 }
 
@@ -56,6 +59,30 @@ export interface ProductImage {
   sort_order: number;
 }
 
+/** A priced/stocked SKU (e.g. a page-count option), distinct from the cosmetic
+    colors/sizes/variants jsonb above — a product should use one or the other
+    for a given axis, never both. Up to two option axes (option1/option2). */
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  option1_name_fr: string | null;
+  option1_name_ar: string | null;
+  option1_value_fr: string | null;
+  option1_value_ar: string | null;
+  option2_name_fr: string | null;
+  option2_name_ar: string | null;
+  option2_value_fr: string | null;
+  option2_value_ar: string | null;
+  price: number;
+  compare_at_price: number | null;
+  stock: number;
+  sku: string | null;
+  image_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -81,6 +108,7 @@ export interface Product {
   updated_at: string;
   category?: Category | null;
   product_images?: ProductImage[];
+  product_variants?: ProductVariant[];
 }
 
 export interface CartVariantPick {
@@ -94,6 +122,7 @@ export interface OrderItem {
   id: string;
   order_id: string;
   product_id: string | null;
+  variant_id: string | null;
   name_fr: string;
   name_ar: string;
   price: number;
@@ -231,6 +260,26 @@ export interface LandingPage {
   created_at: string;
   updated_at: string;
   product?: Product | null;
+}
+
+/* ---- promo panels ---- */
+export type PanelSlot = "home_hero" | "home_mid" | "category_top" | "cart_drawer";
+
+export interface PromoPanel {
+  id: string;
+  slot: PanelSlot;
+  active: boolean;
+  title_fr: string | null;
+  title_ar: string | null;
+  subtitle_fr: string | null;
+  subtitle_ar: string | null;
+  image_url: string | null;
+  link_url: string | null;
+  start_at: string | null;
+  end_at: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 /* ---- policy content (Phase 8.8) ---- */

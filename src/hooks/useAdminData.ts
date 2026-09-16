@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Category, ClientReview, DeliveryPrice, Product } from "@/types/db";
+import type { Category, ClientReview, DeliveryPrice, Product, ProductVariant } from "@/types/db";
 import { DEMO_CATEGORIES, DEMO_DELIVERY_PRICES, DEMO_PRODUCTS, DEMO_REVIEWS } from "@/data/demo";
 import { normalizeProduct } from "@/lib/normalize";
 import { invalidateProductCaches, invalidateTaxonomyCaches } from "@/lib/queryCache";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
-const PRODUCT_SELECT = "*, category:categories(*), product_images(*)";
+const PRODUCT_SELECT = "*, category:categories(*), product_images(*), product_variants(*)";
 
 /* ---------------- products ---------------- */
 
@@ -75,17 +75,44 @@ export function toProductFormState(row: Product): ProductFormState {
   };
 }
 
+/** Editable columns only — an explicit mapper, NEVER a spread of the loaded row. */
+export type ProductVariantFormState = Omit<
+  ProductVariant,
+  "id" | "product_id" | "created_at" | "updated_at"
+>;
+
+export function toProductVariantFormState(row: ProductVariant): ProductVariantFormState {
+  return {
+    option1_name_fr: row.option1_name_fr,
+    option1_name_ar: row.option1_name_ar,
+    option1_value_fr: row.option1_value_fr,
+    option1_value_ar: row.option1_value_ar,
+    option2_name_fr: row.option2_name_fr,
+    option2_name_ar: row.option2_name_ar,
+    option2_value_fr: row.option2_value_fr,
+    option2_value_ar: row.option2_value_ar,
+    price: row.price,
+    compare_at_price: row.compare_at_price,
+    stock: row.stock,
+    sku: row.sku,
+    image_url: row.image_url,
+    sort_order: row.sort_order,
+  };
+}
+
 export interface SaveProductInput {
   id?: string;
   form: ProductFormState;
   /** ordered image URLs; index 0 is the main/thumbnail image */
   imageUrls: string[];
+  /** priced/stocked variant rows — empty for a variant-less product */
+  variantRows: ProductVariantFormState[];
 }
 
 export function useSaveProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, form, imageUrls }: SaveProductInput): Promise<string> => {
+    mutationFn: async ({ id, form, imageUrls, variantRows }: SaveProductInput): Promise<string> => {
       let productId = id;
       if (productId) {
         const { error } = await supabase.from("products").update(form).eq("id", productId);
@@ -112,6 +139,19 @@ export function useSaveProduct() {
         }));
         const { error: insErr } = await supabase.from("product_images").insert(rows);
         if (insErr) throw insErr;
+      }
+
+      // Replace variant rows (delete then insert — same convention as images).
+      const { error: delVarErr } = await supabase
+        .from("product_variants")
+        .delete()
+        .eq("product_id", productId);
+      if (delVarErr) throw delVarErr;
+
+      if (variantRows.length > 0) {
+        const rows = variantRows.map((v, i) => ({ ...v, product_id: productId, sort_order: i }));
+        const { error: insVarErr } = await supabase.from("product_variants").insert(rows);
+        if (insVarErr) throw insVarErr;
       }
       return productId as string;
     },

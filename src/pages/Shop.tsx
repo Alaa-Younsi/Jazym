@@ -1,6 +1,7 @@
-import { SlidersHorizontal, X } from "lucide-react";
+import { ChevronRight, SlidersHorizontal, X } from "lucide-react";
 import { useMemo } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { PanelSlot } from "@/components/panels/PanelSlot";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Container, SectionHeading } from "@/components/ui/Container";
 import { NativeSelect } from "@/components/ui/Field";
@@ -9,6 +10,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useProducts, type ProductSort } from "@/hooks/useProducts";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { childrenOf, pathTo } from "@/lib/categoryTree";
 import { pick } from "@/lib/utils";
 import { cn } from "@/lib/cn";
 
@@ -32,6 +34,20 @@ export default function Shop() {
     [categories, categorySlug],
   );
 
+  const ancestors = useMemo(
+    () => pathTo(categories, activeCategory?.id ?? null),
+    [categories, activeCategory],
+  );
+  const subcategories = useMemo(
+    () => childrenOf(categories, activeCategory?.id ?? null),
+    [categories, activeCategory],
+  );
+  const siblingParentId = activeCategory ? activeCategory.parent_id : null;
+  const siblings = useMemo(
+    () => childrenOf(categories, siblingParentId),
+    [categories, siblingParentId],
+  );
+
   const title = activeCategory ? pick(lang, activeCategory, "name") : t("shopTitle");
   const subtitle = activeCategory
     ? pick(lang, activeCategory, "description")
@@ -53,6 +69,26 @@ export default function Shop() {
 
   return (
     <Container className="py-12">
+      {ancestors.length > 0 && (
+        <nav className="mb-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+          <Link to="/boutique" className="hover:text-brand">
+            {t("navShop")}
+          </Link>
+          {ancestors.map((a, i) => (
+            <span key={a.id} className="flex items-center gap-1.5">
+              <ChevronRight size={12} className="rtl:rotate-180" />
+              {i === ancestors.length - 1 ? (
+                <span className="text-ink">{pick(lang, a, "name")}</span>
+              ) : (
+                <Link to={`/boutique/${a.slug}`} className="hover:text-brand">
+                  {pick(lang, a, "name")}
+                </Link>
+              )}
+            </span>
+          ))}
+        </nav>
+      )}
+
       <SectionHeading
         align="start"
         kicker={t("navShop")}
@@ -60,17 +96,51 @@ export default function Shop() {
         subtitle={subtitle || undefined}
       />
 
-      {/* category chips */}
-      <div className="mt-8 flex flex-wrap gap-2">
-        <CategoryChip to="/boutique" active={!categorySlug}>
-          {t("all")}
-        </CategoryChip>
-        {categories.map((c) => (
-          <CategoryChip key={c.id} to={`/boutique/${c.slug}`} active={categorySlug === c.slug}>
-            {pick(lang, c, "name")}
-          </CategoryChip>
-        ))}
+      <div className="mt-6">
+        <PanelSlot slot="category_top" />
       </div>
+
+      {/* subcategories at this level */}
+      {subcategories.length > 0 && (
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          {subcategories.map((c) => (
+            <Link
+              key={c.id}
+              to={`/boutique/${c.slug}`}
+              className="group flex flex-col items-center gap-2 rounded-card border border-line bg-panel p-4 text-center transition hover:border-brand"
+            >
+              <div className="h-16 w-16 overflow-hidden rounded-lg bg-panel-2">
+                {c.image_url && (
+                  <img
+                    src={c.image_url}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
+              <span className="text-sm font-medium text-ink group-hover:text-brand">
+                {pick(lang, c, "name")}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* sibling chips — quick switch between leaf categories at this level */}
+      {subcategories.length === 0 && (
+        <div className="mt-8 flex flex-wrap gap-2">
+          <CategoryChip to="/boutique" active={!categorySlug}>
+            {t("all")}
+          </CategoryChip>
+          {siblings.map((c) => (
+            <CategoryChip key={c.id} to={`/boutique/${c.slug}`} active={categorySlug === c.slug}>
+              {pick(lang, c, "name")}
+            </CategoryChip>
+          ))}
+        </div>
+      )}
 
       {/* toolbar */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-y border-line py-3">

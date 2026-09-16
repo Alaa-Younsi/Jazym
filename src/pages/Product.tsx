@@ -17,7 +17,28 @@ import { offerLabel } from "@/lib/offers";
 import { SITE_URL } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
-import type { CartVariantPick } from "@/types/db";
+import type { CartVariantPick, ProductVariant } from "@/types/db";
+
+interface AxisOption {
+  fr: string;
+  ar: string;
+}
+
+function dedupeAxisValues(
+  rows: ProductVariant[],
+  valueKey: "option1_value_fr" | "option2_value_fr",
+  valueArKey: "option1_value_ar" | "option2_value_ar",
+): AxisOption[] {
+  const seen = new Set<string>();
+  const out: AxisOption[] = [];
+  for (const row of rows) {
+    const fr = row[valueKey];
+    if (!fr || seen.has(fr)) continue;
+    seen.add(fr);
+    out.push({ fr, ar: row[valueArKey] ?? fr });
+  }
+  return out;
+}
 
 export default function Product() {
   const { slug } = useParams();
@@ -32,6 +53,7 @@ export default function Product() {
   const [color, setColor] = useState<string | null>(null);
   const [size, setSize] = useState<string | null>(null);
   const [variantPicks, setVariantPicks] = useState<Record<string, string>>({});
+  const [optionPicks, setOptionPicks] = useState<{ option1?: string; option2?: string }>({});
   const [showGate, setShowGate] = useState(false);
   const [added, setAdded] = useState(false);
   const viewedRef = useRef<string | null>(null);
@@ -105,18 +127,64 @@ export default function Product() {
         }
       }
     }
+    for (const v of product.product_variants ?? []) {
+      if (v.image_url && !seen.has(v.image_url)) {
+        seen.add(v.image_url);
+        extra.push({ key: `variant-${v.id}`, url: v.image_url });
+      }
+    }
     return [...base, ...extra];
   }, [product]);
 
   if (isLoading) return <PageLoader />;
   if (!product || isError) return <Navigate to="/boutique" replace />;
 
+  const variantRows = product.product_variants ?? [];
+  const hasVariantRows = variantRows.length > 0;
+  const axis1Row = variantRows[0];
+  const axis1Values = dedupeAxisValues(variantRows, "option1_value_fr", "option1_value_ar");
+  const axis2Values = dedupeAxisValues(variantRows, "option2_value_fr", "option2_value_ar");
+  const resolvedVariant = hasVariantRows
+    ? (variantRows.find(
+        (v) =>
+          (v.option1_value_fr ?? undefined) === optionPicks.option1 &&
+          (v.option2_value_fr ?? undefined) === optionPicks.option2,
+      ) ?? null)
+    : null;
+  const needsVariant1 = hasVariantRows && !optionPicks.option1;
+  const needsVariant2 = hasVariantRows && axis2Values.length > 0 && !optionPicks.option2;
+  const comboSoldOut = hasVariantRows && !!resolvedVariant && resolvedVariant.stock <= 0;
+  const isOption1InStock = (value: string) =>
+    variantRows.some(
+      (v) =>
+        v.option1_value_fr === value &&
+        v.stock > 0 &&
+        (optionPicks.option2 === undefined ||
+          (v.option2_value_fr ?? undefined) === optionPicks.option2),
+    );
+  const isOption2InStock = (value: string) =>
+    variantRows.some(
+      (v) =>
+        v.option2_value_fr === value &&
+        v.stock > 0 &&
+        (optionPicks.option1 === undefined || v.option1_value_fr === optionPicks.option1),
+    );
+
   const needsColor = product.colors.length > 0 && !color;
   const needsSize = product.sizes.length > 0 && !size;
   const missingGroups = product.variants.filter((g) => !variantPicks[g.name_fr]);
-  const selectionComplete = !needsColor && !needsSize && missingGroups.length === 0;
-  const soldOut = product.stock <= 0;
-  const maxQty = Math.max(1, Math.min(product.stock || 20, 20));
+  const selectionComplete =
+    !needsColor &&
+    !needsSize &&
+    missingGroups.length === 0 &&
+    !needsVariant1 &&
+    !needsVariant2 &&
+    (!hasVariantRows || !!resolvedVariant);
+  const effectivePrice = resolvedVariant?.price ?? product.price;
+  const effectiveStock = hasVariantRows ? (resolvedVariant?.stock ?? 0) : product.stock;
+  const allVariantsSoldOut = hasVariantRows && variantRows.every((v) => v.stock <= 0);
+  const soldOut = hasVariantRows ? allVariantsSoldOut || comboSoldOut : product.stock <= 0;
+  const maxQty = Math.max(1, Math.min(effectiveStock || 20, 20));
 
   const picks: CartVariantPick[] = product.variants
     .filter((g) => variantPicks[g.name_fr])
@@ -130,8 +198,11 @@ export default function Product() {
       };
     });
 
-  const onSale = product.compare_at_price != null && product.compare_at_price > product.price;
-  const image0 = product.product_images?.[0]?.url ?? null;
+  const effectiveCompareAt = resolvedVariant
+    ? resolvedVariant.compare_at_price
+    : product.compare_at_price;
+  const onSale = effectiveCompareAt != null && effectiveCompareAt > effectivePrice;
+  const image0 = resolvedVariant?.image_url ?? product.product_images?.[0]?.url ?? null;
 
   const swapToImage = (url: string | null | undefined) => {
     if (!url) return;
@@ -146,18 +217,20 @@ export default function Product() {
     }
     addLine({
       product,
-      unitPrice: product.price,
+      unitPrice: effectivePrice,
       quantity: qty,
       color,
       size,
       variants: picks,
       image_url: image0,
+      variantId: resolvedVariant?.id ?? null,
+      stockOverride: hasVariantRows ? effectiveStock : undefined,
     });
     setAdded(true);
     track("add_to_cart", {
       content_ids: [product.id],
       content_type: "product",
-      value: product.price * qty,
+      value: effectivePrice * qty,
       currency: "DZD",
       num_items: qty,
     });
@@ -201,12 +274,9 @@ export default function Product() {
             )}
             <h1 className="fx-display mt-1 text-3xl text-ink sm:text-4xl">{name}</h1>
             <div className="mt-3 flex items-center gap-3">
-              <Price value={product.price} className="text-2xl font-semibold text-ink" />
-              {onSale && product.compare_at_price != null && (
-                <Price
-                  value={product.compare_at_price}
-                  className="text-base text-muted line-through"
-                />
+              <Price value={effectivePrice} className="text-2xl font-semibold text-ink" />
+              {onSale && effectiveCompareAt != null && (
+                <Price value={effectiveCompareAt} className="text-base text-muted line-through" />
               )}
               {product.style_code && (
                 <span className="ms-auto text-xs text-muted">
@@ -231,6 +301,93 @@ export default function Product() {
           )}
 
           {description && <p className="text-sm leading-relaxed text-muted">{description}</p>}
+
+          {/* priced/stocked variants (e.g. page-count options) */}
+          {hasVariantRows && axis1Values.length > 0 && (
+            <Picker
+              label={
+                lang === "ar"
+                  ? (axis1Row?.option1_name_ar ?? axis1Row?.option1_name_fr ?? "")
+                  : (axis1Row?.option1_name_fr ?? "")
+              }
+              required
+              invalid={showGate && needsVariant1}
+            >
+              <div className="flex flex-wrap gap-2">
+                {axis1Values.map((opt) => {
+                  const picked = optionPicks.option1 === opt.fr;
+                  const inStock = isOption1InStock(opt.fr);
+                  return (
+                    <button
+                      key={opt.fr}
+                      type="button"
+                      disabled={!inStock}
+                      onClick={() => {
+                        setOptionPicks((prev) => ({ ...prev, option1: opt.fr }));
+                        const match = variantRows.find(
+                          (v) =>
+                            v.option1_value_fr === opt.fr &&
+                            (v.option2_value_fr ?? undefined) === optionPicks.option2,
+                        );
+                        swapToImage(match?.image_url);
+                      }}
+                      className={cn(
+                        "rounded-lg border px-3 py-1.5 text-sm transition disabled:cursor-not-allowed disabled:opacity-40",
+                        picked
+                          ? "border-brand ring-2 ring-brand/30"
+                          : "border-line hover:border-brand/50",
+                      )}
+                    >
+                      {lang === "ar" ? opt.ar : opt.fr}
+                    </button>
+                  );
+                })}
+              </div>
+            </Picker>
+          )}
+
+          {hasVariantRows && axis2Values.length > 0 && (
+            <Picker
+              label={
+                lang === "ar"
+                  ? (axis1Row?.option2_name_ar ?? axis1Row?.option2_name_fr ?? "")
+                  : (axis1Row?.option2_name_fr ?? "")
+              }
+              required
+              invalid={showGate && needsVariant2}
+            >
+              <div className="flex flex-wrap gap-2">
+                {axis2Values.map((opt) => {
+                  const picked = optionPicks.option2 === opt.fr;
+                  const inStock = isOption2InStock(opt.fr);
+                  return (
+                    <button
+                      key={opt.fr}
+                      type="button"
+                      disabled={!inStock}
+                      onClick={() => {
+                        setOptionPicks((prev) => ({ ...prev, option2: opt.fr }));
+                        const match = variantRows.find(
+                          (v) =>
+                            v.option2_value_fr === opt.fr &&
+                            (v.option1_value_fr ?? undefined) === optionPicks.option1,
+                        );
+                        swapToImage(match?.image_url);
+                      }}
+                      className={cn(
+                        "rounded-lg border px-3 py-1.5 text-sm transition disabled:cursor-not-allowed disabled:opacity-40",
+                        picked
+                          ? "border-brand ring-2 ring-brand/30"
+                          : "border-line hover:border-brand/50",
+                      )}
+                    >
+                      {lang === "ar" ? opt.ar : opt.fr}
+                    </button>
+                  );
+                })}
+              </div>
+            </Picker>
+          )}
 
           {/* colours */}
           {product.colors.length > 0 && (
@@ -408,13 +565,15 @@ export default function Product() {
           {!soldOut && (
             <InlineCheckout
               product={product}
-              unitPrice={product.price}
+              unitPrice={effectivePrice}
               color={color}
               size={size}
               variants={picks}
               image_url={image0}
               selectionComplete={selectionComplete}
               onBlockedSubmit={() => setShowGate(true)}
+              variantId={resolvedVariant?.id ?? null}
+              stock={hasVariantRows ? effectiveStock : undefined}
             />
           )}
         </div>

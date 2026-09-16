@@ -26,6 +26,9 @@ interface InlineCheckoutProps {
   image_url: string | null;
   selectionComplete: boolean;
   onBlockedSubmit: () => void;
+  variantId?: string | null;
+  /** effective stock to cap quantity against — defaults to product.stock */
+  stock?: number;
 }
 
 export function InlineCheckout({
@@ -36,6 +39,8 @@ export function InlineCheckout({
   variants,
   selectionComplete,
   onBlockedSubmit,
+  variantId = null,
+  stock,
 }: InlineCheckoutProps) {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
@@ -64,7 +69,8 @@ export function InlineCheckout({
       : wilayaRow.home_price
     : null;
 
-  const maxQty = Math.max(1, Math.min(product.stock || 20, 20));
+  const effectiveStock = stock ?? product.stock;
+  const maxQty = Math.max(1, Math.min(effectiveStock || 20, 20));
   const goods = lineTotal(unitPrice, qty, product.quantity_offers);
   const discount = lineDiscount(unitPrice, qty, product.quantity_offers);
   const shipping = resolveShipping(wilayaFee, goods, settings);
@@ -96,6 +102,7 @@ export function InlineCheckout({
         items: [
           {
             product_id: product.id,
+            variant_id: variantId,
             quantity: qty,
             color,
             size,

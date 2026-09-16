@@ -33,6 +33,8 @@ const AdminReviews = lazy(() => import("@/pages/admin/Reviews"));
 const AdminLandingPages = lazy(() => import("@/pages/admin/LandingPages"));
 const AdminLandingForm = lazy(() => import("@/pages/admin/LandingPageForm"));
 const AdminPixels = lazy(() => import("@/pages/admin/Pixels"));
+const AdminPanels = lazy(() => import("@/pages/admin/Panels"));
+const AdminPanelForm = lazy(() => import("@/pages/admin/PanelForm"));
 const AdminTeam = lazy(() => import("@/pages/admin/Team"));
 const AdminAccount = lazy(() => import("@/pages/admin/Account"));
 const AdminPolicy = lazy(() => import("@/pages/admin/Policy"));
@@ -77,6 +79,8 @@ function AppRoutes() {
             <Route path="landing" element={<AdminLandingPages />} />
             <Route path="landing/:id" element={<AdminLandingForm />} />
             <Route path="pixels" element={<AdminPixels />} />
+            <Route path="panels" element={<AdminPanels />} />
+            <Route path="panels/:id" element={<AdminPanelForm />} />
             <Route path="team" element={<AdminTeam />} />
             <Route path="account" element={<AdminAccount />} />
             <Route path="policy" element={<AdminPolicy />} />

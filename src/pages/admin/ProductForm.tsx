@@ -9,12 +9,15 @@ import { Field, Input, NativeSelect, Textarea } from "@/components/ui/Field";
 import { PageLoader } from "@/components/ui/Spinner";
 import {
   toProductFormState,
+  toProductVariantFormState,
   useAdminCategories,
   useAdminProduct,
   useSaveProduct,
   type ProductFormState,
+  type ProductVariantFormState,
 } from "@/hooks/useAdminData";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { flattenForSelect } from "@/lib/categoryTree";
 import {
   linesToArray,
   sanitizeColors,
@@ -25,6 +28,29 @@ import {
 } from "@/lib/productForm";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { ProductColor, ProductSize, QuantityOffer, VariantGroup } from "@/types/db";
+
+const MAX_VARIANT_ROWS = 60;
+
+interface AxisValue {
+  fr: string;
+  ar: string;
+}
+
+function parseAxisValues(text: string): AxisValue[] {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [fr, ar] = line.split("|").map((s) => s.trim());
+      return { fr, ar: ar || fr };
+    })
+    .filter((v) => v.fr.length > 0);
+}
+
+function axisValuesToText(values: AxisValue[]): string {
+  return values.map((v) => (v.ar && v.ar !== v.fr ? `${v.fr} | ${v.ar}` : v.fr)).join("\n");
+}
 
 const EMPTY: ProductFormState = {
   slug: "",
@@ -57,12 +83,14 @@ export default function ProductForm() {
 
   const { data: product, isLoading, isError } = useAdminProduct(id);
   const { data: categories = [] } = useAdminCategories();
+  const categoryOptions = useMemo(() => flattenForSelect(categories), [categories]);
   const save = useSaveProduct();
 
   const [form, setForm] = useState<ProductFormState>(EMPTY);
   const [images, setImages] = useState<string[]>([]);
   const [detailsFrText, setDetailsFrText] = useState("");
   const [detailsArText, setDetailsArText] = useState("");
+  const [variantRows, setVariantRows] = useState<ProductVariantFormState[]>([]);
   const [loadFailed, setLoadFailed] = useState(false);
   const [hydrated, setHydrated] = useState(isNew);
 
@@ -77,6 +105,7 @@ export default function ProductForm() {
       setImages((product.product_images ?? []).map((i) => i.url));
       setDetailsFrText(product.details_fr.join("\n"));
       setDetailsArText(product.details_ar.join("\n"));
+      setVariantRows((product.product_variants ?? []).map(toProductVariantFormState));
       setHydrated(true);
     }
   }, [product, isError, isNew]);
@@ -126,6 +155,7 @@ export default function ProductForm() {
         id: isNew ? undefined : id,
         form: payload,
         imageUrls: images,
+        variantRows,
       });
       toast.success(t("adminSaved"));
       navigate("/admin/products");
@@ -237,11 +267,19 @@ export default function ProductForm() {
             productId={isNew ? null : (id ?? null)}
           />
           <SizesEditor value={form.sizes} onChange={(v) => set("sizes", v)} />
-          <VariantsEditor
-            value={form.variants}
-            onChange={(v) => set("variants", v)}
+          <ProductVariantsEditor
+            value={variantRows}
+            onChange={setVariantRows}
+            basePrice={form.price}
             productId={isNew ? null : (id ?? null)}
           />
+          {variantRows.length === 0 && (
+            <VariantsEditor
+              value={form.variants}
+              onChange={(v) => set("variants", v)}
+              productId={isNew ? null : (id ?? null)}
+            />
+          )}
           <OffersEditor value={form.quantity_offers} onChange={(v) => set("quantity_offers", v)} />
         </div>
 
@@ -281,9 +319,11 @@ export default function ProductForm() {
                 onChange={(e) => set("category_id", e.target.value || null)}
               >
                 <option value="">—</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
+                {categoryOptions.map(({ category: c, depth, isLeaf: leaf }) => (
+                  <option key={c.id} value={c.id} disabled={!leaf}>
+                    {"　".repeat(depth)}
                     {lang === "ar" ? c.name_ar : c.name_fr}
+                    {!leaf ? ` (${t("catHasSubcategories")})` : ""}
                   </option>
                 ))}
               </NativeSelect>
@@ -454,6 +494,259 @@ function SizesEditor({
         ))}
         {value.length === 0 && <p className="text-xs text-muted">{t("optional")}</p>}
       </div>
+    </AdminCard>
+  );
+}
+
+interface AxisState {
+  name_fr: string;
+  name_ar: string;
+  valuesText: string;
+}
+
+function deriveAxis(
+  rows: ProductVariantFormState[],
+  nameKey: "option1_name_fr" | "option2_name_fr",
+  nameArKey: "option1_name_ar" | "option2_name_ar",
+  valueKey: "option1_value_fr" | "option2_value_fr",
+  valueArKey: "option1_value_ar" | "option2_value_ar",
+): AxisState | null {
+  const first = rows.find((r) => r[valueKey]);
+  if (!first) return null;
+  const seen = new Set<string>();
+  const values: AxisValue[] = [];
+  for (const r of rows) {
+    const fr = r[valueKey];
+    if (!fr || seen.has(fr)) continue;
+    seen.add(fr);
+    values.push({ fr, ar: r[valueArKey] || fr });
+  }
+  return {
+    name_fr: first[nameKey] || "",
+    name_ar: first[nameArKey] || first[nameKey] || "",
+    valuesText: axisValuesToText(values),
+  };
+}
+
+function ProductVariantsEditor({
+  value,
+  onChange,
+  basePrice,
+  productId,
+}: {
+  value: ProductVariantFormState[];
+  onChange: (v: ProductVariantFormState[]) => void;
+  basePrice: number;
+  productId: string | null;
+}) {
+  const { t } = useI18n();
+  const toast = useAdminToast();
+  const [axis1, setAxis1] = useState<AxisState>(
+    () =>
+      deriveAxis(
+        value,
+        "option1_name_fr",
+        "option1_name_ar",
+        "option1_value_fr",
+        "option1_value_ar",
+      ) ?? { name_fr: "", name_ar: "", valuesText: "" },
+  );
+  const [axis2, setAxis2] = useState<AxisState | null>(() =>
+    deriveAxis(value, "option2_name_fr", "option2_name_ar", "option2_value_fr", "option2_value_ar"),
+  );
+
+  function generate() {
+    const values1 = parseAxisValues(axis1.valuesText);
+    if (values1.length === 0 || !axis1.name_fr.trim()) {
+      toast.error(t("prodVariantMatrixEmpty"));
+      return;
+    }
+    const values2 = axis2 ? parseAxisValues(axis2.valuesText) : [];
+    const combos: [AxisValue, AxisValue | null][] =
+      axis2 && values2.length > 0
+        ? values1.flatMap((v1) => values2.map((v2): [AxisValue, AxisValue | null] => [v1, v2]))
+        : values1.map((v1): [AxisValue, AxisValue | null] => [v1, null]);
+
+    if (combos.length > MAX_VARIANT_ROWS) {
+      toast.error(t("prodVariantMatrixTooMany", { max: MAX_VARIANT_ROWS }));
+      return;
+    }
+
+    const existingByKey = new Map(
+      value.map((r) => [`${r.option1_value_fr ?? ""}::${r.option2_value_fr ?? ""}`, r]),
+    );
+
+    const rows: ProductVariantFormState[] = combos.map(([v1, v2], i) => {
+      const key = `${v1.fr}::${v2?.fr ?? ""}`;
+      const existing = existingByKey.get(key);
+      return {
+        option1_name_fr: axis1.name_fr.trim(),
+        option1_name_ar: axis1.name_ar.trim() || axis1.name_fr.trim(),
+        option1_value_fr: v1.fr,
+        option1_value_ar: v1.ar,
+        option2_name_fr: axis2 ? axis2.name_fr.trim() || null : null,
+        option2_name_ar: axis2 ? axis2.name_ar.trim() || axis2.name_fr.trim() || null : null,
+        option2_value_fr: v2?.fr ?? null,
+        option2_value_ar: v2?.ar ?? null,
+        price: existing?.price ?? basePrice,
+        compare_at_price: existing?.compare_at_price ?? null,
+        stock: existing?.stock ?? 0,
+        sku: existing?.sku ?? null,
+        image_url: existing?.image_url ?? null,
+        sort_order: i,
+      };
+    });
+    onChange(rows);
+  }
+
+  const update = (i: number, patch: Partial<ProductVariantFormState>) =>
+    onChange(value.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
+
+  return (
+    <AdminCard>
+      <h3 className="mb-1 text-sm font-semibold text-ink">{t("prodVariantMatrixTitle")}</h3>
+      <p className="mb-3 text-xs text-muted">{t("prodVariantMatrixHint")}</p>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-line p-3">
+          <div className="mb-2 flex gap-2">
+            <Input
+              className="flex-1"
+              placeholder={t("prodVariantAxisName")}
+              value={axis1.name_fr}
+              onChange={(e) => setAxis1((a) => ({ ...a, name_fr: e.target.value }))}
+            />
+            <Input
+              className="flex-1"
+              dir="rtl"
+              placeholder={t("prodVariantAxisNameAr")}
+              value={axis1.name_ar}
+              onChange={(e) => setAxis1((a) => ({ ...a, name_ar: e.target.value }))}
+            />
+          </div>
+          <Textarea
+            rows={4}
+            placeholder={t("prodVariantAxisValuesPlaceholder")}
+            value={axis1.valuesText}
+            onChange={(e) => setAxis1((a) => ({ ...a, valuesText: e.target.value }))}
+          />
+        </div>
+
+        {axis2 ? (
+          <div className="rounded-lg border border-line p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Input
+                className="flex-1"
+                placeholder={t("prodVariantAxisName")}
+                value={axis2.name_fr}
+                onChange={(e) => setAxis2((a) => (a ? { ...a, name_fr: e.target.value } : a))}
+              />
+              <Input
+                className="flex-1"
+                dir="rtl"
+                placeholder={t("prodVariantAxisNameAr")}
+                value={axis2.name_ar}
+                onChange={(e) => setAxis2((a) => (a ? { ...a, name_ar: e.target.value } : a))}
+              />
+              <button
+                type="button"
+                onClick={() => setAxis2(null)}
+                className="text-muted hover:text-danger"
+                aria-label={t("delete")}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+            <Textarea
+              rows={4}
+              placeholder={t("prodVariantAxisValuesPlaceholder")}
+              value={axis2.valuesText}
+              onChange={(e) => setAxis2((a) => (a ? { ...a, valuesText: e.target.value } : a))}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAxis2({ name_fr: "", name_ar: "", valuesText: "" })}
+            className="flex items-center justify-center gap-1 rounded-lg border border-dashed border-line p-3 text-xs text-brand hover:border-brand"
+          >
+            <Plus size={13} />
+            {t("prodVariantAddAxis2")}
+          </button>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={generate}
+        className="mt-3 inline-flex items-center gap-1 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
+      >
+        {t("prodGenerateMatrix")}
+      </button>
+
+      {value.length > 0 && (
+        <div className="mt-4 flex flex-col gap-2">
+          {value.map((row, i) => (
+            <div
+              key={i}
+              className="flex flex-wrap items-center gap-2 rounded-lg border border-line p-2 text-sm"
+            >
+              <span className="w-40 shrink-0 truncate text-ink">
+                {row.option1_value_fr}
+                {row.option2_value_fr ? ` / ${row.option2_value_fr}` : ""}
+              </span>
+              <Input
+                type="number"
+                className="w-24"
+                min={0}
+                step={50}
+                placeholder={t("prodVariantPrice")}
+                value={row.price || ""}
+                onChange={(e) => update(i, { price: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                className="w-24"
+                min={0}
+                step={50}
+                placeholder={t("prodVariantCompareAt")}
+                value={row.compare_at_price ?? ""}
+                onChange={(e) =>
+                  update(i, { compare_at_price: e.target.value ? Number(e.target.value) : null })
+                }
+              />
+              <Input
+                type="number"
+                className="w-20"
+                min={0}
+                placeholder={t("prodVariantStock")}
+                value={row.stock}
+                onChange={(e) => update(i, { stock: Math.max(0, Number(e.target.value)) })}
+              />
+              <Input
+                className="w-28"
+                placeholder={t("prodVariantSku")}
+                value={row.sku ?? ""}
+                onChange={(e) => update(i, { sku: e.target.value || null })}
+              />
+              <SingleImageUpload
+                value={row.image_url ?? null}
+                onChange={(url) => update(i, { image_url: url })}
+                prefix={productId ? `variants/${productId}/` : "variants/"}
+              />
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((_, idx) => idx !== i))}
+                className="ms-auto text-muted hover:text-danger"
+                aria-label={t("delete")}
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {value.length === 0 && <p className="mt-3 text-xs text-muted">{t("optional")}</p>}
     </AdminCard>
   );
 }

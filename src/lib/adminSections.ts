@@ -6,6 +6,7 @@ import {
   Truck,
   Star,
   LayoutTemplate,
+  Megaphone,
   Radio,
   Users,
   UserCog,
@@ -63,6 +64,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: LayoutTemplate,
   },
   { key: "pixels", route: "/admin/pixels", labelKey: "adminSecPixels", icon: Radio },
+  { key: "panels", route: "/admin/panels", labelKey: "adminSecPanels", icon: Megaphone },
   { key: "policy", route: "/admin/policy", labelKey: "adminSecPolicy", icon: FileText },
   {
     key: "team",
