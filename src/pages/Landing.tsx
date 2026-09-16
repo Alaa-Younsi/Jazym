@@ -1,7 +1,17 @@
 import { motion } from "framer-motion";
-import { ArrowRight, BadgeCheck, PackageCheck, Truck, Wallet } from "lucide-react";
+import {
+  ArrowRight,
+  BadgeCheck,
+  MapPin,
+  PackageCheck,
+  Sparkles,
+  Truck,
+  Wallet,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatedCounter } from "@/components/effects/AnimatedCounter";
 import { HeroArt } from "@/components/effects/HeroArt";
+import { Reveal } from "@/components/effects/Reveal";
 import { PanelSlot } from "@/components/panels/PanelSlot";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductPlaceholder } from "@/components/product/ProductPlaceholder";
@@ -10,6 +20,7 @@ import { Container, SectionHeading } from "@/components/ui/Container";
 import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Stars } from "@/components/ui/Stars";
 import { useCategories } from "@/hooks/useCategories";
+import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { useFeaturedProducts } from "@/hooks/useProducts";
 import { useReviews } from "@/hooks/useReviews";
 import { useSeo } from "@/hooks/useSeo";
@@ -23,6 +34,7 @@ export default function Landing() {
   const { data: featured = [] } = useFeaturedProducts(8);
   const { data: categories = [] } = useCategories();
   const { data: reviews = [] } = useReviews();
+  const reducedMotion = usePrefersReducedMotion();
 
   useSeo({
     title: `${t("brandTagline")} — ${SITE_NAME}`,
@@ -51,35 +63,63 @@ export default function Landing() {
         />
         <Container className="relative grid items-center gap-10 py-14 lg:grid-cols-2 lg:py-20">
           <div className="flex flex-col gap-6">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-line bg-panel px-3 py-1 text-xs font-medium text-brand">
-              <FlowerMark className="h-3.5 w-3.5" />
-              {t("heroKicker")}
-            </span>
-            <h1 className="fx-display text-4xl text-ink sm:text-5xl lg:text-[3.4rem]">
-              {t("heroTitle")}
-            </h1>
-            <p className="max-w-lg text-base leading-relaxed text-muted">{t("heroSubtitle")}</p>
-            <div className="flex flex-wrap gap-3">
-              <ButtonLink to="/boutique" size="lg">
-                {t("heroCtaShop")}
-                <ArrowRight size={18} className="rtl:rotate-180" />
-              </ButtonLink>
-              <ButtonLink to="/boutique/strategies" size="lg" variant="secondary">
-                {t("heroCtaStrategies")}
-              </ButtonLink>
-            </div>
-            <dl className="mt-2 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-5">
-              {[
-                { v: "69", l: t("heroStatWilayas") },
-                { v: "100%", l: t("heroStatCod") },
-                { v: lang === "ar" ? "0 دج" : "0 DA", l: t("heroStatCustom") },
-              ].map((s) => (
-                <div key={s.l}>
-                  <dt className="num-ltr fx-display text-2xl text-brand">{s.v}</dt>
-                  <dd className="text-xs leading-tight text-muted">{s.l}</dd>
-                </div>
-              ))}
-            </dl>
+            <Reveal>
+              <span className="relative inline-flex w-fit items-center gap-2.5 rounded-full border border-brand/30 bg-brand-soft/40 px-3.5 py-1.5 text-xs font-medium text-brand shadow-soft backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+                </span>
+                {t("heroKicker")}
+              </span>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <h1 className="fx-display text-4xl text-ink sm:text-5xl lg:text-[3.4rem]">
+                {t("heroTitle")}
+              </h1>
+            </Reveal>
+            <Reveal delay={0.16}>
+              <p className="max-w-lg text-base leading-relaxed text-muted">{t("heroSubtitle")}</p>
+            </Reveal>
+            <Reveal delay={0.24}>
+              <div className="flex flex-wrap gap-3">
+                <ButtonLink to="/boutique" size="lg">
+                  {t("heroCtaShop")}
+                  <ArrowRight size={18} className="rtl:rotate-180" />
+                </ButtonLink>
+                <ButtonLink to="/boutique/strategies" size="lg" variant="secondary">
+                  {t("heroCtaStrategies")}
+                </ButtonLink>
+              </div>
+            </Reveal>
+            <Reveal delay={0.32}>
+              <dl className="mt-2 grid max-w-md grid-cols-3 divide-x divide-line rtl:divide-x-reverse">
+                {[
+                  { Icon: MapPin, value: 69, suffix: "", l: t("heroStatWilayas") },
+                  { Icon: Wallet, value: 100, suffix: "%", l: t("heroStatCod") },
+                  {
+                    Icon: Sparkles,
+                    value: 0,
+                    suffix: lang === "ar" ? " دج" : " DA",
+                    l: t("heroStatCustom"),
+                  },
+                ].map((s, i) => (
+                  <div
+                    key={s.l}
+                    className="group flex flex-col gap-1.5 px-4 transition-transform first:ps-0 hover:-translate-y-0.5 last:pe-0"
+                  >
+                    <s.Icon size={16} className="text-brand/70 transition group-hover:text-brand" />
+                    <dt className="num-ltr fx-display text-2xl text-brand">
+                      <AnimatedCounter
+                        value={s.value}
+                        suffix={s.suffix}
+                        duration={1000 + i * 200}
+                      />
+                    </dt>
+                    <dd className="text-xs leading-tight text-muted">{s.l}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
           </div>
           <HeroArt />
         </Container>
@@ -172,13 +212,15 @@ export default function Landing() {
             { t: t("howStep2Title"), b: t("howStep2Body") },
             { t: t("howStep3Title"), b: t("howStep3Body") },
           ].map((step, i) => (
-            <div key={step.t} className="relative rounded-card border border-line bg-panel p-6">
-              <span className="fx-display absolute end-5 top-3 text-5xl text-brand/15">
-                {i + 1}
-              </span>
-              <h3 className="fx-display text-lg text-ink">{step.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{step.b}</p>
-            </div>
+            <Reveal key={step.t} delay={i * 0.1}>
+              <div className="group relative h-full rounded-card border border-line bg-panel p-6 transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lift">
+                <span className="fx-display absolute end-5 top-3 text-5xl text-brand/15 transition group-hover:text-brand/25">
+                  {i + 1}
+                </span>
+                <h3 className="fx-display text-lg text-ink">{step.t}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{step.b}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </Container>
@@ -197,14 +239,16 @@ export default function Landing() {
               { Icon: Truck, t: t("feature2Title"), b: t("feature2Body") },
               { Icon: Wallet, t: t("feature3Title"), b: t("feature3Body") },
               { Icon: PackageCheck, t: t("feature4Title"), b: t("feature4Body") },
-            ].map((f) => (
-              <div key={f.t} className="flex flex-col gap-3">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-soft/70 text-brand">
-                  <f.Icon size={20} />
-                </span>
-                <h3 className="text-sm font-semibold text-ink">{f.t}</h3>
-                <p className="text-sm leading-relaxed text-muted">{f.b}</p>
-              </div>
+            ].map((f, i) => (
+              <Reveal key={f.t} delay={i * 0.08}>
+                <div className="group flex flex-col gap-3">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-brand-soft/70 text-brand transition duration-300 group-hover:scale-110 group-hover:bg-brand group-hover:text-white">
+                    <f.Icon size={20} />
+                  </span>
+                  <h3 className="text-sm font-semibold text-ink">{f.t}</h3>
+                  <p className="text-sm leading-relaxed text-muted">{f.b}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </Container>
@@ -215,17 +259,16 @@ export default function Landing() {
         <Container as="section" className="py-16">
           <SectionHeading kicker="★★★★★" title={t("testimonialsTitle")} />
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {reviews.slice(0, 6).map((r) => (
-              <figure
-                key={r.id}
-                className="flex flex-col gap-3 rounded-card border border-line bg-panel p-6"
-              >
-                <Stars value={r.stars} />
-                <blockquote className="text-sm leading-relaxed text-ink/90">
-                  “{r.review_text}”
-                </blockquote>
-                <figcaption className="mt-auto text-xs text-muted">{r.client_name}</figcaption>
-              </figure>
+            {reviews.slice(0, 6).map((r, i) => (
+              <Reveal key={r.id} delay={(i % 3) * 0.08}>
+                <figure className="flex h-full flex-col gap-3 rounded-card border border-line bg-panel p-6 transition hover:-translate-y-1 hover:shadow-lift">
+                  <Stars value={r.stars} />
+                  <blockquote className="text-sm leading-relaxed text-ink/90">
+                    “{r.review_text}”
+                  </blockquote>
+                  <figcaption className="mt-auto text-xs text-muted">{r.client_name}</figcaption>
+                </figure>
+              </Reveal>
             ))}
           </div>
         </Container>
@@ -233,8 +276,14 @@ export default function Landing() {
 
       {/* ---------- closing CTA ---------- */}
       <Container as="section" className="pb-24">
-        <div className="relative overflow-hidden rounded-card border border-line bg-ink px-8 py-14 text-center text-bg">
-          <FlowerMark className="absolute -end-8 -top-8 h-40 w-40 text-brand/25" />
+        <Reveal className="relative overflow-hidden rounded-card border border-line bg-ink px-8 py-14 text-center text-bg">
+          <motion.div
+            className="absolute -end-8 -top-8 h-40 w-40 text-brand/25"
+            animate={reducedMotion ? undefined : { rotate: 360 }}
+            transition={{ duration: 40, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          >
+            <FlowerMark className="h-full w-full" />
+          </motion.div>
           <h2 className="fx-display relative text-3xl sm:text-4xl">{t("brandTagline")}</h2>
           <p className="relative mx-auto mt-3 max-w-md text-sm text-bg/70">
             {t("brandTaglineLong")}
@@ -242,7 +291,7 @@ export default function Landing() {
           <ButtonLink variant="gold" size="lg" className="relative mt-6" to="/boutique">
             {t("heroCtaShop")}
           </ButtonLink>
-        </div>
+        </Reveal>
       </Container>
     </>
   );

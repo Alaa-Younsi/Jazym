@@ -1,4 +1,4 @@
-import { ChevronRight, FolderTree, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronRight, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminCard, AdminPageHeader, EmptyState, LoadError } from "@/components/admin/AdminUI";
@@ -143,16 +143,17 @@ export default function Categories() {
       <AdminPageHeader
         title={t("catListTitle")}
         actions={
-          currentHasProducts ? (
-            <ButtonLink size="sm" variant="secondary" to="/admin/products">
-              {t("catManageProducts")}
-            </ButtonLink>
-          ) : (
+          <>
+            {currentHasProducts && (
+              <ButtonLink size="sm" variant="secondary" to="/admin/products">
+                {t("catManageProducts")}
+              </ButtonLink>
+            )}
             <Button size="sm" onClick={openNew}>
               <Plus size={15} />
               {t("catNew")}
             </Button>
-          )
+          </>
         }
       />
 
@@ -186,10 +187,7 @@ export default function Categories() {
       )}
 
       {levelCategories.length === 0 ? (
-        <EmptyState
-          title={t("catEmptyLevel")}
-          hint={currentHasProducts ? undefined : t("catEmptyLevelHint")}
-        />
+        <EmptyState title={t("catEmptyLevel")} hint={t("catEmptyLevelHint")} />
       ) : (
         <div className="grid gap-3">
           {levelCategories.map((c) => {
@@ -219,23 +217,20 @@ export default function Categories() {
                   <p className="font-medium text-ink">{lang === "ar" ? c.name_ar : c.name_fr}</p>
                   <p className="text-xs text-muted">
                     /{c.slug}
-                    {isLeaf
-                      ? productCount > 0
-                        ? ` · ${t("catProductCount", { count: productCount })}`
-                        : ` · ${t("catEmptyLevel")}`
-                      : ` · ${t("catSubcategoryCount", { count: childCount })}`}
+                    {productCount > 0 && ` · ${t("catProductCount", { count: productCount })}`}
+                    {childCount > 0 && ` · ${t("catSubcategoryCount", { count: childCount })}`}
+                    {isLeaf && productCount === 0 && ` · ${t("catEmptyLevel")}`}
                   </p>
                 </button>
-                {!isLeaf && (
-                  <button
-                    type="button"
-                    onClick={() => setCurrentParentId(c.id)}
-                    className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
-                    aria-label={t("catBrowse")}
-                  >
-                    <FolderTree size={14} />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setCurrentParentId(c.id)}
+                  className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
+                  aria-label={t("catBrowse")}
+                >
+                  {t("catBrowse")}
+                  <ChevronRight size={13} className="rtl:rotate-180" />
+                </button>
                 <button
                   type="button"
                   onClick={() => openEdit(c)}

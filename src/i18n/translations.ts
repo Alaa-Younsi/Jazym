@@ -374,7 +374,7 @@ export const translations = {
     catHasSubcategories: "a des sous-catégories",
     catManageProducts: "Gérer les produits",
     catHoldsProductsHint:
-      "Cette catégorie contient déjà des produits — elle ne peut pas avoir de sous-catégories.",
+      "Cette catégorie contient encore des produits placés directement dessus. Vous pouvez ajouter des sous-catégories ci-dessous, puis déplacer ces produits vers la bonne sous-catégorie depuis leur fiche.",
     catEmptyLevel: "Aucune sous-catégorie",
     catEmptyLevelHint: "Ajoutez une sous-catégorie ou des produits ici.",
     catProductCount: "{count} produit(s)",
@@ -909,7 +909,8 @@ export const translations = {
     catBrowse: "تصفّح",
     catHasSubcategories: "لديها فئات فرعية",
     catManageProducts: "إدارة المنتجات",
-    catHoldsProductsHint: "هذه الفئة تحتوي على منتجات بالفعل — لا يمكن إضافة فئات فرعية لها.",
+    catHoldsProductsHint:
+      "هذه الفئة لا تزال تحتوي على منتجات موضوعة مباشرة عليها. يمكنك إضافة فئات فرعية أدناه، ثم نقل هذه المنتجات إلى الفئة الفرعية المناسبة من بطاقة كل منتج.",
     catEmptyLevel: "لا توجد فئات فرعية",
     catEmptyLevelHint: "أضف فئة فرعية أو منتجات هنا.",
     catProductCount: "{count} منتج",

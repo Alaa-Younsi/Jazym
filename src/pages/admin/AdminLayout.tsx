@@ -38,7 +38,7 @@ function SidebarContent({
         </span>
       </Link>
 
-      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto">
+      <nav className="fx-scrollbar min-h-0 flex-1 space-y-1 overflow-y-auto">
         {sections.map((s) => (
           <NavLink
             key={s.key}
@@ -174,7 +174,7 @@ export default function AdminLayout() {
             <ThemeToggle />
           </header>
 
-          <main ref={mainRef} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <main ref={mainRef} className="fx-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <Outlet />
           </main>
         </div>

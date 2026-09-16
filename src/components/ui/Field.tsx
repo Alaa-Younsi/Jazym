@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import {
   forwardRef,
   type InputHTMLAttributes,
@@ -69,13 +70,22 @@ export const NativeSelect = forwardRef<
   HTMLSelectElement,
   SelectHTMLAttributes<HTMLSelectElement> & { invalid?: boolean }
 >(function NativeSelect({ className, invalid, children, ...rest }, ref) {
+  // The select keeps its own width class (defaults to w-full via `control`);
+  // the wrapper just needs to size the same way — shrink-wrap for an
+  // explicit w-auto select, otherwise a normal block filling its container.
   return (
-    <select
-      ref={ref}
-      className={cn(control, "appearance-none pe-9", invalid && "border-danger", className)}
-      {...rest}
-    >
-      {children}
-    </select>
+    <span className={cn("relative", className?.includes("w-auto") ? "inline-block" : "block")}>
+      <select
+        ref={ref}
+        className={cn(control, "appearance-none pe-9", invalid && "border-danger", className)}
+        {...rest}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        size={15}
+        className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-muted"
+      />
+    </span>
   );
 });

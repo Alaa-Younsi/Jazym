@@ -1,5 +1,9 @@
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { FlowerMark } from "@/components/ui/FlowerMark";
 import { usePanel } from "@/hooks/usePromoPanels";
+import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { responsiveSrcSet } from "@/lib/image";
 import type { PanelSlot as PanelSlotKey } from "@/types/db";
@@ -10,6 +14,7 @@ import type { PanelSlot as PanelSlotKey } from "@/types/db";
 export function PanelSlot({ slot }: { slot: PanelSlotKey }) {
   const { lang } = useI18n();
   const { data: panel } = usePanel(slot);
+  const reduced = usePrefersReducedMotion();
   if (!panel) return null;
 
   const title = lang === "ar" ? panel.title_ar : panel.title_fr;
@@ -17,9 +22,17 @@ export function PanelSlot({ slot }: { slot: PanelSlotKey }) {
   const hasText = !!(title || subtitle);
   if (!panel.image_url && !hasText) return null;
 
+  const isLink = !!panel.link_url;
+
   const content = (
-    <div className="relative overflow-hidden rounded-card border border-line">
-      {panel.image_url && (
+    <div
+      className={
+        panel.image_url
+          ? "group relative overflow-hidden rounded-card border border-line"
+          : "group relative overflow-hidden rounded-card border border-brand/25 bg-gradient-to-br from-brand via-violet to-brand/80"
+      }
+    >
+      {panel.image_url ? (
         <img
           src={panel.image_url}
           srcSet={responsiveSrcSet(panel.image_url)}
@@ -27,34 +40,54 @@ export function PanelSlot({ slot }: { slot: PanelSlotKey }) {
           alt=""
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
+      ) : (
+        <motion.div
+          className="pointer-events-none absolute -end-6 -top-6 h-36 w-36 text-white/15"
+          animate={reduced ? undefined : { rotate: 360 }}
+          transition={{ duration: 50, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+        >
+          <FlowerMark className="h-full w-full" />
+        </motion.div>
       )}
       {hasText && (
         <div
           className={
             panel.image_url
-              ? "absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/70 to-transparent p-5 text-white"
-              : "flex flex-col gap-1 bg-panel p-5"
+              ? "absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink/70 to-transparent p-5 text-white sm:p-7"
+              : "relative flex flex-col gap-1 p-5 text-white sm:p-7"
           }
         >
-          {title && <p className="fx-display text-xl">{title}</p>}
-          {subtitle && <p className="text-sm opacity-90">{subtitle}</p>}
+          {title && <p className="fx-display text-xl sm:text-2xl">{title}</p>}
+          {subtitle && <p className="max-w-md text-sm opacity-90">{subtitle}</p>}
+          {isLink && (
+            <span className="mt-2 inline-flex w-fit items-center gap-1.5 text-xs font-semibold uppercase tracking-wider opacity-90 transition group-hover:gap-2.5">
+              {lang === "ar" ? "اكتشف" : "Découvrir"}
+              <ArrowRight size={13} className="rtl:rotate-180" />
+            </span>
+          )}
         </div>
       )}
     </div>
   );
 
-  if (!panel.link_url) return content;
-  if (panel.link_url.startsWith("/")) {
+  if (!isLink) return content;
+  const linkClassName = "block transition hover:-translate-y-0.5 hover:shadow-lift";
+  if (panel.link_url?.startsWith("/")) {
     return (
-      <Link to={panel.link_url} className="block">
+      <Link to={panel.link_url} className={linkClassName}>
         {content}
       </Link>
     );
   }
   return (
-    <a href={panel.link_url} target="_blank" rel="noopener noreferrer" className="block">
+    <a
+      href={panel.link_url ?? undefined}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={linkClassName}
+    >
       {content}
     </a>
   );
