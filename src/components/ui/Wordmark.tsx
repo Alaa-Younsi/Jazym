@@ -1,30 +1,49 @@
 import { cn } from "@/lib/cn";
-import { FlowerMark } from "./FlowerMark";
 
 interface WordmarkProps {
   className?: string;
-  /** stacked = flower above, wordmark below (used in admin sidebar) */
+  /** stacked = larger, centred (used in the admin sidebar / login card) */
   stacked?: boolean;
+  /** render at high priority — use on the header, which is above the fold */
+  eager?: boolean;
 }
 
 /**
- * Text wordmark echoing the logo: "Jaz" · flower · "ym" set in the display
- * serif (the logo replaces the apostrophe of "Jaz'ym" with the flower). Not the
- * raster logo — that's `public/logo.webp`, used for OG / print.
+ * The official Jazym logo (`public/jazym-logo.png`, optimised into
+ * `jazym-logo.webp` by `scripts/optimize-logo.mjs` — 659 KB → 15 KB).
+ *
+ * Two files, not a CSS filter: the wordmark is black calligraphy but the flower
+ * is brand blue + gold, so `invert()` would turn the flower orange. The dark
+ * variant re-lights only the near-greyscale lettering. Which one shows is
+ * decided by CSS on `html[data-theme]` (see `.fx-logo-*` in index.css) so the
+ * swap happens pre-paint, with no theme flash and no JS.
  */
-export function Wordmark({ className, stacked }: WordmarkProps) {
+export function Wordmark({ className, stacked, eager }: WordmarkProps) {
+  const size = stacked ? "h-14" : "h-10 sm:h-11";
+  const common = cn("w-auto object-contain", size, className);
   return (
-    <span
-      dir="ltr"
-      className={cn(
-        "inline-flex items-baseline gap-[0.1em] font-display text-[1.7rem] font-semibold tracking-tight text-ink",
-        stacked && "flex-col items-center gap-1.5 text-3xl",
-        className,
-      )}
-    >
-      <span>Jaz</span>
-      <FlowerMark className="h-[0.7em] w-[0.7em] translate-y-[-0.05em] text-brand" />
-      <span>ym</span>
-    </span>
+    <>
+      <img
+        src="/jazym-logo.webp"
+        alt="Jazym"
+        width={320}
+        height={207}
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "auto"}
+        decoding="async"
+        className={cn("fx-logo-light", common)}
+      />
+      <img
+        src="/jazym-logo-dark.webp"
+        alt="Jazym"
+        width={320}
+        height={207}
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "auto"}
+        decoding="async"
+        className={cn("fx-logo-dark", common)}
+        aria-hidden
+      />
+    </>
   );
 }

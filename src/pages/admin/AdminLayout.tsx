@@ -170,11 +170,14 @@ export default function AdminLayout() {
             >
               <Menu size={20} />
             </button>
-            <Wordmark className="text-xl" />
+            <Wordmark className="h-7" />
             <ThemeToggle />
           </header>
 
-          <main ref={mainRef} className="fx-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <main
+            ref={mainRef}
+            className="fx-scrollbar min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8"
+          >
             {/* Scoped to the outlet ONLY — see skill's "opens but won't close"
                 note: a lazy admin sub-page suspending here must never tear
                 down this layout (and the mobile nav drawer's AnimatePresence

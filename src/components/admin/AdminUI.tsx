@@ -10,10 +10,13 @@ export function AdminPageHeader({
   description?: string;
   actions?: ReactNode;
 }) {
+  /* Stacks on phones: a long title next to two or three action buttons was
+     pushing the admin scroll container into horizontal overflow, which drags
+     the whole page sideways and clips the heading. */
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h1 className="fx-display text-2xl text-ink">{title}</h1>
+    <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+      <div className="min-w-0">
+        <h1 className="fx-display text-xl text-ink sm:text-2xl">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

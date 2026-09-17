@@ -201,67 +201,80 @@ export default function Categories() {
             const productCount = productCountByCategory.get(c.id) ?? 0;
             const isLeaf = childCount === 0;
             return (
-              <AdminCard key={c.id} className="flex items-center gap-4">
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-panel-2">
-                  {c.image_url && (
-                    <img
-                      src={c.image_url}
-                      srcSet={responsiveSrcSet(c.image_url)}
-                      sizes="48px"
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover"
-                    />
-                  )}
+              /* Phone: identity row on top, actions on their own row beneath.
+                 Laying all six controls out in one line on a 360px screen was
+                 forcing the whole admin page into horizontal overflow. */
+              <AdminCard
+                key={c.id}
+                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                  <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-panel-2 sm:h-12 sm:w-12">
+                    {c.image_url && (
+                      <img
+                        src={c.image_url}
+                        srcSet={responsiveSrcSet(c.image_url)}
+                        sizes="48px"
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentParentId(c.id)}
+                    className="min-w-0 flex-1 text-start"
+                  >
+                    <p className="truncate font-medium text-ink">
+                      {lang === "ar" ? c.name_ar : c.name_fr}
+                    </p>
+                    <p className="truncate text-xs text-muted">
+                      /{c.slug}
+                      {productCount > 0 && ` · ${t("catProductCount", { count: productCount })}`}
+                      {childCount > 0 && ` · ${t("catSubcategoryCount", { count: childCount })}`}
+                      {isLeaf && productCount === 0 && ` · ${t("catEmptyLevel")}`}
+                    </p>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setCurrentParentId(c.id)}
-                  className="min-w-0 flex-1 text-start"
-                >
-                  <p className="font-medium text-ink">{lang === "ar" ? c.name_ar : c.name_fr}</p>
-                  <p className="text-xs text-muted">
-                    /{c.slug}
-                    {productCount > 0 && ` · ${t("catProductCount", { count: productCount })}`}
-                    {childCount > 0 && ` · ${t("catSubcategoryCount", { count: childCount })}`}
-                    {isLeaf && productCount === 0 && ` · ${t("catEmptyLevel")}`}
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openNew(c.id, childCount)}
-                  className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
-                  aria-label={t("catAddSubcategory")}
-                  title={t("catAddSubcategory")}
-                >
-                  <Plus size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentParentId(c.id)}
-                  className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
-                  aria-label={t("catBrowse")}
-                >
-                  {t("catBrowse")}
-                  <ChevronRight size={13} className="rtl:rotate-180" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openEdit(c)}
-                  className="rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
-                  aria-label={t("edit")}
-                >
-                  <Pencil size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDelete(c)}
-                  className="rounded-full border border-line p-2 text-muted hover:border-danger hover:text-danger"
-                  aria-label={t("delete")}
-                >
-                  <Trash2 size={14} />
-                </button>
+
+                <div className="flex shrink-0 items-center gap-2 border-t border-line pt-3 sm:border-0 sm:pt-0">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentParentId(c.id)}
+                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-line px-3 py-2 text-xs font-medium text-ink hover:border-brand hover:text-brand sm:flex-none sm:py-1.5"
+                    aria-label={t("catBrowse")}
+                  >
+                    {t("catBrowse")}
+                    <ChevronRight size={13} className="rtl:rotate-180" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openNew(c.id, childCount)}
+                    className="shrink-0 rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
+                    aria-label={t("catAddSubcategory")}
+                    title={t("catAddSubcategory")}
+                  >
+                    <Plus size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openEdit(c)}
+                    className="shrink-0 rounded-full border border-line p-2 text-muted hover:border-brand hover:text-brand"
+                    aria-label={t("edit")}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(c)}
+                    className="shrink-0 rounded-full border border-line p-2 text-muted hover:border-danger hover:text-danger"
+                    aria-label={t("delete")}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </AdminCard>
             );
           })}

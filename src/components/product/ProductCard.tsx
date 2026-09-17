@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Price } from "@/components/ui/Price";
+import { SmartImage } from "@/components/ui/SmartImage";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { cn } from "@/lib/cn";
@@ -20,7 +21,11 @@ export function ProductCard({ product, eager }: ProductCardProps) {
   const addLine = useCart((s) => s.addLine);
 
   const name = lang === "ar" ? product.name_ar : product.name_fr;
-  const image = product.product_images?.[0]?.url ?? null;
+  const images = product.product_images ?? [];
+  const image = images[0]?.url ?? null;
+  // Second photo, revealed on hover — the classic apparel-shop "show me the
+  // other angle" move. Only when there genuinely is one.
+  const hoverImage = images[1]?.url ?? null;
   const onSale = product.compare_at_price != null && product.compare_at_price > product.price;
   const needsChoice =
     product.colors.length > 0 || product.sizes.length > 0 || product.variants.length > 0;
@@ -37,22 +42,43 @@ export function ProductCard({ product, eager }: ProductCardProps) {
     >
       <Link
         to={`/produit/${product.slug}`}
-        className="relative block overflow-hidden rounded-card border border-line bg-panel"
+        className="relative block overflow-hidden rounded-card border border-line bg-panel transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-brand/40 hover:shadow-lift"
       >
-        <div className="aspect-[4/5] w-full overflow-hidden">
+        <div className="fx-curl relative aspect-[4/5] w-full overflow-hidden">
           <ProductThumb
             src={image}
             name={name}
             eager={eager}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 260px"
-            className="h-full w-full transition-transform duration-500 group-hover:scale-[1.04]"
+            className={cn(
+              "h-full w-full transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+              hoverImage
+                ? "group-hover:scale-[1.06] group-hover:opacity-0"
+                : "group-hover:scale-[1.06]",
+            )}
           />
+          {hoverImage && (
+            // The opacity/scale hover lives on this wrapper, not on SmartImage:
+            // SmartImage owns its own opacity for the blur-up, and two
+            // competing `opacity-*` utilities on one element resolve by
+            // stylesheet order, not by class order.
+            <span className="absolute inset-0 scale-105 opacity-0 transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-100 group-hover:opacity-100">
+              <SmartImage
+                src={hoverImage}
+                alt=""
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 260px"
+                className="h-full w-full object-cover"
+              />
+            </span>
+          )}
+          {/* ink wash that rises as the card is hovered */}
+          <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3">
           <div className="flex flex-col gap-1">
             {product.featured && (
-              <span className="rounded-full bg-gold/90 px-2 py-0.5 text-[0.65rem] font-semibold text-ink">
+              <span className="rounded-full bg-gold px-2 py-0.5 text-[0.65rem] font-semibold text-[#14131A]">
                 {t("featuredTitle")}
               </span>
             )}

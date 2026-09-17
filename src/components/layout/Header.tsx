@@ -41,13 +41,14 @@ export function Header() {
   // Top-level categories only, capped — a deep matière/thème tree must never
   // flood the main nav (that's what the shop page's own browsing is for).
   const topCategories = childrenOf(categories, null).slice(0, 4);
+  // No policy link here by client request — it lives in the footer, where
+  // shipping/returns copy is conventionally looked for anyway.
   const navItems = [
     { to: "/boutique", label: t("navShop") },
     ...topCategories.map((c) => ({
       to: `/boutique/${c.slug}`,
       label: pick(lang, c, "name"),
     })),
-    { to: "/politique", label: t("footerPolicy") },
     { to: "/contact", label: t("navContact") },
   ];
 
@@ -87,8 +88,12 @@ export function Header() {
             </button>
           </div>
 
-          <Link to="/" className="shrink-0" aria-label={t("brandName")}>
-            <Wordmark />
+          <Link
+            to="/"
+            className="shrink-0 transition-transform duration-300 hover:scale-[1.03]"
+            aria-label={t("brandName")}
+          >
+            <Wordmark eager />
           </Link>
 
           <nav className="hidden items-center gap-7 lg:flex">

@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
 import { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { PageLoader } from "@/components/ui/Spinner";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
@@ -9,6 +11,8 @@ import { WhatsAppButton } from "./WhatsAppButton";
 
 export function StoreLayout() {
   const { t } = useI18n();
+  const { pathname } = useLocation();
+  const reduced = usePrefersReducedMotion();
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <a
@@ -25,7 +29,18 @@ export function StoreLayout() {
           close" note. */}
       <main id="main" className="flex-1">
         <Suspense fallback={<PageLoader />}>
-          <Outlet />
+          {/* Enter-only page transition, keyed on the path. Deliberately NOT
+              wrapped in <AnimatePresence>: an exit animation racing a route
+              change is exactly what left the cart drawer stuck open before.
+              No exit means nothing to get stuck. */}
+          <motion.div
+            key={pathname}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Outlet />
+          </motion.div>
         </Suspense>
       </main>
       <Footer />

@@ -12,6 +12,11 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      screens: {
+        /* Small-phone step. The hero headline needs one size between a 360px
+           Android and the 640px `sm` breakpoint or it crowds the viewport. */
+        xs: "420px",
+      },
       colors: {
         bg: token("bg"),
         panel: token("panel"),

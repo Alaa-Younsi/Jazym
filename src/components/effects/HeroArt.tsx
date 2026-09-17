@@ -13,8 +13,10 @@ export function HeroArt() {
   const saveData = useSaveData();
   const animate = !reduced && !saveData;
 
+  // Fills whatever box HeroScene gives it — a short banner on phones, a square
+  // on desktop. The SVG letterboxes itself via preserveAspectRatio.
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-md">
+    <div className="relative mx-auto h-full w-full max-w-md">
       <div
         className="absolute inset-0 rounded-full blur-2xl"
         style={{
