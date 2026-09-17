@@ -69,8 +69,8 @@ export function StatCard({
   tone,
 }: {
   label: string;
-  value: string | number;
-  hint?: string;
+  value: ReactNode;
+  hint?: ReactNode;
   tone?: "danger";
 }) {
   return (

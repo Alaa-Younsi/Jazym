@@ -35,8 +35,10 @@ Sans clés Supabase le site tourne en **mode démo** : catalogue Jazym intégré
 | `bun run preview` | prévisualise `dist/` |
 | `bun run typecheck` | `tsc -b --noEmit` |
 | `bun run lint` | `biome check .` |
+| `bun run test:db` | applique **toutes** les migrations dans un Postgres en mémoire (PGlite) et vérifie que le moteur de promotions SQL et son miroir TypeScript donnent le même prix |
 | `bun run format` | `biome format --write .` |
 | `bun run scripts/gen-brand-assets.mjs` | régénère favicons + `logo.webp` + `og-image.png` depuis `_brand/logo.jpeg` |
+| `bun run optimize:logo` | régénère `public/jazym-logo*.webp` depuis `_brand/jazym-logo.png` |
 | `bun run scripts/gen-seed-sql.mjs` | régénère `supabase/migrations/0008_seed.sql` depuis la démo |
 | `bun run scripts/csp-hash.mjs` | recalcule le hash CSP du script de thème (après `vite build`) |
 
@@ -47,13 +49,16 @@ src/
   components/  layout · product · checkout · landing · ui · admin · effects
   hooks/       useProducts · useOrders · useStoreSettings · useAdminProfile · …
   i18n/        translations.ts (FR/AR à plat) + LanguageProvider
-  lib/         supabase · format · offers · orderErrors · image · tracking · …
+  lib/         supabase · format · offers · promotions · announcement · video
+               · orderErrors · image · datetime · tracking · …
   pages/       Landing · Shop · Product · Checkout · OrderConfirmation · Policy
                · Contact · LandingPageView · admin/*
   data/demo.ts catalogue Jazym intégré (mode démo)
 supabase/
-  migrations/  0001…0008 (schéma, RLS, RPC place_order, permissions, pixels,
-               pages de vente, politique, seed)
+  migrations/  0001…0020 (schéma, RLS, RPC place_order, permissions, pixels,
+               pages de vente, politique, seed, arbre de catégories, variantes
+               tarifées, panneaux promo, commandes manuelles, bandeau
+               d'annonce, moteur d'offres & promotions)
   functions/   create-worker · set-worker-password (edge, service-role)
 middleware.ts  OG link-preview pour /produit/:slug (crawlers)
 vercel.json    rewrite SPA + en-têtes sécurité + CSP + cache

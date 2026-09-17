@@ -163,6 +163,20 @@ export interface StoreSettings {
   store_address_ar: string | null;
   announcement_fr: string | null;
   announcement_ar: string | null;
+  announcement_enabled: boolean;
+  announcement_items: AnnouncementItem[];
+  /** Seconds each message stays on screen before the next one rotates in. */
+  announcement_speed: number;
+  announcement_style: AnnouncementStyle;
+}
+
+export type AnnouncementStyle = "gradient" | "solid" | "soft";
+
+export interface AnnouncementItem {
+  text_fr: string;
+  text_ar: string;
+  emoji_start: string;
+  emoji_end: string;
 }
 
 export interface DeliveryPrice {
@@ -278,6 +292,38 @@ export interface PromoPanel {
   start_at: string | null;
   end_at: string | null;
   sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/* ---- offers & promotions ---- */
+export type PromotionType = "buy_x_get_y" | "buy_x_percent" | "category_percent" | "pack";
+export type PromotionScope = "all" | "categories" | "products";
+
+export interface PackItem {
+  product_id: string;
+  quantity: number;
+}
+
+export interface Promotion {
+  id: string;
+  name: string;
+  type: PromotionType;
+  active: boolean;
+  /** Higher wins when two packs compete for the same cart quantity. */
+  priority: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  scope: PromotionScope;
+  category_ids: string[];
+  product_ids: string[];
+  buy_qty: number;
+  get_qty: number;
+  percent: number;
+  pack_items: PackItem[];
+  pack_price: number | null;
+  label_fr: string | null;
+  label_ar: string | null;
   created_at: string;
   updated_at: string;
 }

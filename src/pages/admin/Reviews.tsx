@@ -69,7 +69,7 @@ export default function Reviews() {
 
   async function onSave() {
     if (!form.client_name.trim() || !form.review_text.trim()) {
-      toast.error(t("adminSaveError"));
+      toast.error(t("adminNeedsFields"));
       return;
     }
     if (!isSupabaseConfigured) {
@@ -105,7 +105,7 @@ export default function Reviews() {
   }
 
   async function onDelete(id: string) {
-    if (!window.confirm(t("lpDeleteConfirm"))) return;
+    if (!window.confirm(t("revDeleteConfirm"))) return;
     try {
       await del.mutateAsync(id);
       toast.success(t("adminDeleted"));

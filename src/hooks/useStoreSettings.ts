@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import type { StoreSettings } from "@/types/db";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AnnouncementItem, AnnouncementStyle, StoreSettings } from "@/types/db";
 import { DEMO_STORE_SETTINGS } from "@/data/demo";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
@@ -18,6 +18,25 @@ export function useStoreSettings() {
       if (error) throw error;
       return (data as StoreSettings | null) ?? DEMO_STORE_SETTINGS;
     },
+  });
+}
+
+/** The announcement-bar columns only — never a spread of the loaded row. */
+export interface AnnouncementFormState {
+  announcement_enabled: boolean;
+  announcement_items: AnnouncementItem[];
+  announcement_speed: number;
+  announcement_style: AnnouncementStyle;
+}
+
+export function useSaveAnnouncement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (form: AnnouncementFormState) => {
+      const { error } = await supabase.from("store_settings").update(form).eq("id", 1);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["store-settings"] }),
   });
 }
 

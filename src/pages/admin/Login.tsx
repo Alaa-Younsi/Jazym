@@ -24,7 +24,7 @@ export default function AdminLogin() {
     e.preventDefault();
     setError(null);
     if (!isSupabaseConfigured) {
-      setError("Supabase n'est pas encore connecté.");
+      setError(t("adminNeedsSupabase"));
       return;
     }
     setBusy(true);

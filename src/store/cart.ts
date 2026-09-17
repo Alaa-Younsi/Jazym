@@ -7,6 +7,8 @@ export interface CartLine {
   /** stable identity: productId + variantId + color + size + sorted variant-pick key */
   key: string;
   productId: string;
+  /** the product's category — needed to price category-wide promotions */
+  categoryId: string | null;
   /** resolved priced/stocked variant row, when the product sells through variants */
   variantId: string | null;
   slug: string;
@@ -86,6 +88,7 @@ export const useCart = create<CartState>()(
           const line: CartLine = {
             key,
             productId: input.product.id,
+            categoryId: input.product.category_id,
             variantId,
             slug: input.product.slug,
             name_fr: input.product.name_fr,
@@ -116,7 +119,15 @@ export const useCart = create<CartState>()(
     }),
     {
       name: "jazym-cart",
+      version: 2,
       partialize: (state) => ({ lines: state.lines }),
+      // A cart persisted before categoryId existed would price category-wide
+      // promotions as if the product had no category. Drop it rather than
+      // silently under-discounting someone's basket.
+      migrate: (persisted, version) => {
+        if (version >= 2) return persisted as { lines: CartLine[] };
+        return { lines: [] };
+      },
     },
   ),
 );

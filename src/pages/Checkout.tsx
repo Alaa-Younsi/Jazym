@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Price } from "@/components/ui/Price";
 import { usePixel } from "@/components/TrackingProvider";
+import { useCartQuote } from "@/hooks/useCartQuote";
 import { useDeliveryPrices } from "@/hooks/useDeliveryPrices";
 import { useHoneypot } from "@/hooks/useHoneypot";
 import { usePlaceOrder } from "@/hooks/useOrders";
@@ -17,7 +18,6 @@ import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/checkoutSchema";
 import { variantSummary } from "@/lib/format";
-import { lineDiscount, lineTotal } from "@/lib/offers";
 import { orderErrorKey } from "@/lib/orderErrors";
 import { useCart } from "@/store/cart";
 
@@ -45,14 +45,7 @@ export default function Checkout() {
   const wilaya = form.watch("wilaya");
   const deliveryType = form.watch("delivery_type");
 
-  const subtotal = lines.reduce(
-    (s, l) => s + lineTotal(l.unitPrice, l.quantity, l.quantity_offers),
-    0,
-  );
-  const discount = lines.reduce(
-    (s, l) => s + lineDiscount(l.unitPrice, l.quantity, l.quantity_offers),
-    0,
-  );
+  const quote = useCartQuote();
 
   const wilayaRow = deliveryPrices.find((d) => d.wilaya === wilaya) ?? null;
   const wilayaFee = wilayaRow
@@ -60,19 +53,19 @@ export default function Checkout() {
       ? wilayaRow.office_price
       : wilayaRow.home_price
     : null;
-  const shipping = resolveShipping(wilayaFee, subtotal, settings);
-  const total = subtotal + shipping.amount;
+  const shipping = resolveShipping(wilayaFee, quote.total, settings);
+  const total = quote.total + shipping.amount;
 
   useEffect(() => {
     if (checkoutTracked.current || lines.length === 0) return;
     checkoutTracked.current = true;
     track("initiate_checkout", {
       content_ids: lines.map((l) => l.productId),
-      value: subtotal,
+      value: quote.total,
       currency: "DZD",
       num_items: lines.reduce((s, l) => s + l.quantity, 0),
     });
-  }, [lines, subtotal, track]);
+  }, [lines, quote.total, track]);
 
   if (lines.length === 0 && !placeOrder.isSuccess) {
     return <Navigate to="/boutique" replace />;
@@ -167,7 +160,7 @@ export default function Checkout() {
                       </p>
                     </div>
                     <Price
-                      value={lineTotal(l.unitPrice, l.quantity, l.quantity_offers)}
+                      value={quote.lines[l.key]?.net ?? l.unitPrice * l.quantity}
                       className="text-sm text-ink"
                     />
                   </li>
@@ -179,14 +172,14 @@ export default function Checkout() {
               <div className="flex justify-between text-muted">
                 <dt>{t("cartSubtotal")}</dt>
                 <dd>
-                  <Price value={subtotal} className="text-ink" />
+                  <Price value={quote.subtotal} className="text-ink" />
                 </dd>
               </div>
-              {discount > 0 && (
+              {quote.discount > 0 && (
                 <div className="flex justify-between text-success">
                   <dt>{t("cartDiscount")}</dt>
                   <dd>
-                    <Price value={discount} prefix="-" />
+                    <Price value={quote.discount} prefix="-" />
                   </dd>
                 </div>
               )}

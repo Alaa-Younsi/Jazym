@@ -97,7 +97,7 @@ export default function Pixels() {
   }
 
   async function onDelete(id: string) {
-    if (!window.confirm(t("lpDeleteConfirm"))) return;
+    if (!window.confirm(t("pixDeleteConfirm"))) return;
     try {
       await del.mutateAsync(id);
       toast.success(t("adminDeleted"));

@@ -18,7 +18,7 @@ export default function LandingPages() {
     return (
       <div>
         <AdminPageHeader title={t("lpListTitle")} />
-        <LoadError message="Supabase requis pour gérer les pages de vente." />
+        <LoadError message={t("adminNeedsSupabase")} />
       </div>
     );
   }

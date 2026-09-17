@@ -9,6 +9,7 @@ import { Price } from "@/components/ui/Price";
 import { useAdminProducts } from "@/hooks/useAdminData";
 import { useAdminCreateOrder, type AdminOrderLine } from "@/hooks/useOrders";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { orderErrorKey } from "@/lib/orderErrors";
 import { ORDER_STATUSES, orderStatusKey } from "@/lib/orderStatus";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { WILAYAS } from "@/lib/wilayas";
@@ -135,7 +136,7 @@ export default function OrderNew() {
       navigate("/admin/orders");
     } catch (err) {
       const message = err instanceof Error ? err.message : "";
-      toast.error(message || t("adminSaveError"));
+      toast.error(t(orderErrorKey(message)));
     }
   }
 

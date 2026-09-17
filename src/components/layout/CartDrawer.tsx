@@ -7,9 +7,9 @@ import { Drawer } from "@/components/ui/Drawer";
 import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Price } from "@/components/ui/Price";
 import { ProductThumb } from "@/components/product/ProductThumb";
+import { useCartQuote } from "@/hooks/useCartQuote";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { variantSummary } from "@/lib/format";
-import { lineDiscount, lineTotal } from "@/lib/offers";
 import { useCart } from "@/store/cart";
 
 export function CartDrawer() {
@@ -28,14 +28,7 @@ export function CartDrawer() {
     closeCart();
   }
 
-  const subtotal = lines.reduce(
-    (sum, l) => sum + lineTotal(l.unitPrice, l.quantity, l.quantity_offers),
-    0,
-  );
-  const discount = lines.reduce(
-    (sum, l) => sum + lineDiscount(l.unitPrice, l.quantity, l.quantity_offers),
-    0,
-  );
+  const quote = useCartQuote();
   const count = lines.reduce((s, l) => s + l.quantity, 0);
 
   return (
@@ -67,8 +60,9 @@ export function CartDrawer() {
           <ul className="flex-1 divide-y divide-line overflow-y-auto px-5">
             {lines.map((line) => {
               const summary = variantSummary(line.variants, lang);
-              const total = lineTotal(line.unitPrice, line.quantity, line.quantity_offers);
-              const saved = lineDiscount(line.unitPrice, line.quantity, line.quantity_offers);
+              const priced = quote.lines[line.key];
+              const total = priced?.net ?? line.unitPrice * line.quantity;
+              const saved = priced?.discount ?? 0;
               return (
                 <li key={line.key} className="flex gap-3 py-4">
                   <ProductThumb
@@ -143,13 +137,19 @@ export function CartDrawer() {
           <div className="border-t border-line px-5 py-4">
             <div className="flex items-center justify-between text-sm text-muted">
               <span>{t("cartSubtotal")}</span>
-              <Price value={subtotal} className="text-ink" />
+              <Price value={quote.subtotal} className="text-ink" />
             </div>
-            {discount > 0 && (
-              <div className="mt-1 flex items-center justify-between text-sm text-success">
-                <span>{t("cartDiscount")}</span>
-                <Price value={discount} prefix="-" />
-              </div>
+            {quote.discount > 0 && (
+              <>
+                <div className="mt-1 flex items-center justify-between text-sm text-success">
+                  <span>{t("cartDiscount")}</span>
+                  <Price value={quote.discount} prefix="-" />
+                </div>
+                <div className="mt-1 flex items-center justify-between text-sm font-semibold text-ink">
+                  <span>{t("cartTotal")}</span>
+                  <Price value={quote.total} />
+                </div>
+              </>
             )}
             <p className="mt-1 text-xs text-muted">{t("cartShippingNote")}</p>
             <Button fullWidth className="mt-4" onClick={() => goTo("/commander")}>

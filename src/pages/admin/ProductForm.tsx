@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminCard, AdminPageHeader, LoadError } from "@/components/admin/AdminUI";
 import { SingleImageUpload, MultiImageUpload } from "@/components/admin/ImageUploader";
+import { VideoField } from "@/components/admin/VideoField";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/Field";
 import { PageLoader } from "@/components/ui/Spinner";
@@ -249,15 +250,12 @@ export default function ProductForm() {
           <AdminCard>
             <h3 className="mb-3 text-sm font-semibold text-ink">{t("prodImages")}</h3>
             <MultiImageUpload value={images} onChange={setImages} />
-            <div className="mt-4">
-              <Field label={t("prodVideo")}>
-                <Input
-                  dir="ltr"
-                  placeholder="https://…"
-                  value={form.video_url ?? ""}
-                  onChange={(e) => set("video_url", e.target.value || null)}
-                />
-              </Field>
+            <div className="mt-5 border-t border-line pt-5">
+              <VideoField
+                value={form.video_url}
+                onChange={(url) => set("video_url", url)}
+                prefix={isNew ? "" : `${id}/`}
+              />
             </div>
           </AdminCard>
 

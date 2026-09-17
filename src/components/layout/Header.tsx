@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Search, ShoppingBag, Truck } from "lucide-react";
+import { Menu, Search, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
@@ -9,10 +9,17 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { useCategories } from "@/hooks/useCategories";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { useI18n } from "@/i18n/LanguageProvider";
+import {
+  announcementItems,
+  announcementSpeed,
+  announcementStyle,
+  isAnnouncementEnabled,
+} from "@/lib/announcement";
 import { childrenOf } from "@/lib/categoryTree";
 import { pick } from "@/lib/utils";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
+import { AnnouncementBar } from "./AnnouncementBar";
 import { LangToggle, ThemeToggle } from "./ToggleControls";
 
 export function Header() {
@@ -36,7 +43,7 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const announcement = lang === "ar" ? settings?.announcement_ar : settings?.announcement_fr;
+  const announcements = isAnnouncementEnabled(settings) ? announcementItems(settings) : [];
 
   // Top-level categories only, capped — a deep matière/thème tree must never
   // flood the main nav (that's what the shop page's own browsing is for).
@@ -61,15 +68,11 @@ export function Header() {
 
   return (
     <>
-      {announcement && (
-        <div className="fx-glint relative overflow-hidden bg-gradient-to-r from-brand via-violet to-brand bg-[length:200%_100%] text-bg">
-          <Container className="flex items-center justify-center gap-2 py-2 text-[0.72rem] font-medium tracking-wide">
-            <Truck size={13} className="shrink-0 opacity-90" />
-            <span>{announcement}</span>
-            <FlowerMark className="h-3 w-3 shrink-0 text-gold" />
-          </Container>
-        </div>
-      )}
+      <AnnouncementBar
+        items={announcements}
+        style={announcementStyle(settings)}
+        speed={announcementSpeed(settings)}
+      />
       <header
         className={cn(
           "sticky top-0 z-40 border-b transition-colors",

@@ -12,6 +12,7 @@ export default function Dashboard() {
   const { data: ordersRes } = useAdminOrders("all");
   const { data: products = [] } = useAdminProducts();
   const orders = ordersRes?.rows ?? [];
+  const capped = ordersRes?.capped ?? false;
 
   const pending = orders.filter((o) => o.status === "pending").length;
   const deliveredRevenue = orders
@@ -27,15 +28,23 @@ export default function Dashboard() {
     <div>
       <AdminPageHeader title={t("adminSecDashboard")} />
 
+      {capped && (
+        <p className="mb-4 rounded-lg bg-gold/15 px-3 py-2 text-xs text-ink">
+          {t("ordShowingRecent", { count: orders.length })}
+        </p>
+      )}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label={t("dashOrdersTotal")} value={orders.length} />
         <StatCard label={t("dashOrdersPending")} value={pending} />
         <StatCard
           label={t("dashRevenue")}
-          value={`${new Intl.NumberFormat("fr-FR").format(Math.round(deliveredRevenue))} DA`}
-          hint={`${t("dashRevenueBooked")}: ${new Intl.NumberFormat("fr-FR").format(
-            Math.round(bookedRevenue),
-          )} DA`}
+          value={<Price value={deliveredRevenue} />}
+          hint={
+            <>
+              {t("dashRevenueBooked")}: <Price value={bookedRevenue} />
+            </>
+          }
         />
         <StatCard label={t("dashProductsActive")} value={activeProducts} />
         <StatCard

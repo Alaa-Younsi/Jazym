@@ -7,6 +7,7 @@ import type { TranslationKey } from "@/i18n/translations";
  */
 export function orderErrorKey(message: string | undefined | null): TranslationKey {
   const m = (message ?? "").toUpperCase();
+  if (m.includes("ERR_FORBIDDEN")) return "teamErrForbidden";
   if (m.includes("ERR_CART_EMPTY")) return "orderErrCartEmpty";
   if (m.includes("ERR_MISSING_SELECTION")) return "orderErrMissingSelection";
   if (m.includes("ERR_PRODUCT_UNAVAILABLE")) return "orderErrProductUnavailable";

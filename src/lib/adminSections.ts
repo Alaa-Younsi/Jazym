@@ -7,7 +7,9 @@ import {
   Star,
   LayoutTemplate,
   Megaphone,
+  Percent,
   Radio,
+  Sparkles,
   Users,
   UserCog,
   FileText,
@@ -65,6 +67,18 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   },
   { key: "pixels", route: "/admin/pixels", labelKey: "adminSecPixels", icon: Radio },
   { key: "panels", route: "/admin/panels", labelKey: "adminSecPanels", icon: Megaphone },
+  {
+    key: "promotions",
+    route: "/admin/promotions",
+    labelKey: "adminSecPromotions",
+    icon: Percent,
+  },
+  {
+    key: "announcement",
+    route: "/admin/announcement",
+    labelKey: "adminSecAnnouncement",
+    icon: Sparkles,
+  },
   { key: "policy", route: "/admin/policy", labelKey: "adminSecPolicy", icon: FileText },
   {
     key: "team",

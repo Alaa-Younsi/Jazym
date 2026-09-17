@@ -8,6 +8,7 @@ import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
 import type { Product } from "@/types/db";
+import { OfferRibbon } from "./OfferBadges";
 import { ProductThumb } from "./ProductThumb";
 
 interface ProductCardProps {
@@ -87,6 +88,7 @@ export function ProductCard({ product, eager }: ProductCardProps) {
                 {t("promo")}
               </span>
             )}
+            <OfferRibbon product={product} />
           </div>
           {soldOut && (
             <span className="rounded-full bg-ink/80 px-2 py-0.5 text-[0.65rem] font-semibold text-bg">

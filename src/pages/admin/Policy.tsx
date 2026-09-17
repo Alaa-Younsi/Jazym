@@ -58,7 +58,7 @@ export default function Policy() {
     return (
       <div>
         <AdminPageHeader title={t("polEditTitle")} description={t("polEditIntro")} />
-        <LoadError message="Supabase requis pour éditer la politique." />
+        <LoadError message={t("adminNeedsSupabase")} />
       </div>
     );
   }
@@ -113,8 +113,10 @@ export default function Policy() {
         icon: null,
         sort_order: sections.length + 10,
         active: true,
-        title_fr: "Nouvelle section",
-        body_fr: "…",
+        title_fr: translations.fr.polNewSectionTitle,
+        title_ar: translations.ar.polNewSectionTitle,
+        body_fr: translations.fr.polNewSectionBody,
+        body_ar: translations.ar.polNewSectionBody,
       });
       toast.success(t("adminSaved"));
     } catch {
@@ -289,7 +291,7 @@ function SectionEditor({
   }
 
   async function onDelete() {
-    if (!window.confirm(t("lpDeleteConfirm"))) return;
+    if (!window.confirm(t("polDeleteConfirm"))) return;
     try {
       await del.mutateAsync(section.id);
       toast.success(t("adminDeleted"));

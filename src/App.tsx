@@ -35,6 +35,9 @@ const AdminLandingPages = lazy(() => import("@/pages/admin/LandingPages"));
 const AdminLandingForm = lazy(() => import("@/pages/admin/LandingPageForm"));
 const AdminPixels = lazy(() => import("@/pages/admin/Pixels"));
 const AdminPanels = lazy(() => import("@/pages/admin/Panels"));
+const AdminPromotions = lazy(() => import("@/pages/admin/Promotions"));
+const AdminPromotionForm = lazy(() => import("@/pages/admin/PromotionForm"));
+const AdminAnnouncement = lazy(() => import("@/pages/admin/Announcement"));
 const AdminPanelForm = lazy(() => import("@/pages/admin/PanelForm"));
 const AdminTeam = lazy(() => import("@/pages/admin/Team"));
 const AdminAccount = lazy(() => import("@/pages/admin/Account"));
@@ -83,6 +86,9 @@ function AppRoutes() {
             <Route path="pixels" element={<AdminPixels />} />
             <Route path="panels" element={<AdminPanels />} />
             <Route path="panels/:id" element={<AdminPanelForm />} />
+            <Route path="promotions" element={<AdminPromotions />} />
+            <Route path="promotions/:id" element={<AdminPromotionForm />} />
+            <Route path="announcement" element={<AdminAnnouncement />} />
             <Route path="team" element={<AdminTeam />} />
             <Route path="account" element={<AdminAccount />} />
             <Route path="policy" element={<AdminPolicy />} />

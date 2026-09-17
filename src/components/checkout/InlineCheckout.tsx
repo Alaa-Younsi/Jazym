@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { usePixel } from "@/components/TrackingProvider";
+import { useLineQuote } from "@/hooks/useCartQuote";
 import { useDeliveryPrices } from "@/hooks/useDeliveryPrices";
 import { useHoneypot } from "@/hooks/useHoneypot";
 import { usePlaceOrder } from "@/hooks/useOrders";
 import { resolveShipping, useStoreSettings } from "@/hooks/useStoreSettings";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/checkoutSchema";
-import { lineDiscount, lineTotal } from "@/lib/offers";
 import { orderErrorKey } from "@/lib/orderErrors";
 import type { CartVariantPick, Product } from "@/types/db";
 import { CheckoutFields } from "./CheckoutFields";
@@ -71,10 +71,17 @@ export function InlineCheckout({
 
   const effectiveStock = stock ?? product.stock;
   const maxQty = Math.max(1, Math.min(effectiveStock || 20, 20));
-  const goods = lineTotal(unitPrice, qty, product.quantity_offers);
-  const discount = lineDiscount(unitPrice, qty, product.quantity_offers);
-  const shipping = resolveShipping(wilayaFee, goods, settings);
-  const estimatedTotal = goods + shipping.amount;
+  const quote = useLineQuote({
+    key: product.id,
+    productId: product.id,
+    categoryId: product.category_id,
+    variantId,
+    unitPrice,
+    quantity: qty,
+    quantityOffers: product.quantity_offers,
+  });
+  const shipping = resolveShipping(wilayaFee, quote.total, settings);
+  const estimatedTotal = quote.total + shipping.amount;
 
   function handleFormFocus() {
     if (trackedCheckoutId.current === product.id) return;
@@ -82,7 +89,7 @@ export function InlineCheckout({
     track("initiate_checkout", {
       content_ids: [product.id],
       content_type: "product",
-      value: goods,
+      value: quote.total,
       currency: "DZD",
       num_items: qty,
     });
@@ -173,11 +180,11 @@ export function InlineCheckout({
 
       <dl className="flex flex-col gap-1 border-t border-line pt-3 text-sm">
         <Row label={t("cartSubtotal")}>
-          <Price value={goods} />
+          <Price value={quote.subtotal} />
         </Row>
-        {discount > 0 && (
+        {quote.discount > 0 && (
           <Row label={t("cartDiscount")} tone="success">
-            <Price value={discount} prefix="-" />
+            <Price value={quote.discount} prefix="-" />
           </Row>
         )}
         <Row label={t("cartShipping")}>

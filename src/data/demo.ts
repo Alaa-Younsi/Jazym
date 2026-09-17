@@ -455,6 +455,17 @@ export const DEMO_STORE_SETTINGS: StoreSettings = {
   store_address_ar: null,
   announcement_fr: "Livraison partout en Algérie · Paiement à la livraison",
   announcement_ar: "توصيل إلى كامل الوطن · الدفع عند الاستلام",
+  announcement_enabled: true,
+  announcement_items: [
+    {
+      text_fr: "Livraison partout en Algérie · Paiement à la livraison",
+      text_ar: "توصيل إلى كامل الوطن · الدفع عند الاستلام",
+      emoji_start: "🚚",
+      emoji_end: "🌼",
+    },
+  ],
+  announcement_speed: 6,
+  announcement_style: "gradient",
 };
 
 /** Fallback delivery grid — a rough zone-based estimate. Real prices come from

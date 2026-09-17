@@ -76,7 +76,7 @@ export default function LandingPageForm() {
     return (
       <div>
         <AdminPageHeader title={t("lpNew")} />
-        <LoadError message="Supabase requis." />
+        <LoadError message={t("adminNeedsSupabase")} />
       </div>
     );
   }

@@ -7,7 +7,7 @@ import { useI18n } from "@/i18n/LanguageProvider";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { PanelSlot } from "@/types/db";
 
-const SLOT_LABEL_KEYS: Record<
+export const SLOT_LABEL_KEYS: Record<
   PanelSlot,
   "panelSlotHomeHero" | "panelSlotHomeMid" | "panelSlotCategoryTop" | "panelSlotCartDrawer"
 > = {
@@ -25,7 +25,7 @@ export default function Panels() {
     return (
       <div>
         <AdminPageHeader title={t("panelListTitle")} />
-        <LoadError message="Supabase requis pour gérer les panneaux." />
+        <LoadError message={t("adminNeedsSupabase")} />
       </div>
     );
   }

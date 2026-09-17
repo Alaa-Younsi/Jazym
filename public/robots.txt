@@ -6,4 +6,4 @@ Disallow: /commander
 Disallow: /commande/
 Disallow: /lp/
 
-Sitemap: https://PLACEHOLDER-DOMAIN.tld/sitemap.xml
+Sitemap: http://localhost:5173/sitemap.xml

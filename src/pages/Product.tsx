@@ -3,17 +3,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { InlineCheckout } from "@/components/checkout/InlineCheckout";
 import { Gallery, type GalleryImage } from "@/components/product/Gallery";
+import { OfferBadges } from "@/components/product/OfferBadges";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Price } from "@/components/ui/Price";
 import { PageLoader } from "@/components/ui/Spinner";
+import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { usePixel } from "@/components/TrackingProvider";
 import { useProduct, useRelatedProducts } from "@/hooks/useProducts";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
-import { offerLabel } from "@/lib/offers";
 import { SITE_URL } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
@@ -286,19 +287,7 @@ export default function Product() {
             </div>
           </div>
 
-          {product.quantity_offers.length > 0 && (
-            <ul className="flex flex-wrap gap-2">
-              {product.quantity_offers.map((offer, i) => (
-                <li
-                  key={i}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-ink"
-                >
-                  <FlowerMark className="h-3.5 w-3.5 text-gold" />
-                  {offerLabel(offer, lang)}
-                </li>
-              ))}
-            </ul>
-          )}
+          <OfferBadges product={product} />
 
           {description && <p className="text-sm leading-relaxed text-muted">{description}</p>}
 
@@ -550,17 +539,7 @@ export default function Product() {
             </div>
           )}
 
-          {product.video_url && (
-            <video
-              controls
-              preload="none"
-              poster={image0 ?? undefined}
-              className="w-full rounded-card border border-line"
-              aria-label={t("productVideo")}
-            >
-              <source src={product.video_url} />
-            </video>
-          )}
+          <VideoPlayer url={product.video_url} poster={image0} />
 
           {!soldOut && (
             <InlineCheckout

@@ -119,7 +119,7 @@ export default function Categories() {
       if (message.includes("ERR_CATEGORY_NOT_LEAF")) {
         toast.error(t("catSaveBlockedNotLeaf"));
       } else {
-        toast.error(message || t("adminSaveError"));
+        toast.error(t("adminSaveError"));
       }
     }
   }
@@ -135,7 +135,7 @@ export default function Categories() {
       toast.error(t("catDeleteBlockedProducts"));
       return;
     }
-    if (!window.confirm(t("lpDeleteConfirm"))) return;
+    if (!window.confirm(t("catDeleteConfirm"))) return;
     try {
       await del.mutateAsync(c.id);
       toast.success(t("adminDeleted"));

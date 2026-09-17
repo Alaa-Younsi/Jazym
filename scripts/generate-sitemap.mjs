@@ -1,6 +1,10 @@
-/* Generates public/sitemap.xml at build time (prebuild npm script).
-   Bun loads .env automatically. Degrades to static routes only if Supabase
-   env is missing. Every STATIC_ROUTE must exist in src/App.tsx. */
+/* Generates public/sitemap.xml AND public/robots.txt at build time (prebuild
+   npm script). Bun loads .env automatically. Degrades to static routes only if
+   Supabase env is missing. Every STATIC_ROUTE must exist in src/App.tsx.
+
+   robots.txt is generated rather than committed for one reason: its Sitemap:
+   line must carry the real domain, and a hand-edited copy is exactly the file
+   everyone forgets on go-live. */
 
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -49,3 +53,11 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.s
 const out = fileURLToPath(new URL("../public/sitemap.xml", import.meta.url));
 await writeFile(out, xml, "utf8");
 console.log(`sitemap.xml — ${entries.length} URLs (${products.length} products)`);
+
+/* Keep these in sync with the non-indexable routes in src/App.tsx. */
+const DISALLOW = ["/admin", "/admin/", "/commander", "/commande/", "/lp/"];
+const robots = `User-agent: *\nAllow: /\n${DISALLOW.map((d) => `Disallow: ${d}`).join(
+  "\n",
+)}\n\nSitemap: ${DOMAIN}/sitemap.xml\n`;
+await writeFile(fileURLToPath(new URL("../public/robots.txt", import.meta.url)), robots, "utf8");
+console.log(`robots.txt — sitemap at ${DOMAIN}/sitemap.xml`);

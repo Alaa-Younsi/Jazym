@@ -1,6 +1,5 @@
 import { useAdminToast } from "@/components/admin/AdminToast";
-import { AdminPageHeader, LoadError } from "@/components/admin/AdminUI";
-import { Toggle } from "@/components/admin/AdminUI";
+import { AdminPageHeader, LoadError, Toggle } from "@/components/admin/AdminUI";
 import { PageLoader } from "@/components/ui/Spinner";
 import { useAdminDeliveryPrices, useUpdateDeliveryPrice } from "@/hooks/useAdminData";
 import { useI18n } from "@/i18n/LanguageProvider";

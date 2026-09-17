@@ -9,7 +9,15 @@ Checklist à suivre dans l'ordre. Chaque point coché = un défaut connu évité
    `VITE_SUPABASE_ANON_KEY`, `VITE_SITE_URL` (domaine de prod).
    **Ne jamais committer `.env`.**
 3. **Migrations** — dans le SQL Editor Supabase, exécuter dans l'ordre :
-   `supabase/migrations/0001` → `0008`.
+   `supabase/migrations/0001` → `0020`.
+   - `bun run test:db` rejoue d'abord tout le dossier dans un Postgres jetable :
+     si une migration ne s'applique plus, on le sait avant de coller quoi que ce
+     soit dans le SQL Editor.
+   - `0018` → `0020` ajoutent le **bandeau d'annonce** et le **moteur d'offres
+     & promotions** (table `promotions`, `apply_promotions`, `price_cart`, et
+     `place_order` recablé dessus). Tant qu'elles ne sont pas passées, les
+     sections « Offres & promos » et « Bandeau d'annonce » de l'admin
+     remontent une erreur de chargement — c'est attendu.
    - **Avant `0004`** : ouvrir `0004_admin_permissions.sql` et remplacer
      `owner@jazym.dz` par l'e-mail réel du propriétaire. Après cette migration,
      **seuls les admins enregistrés peuvent écrire**.
