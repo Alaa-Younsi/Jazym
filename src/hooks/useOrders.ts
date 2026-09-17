@@ -153,6 +153,70 @@ export function useUpdateOrderStatus() {
   });
 }
 
+export function useUpdateOrderNotes() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, notes }: { id: string; notes: string | null }) => {
+      const { error } = await supabase.from("orders").update({ notes }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateOrderCaches(qc),
+  });
+}
+
+/** A line the admin enters by hand for a manually-logged order — a real
+    catalog product (with its own snapshot fields) or a free-text line. */
+export interface AdminOrderLine {
+  product_id?: string | null;
+  variant_id?: string | null;
+  name_fr: string;
+  name_ar?: string;
+  price: number;
+  quantity: number;
+  image_url?: string | null;
+}
+
+export interface AdminCreateOrderInput {
+  customer_name: string;
+  customer_phone: string;
+  wilaya: string;
+  city: string;
+  address?: string | null;
+  notes?: string | null;
+  delivery_type: "home" | "office";
+  shipping: number;
+  status: OrderStatus;
+  items: AdminOrderLine[];
+}
+
+/** Logs an order that happened outside the site (phone/in-person sale) via
+    the admin_create_order RPC — distinct from place_order(), no customer
+    rate-limiting, admin-entered price/shipping trusted as-is. */
+export function useAdminCreateOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: AdminCreateOrderInput): Promise<string> => {
+      const { data, error } = await supabase.rpc("admin_create_order", {
+        customer: {
+          customer_name: input.customer_name,
+          customer_phone: input.customer_phone,
+          wilaya: input.wilaya,
+          city: input.city,
+          address: input.address ?? null,
+          notes: input.notes ?? null,
+          delivery_type: input.delivery_type,
+          shipping: input.shipping,
+        },
+        items: input.items,
+        order_status: input.status,
+      });
+      if (error) throw error;
+      return String(data);
+    },
+    onSuccess: () => invalidateOrderCaches(qc),
+  });
+}
+
 export function useDeleteAllOrders() {
   const qc = useQueryClient();
   return useMutation({

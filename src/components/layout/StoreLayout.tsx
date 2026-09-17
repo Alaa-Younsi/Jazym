@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { PageLoader } from "@/components/ui/Spinner";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { CartDrawer } from "./CartDrawer";
@@ -16,8 +18,15 @@ export function StoreLayout() {
         {t("skipToContent")}
       </a>
       <Header />
+      {/* Scoped to the outlet ONLY — a lazy page chunk suspending here must
+          never tear down Header/Footer/CartDrawer, or a drawer mid-close
+          (AnimatePresence exit animation in flight) gets torn down with it
+          and gets stuck half-open forever. See skill's "opens but won't
+          close" note. */}
       <main id="main" className="flex-1">
-        <Outlet />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
       <CartDrawer />

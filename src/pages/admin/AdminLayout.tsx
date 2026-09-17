@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, Menu, ShieldAlert, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import { AdminToastProvider } from "@/components/admin/AdminToast";
 import { LangToggle, ThemeToggle } from "@/components/layout/ToggleControls";
@@ -175,7 +175,13 @@ export default function AdminLayout() {
           </header>
 
           <main ref={mainRef} className="fx-scrollbar flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <Outlet />
+            {/* Scoped to the outlet ONLY — see skill's "opens but won't close"
+                note: a lazy admin sub-page suspending here must never tear
+                down this layout (and the mobile nav drawer's AnimatePresence
+                mid-exit with it), or the drawer gets stuck half-open. */}
+            <Suspense fallback={<PageLoader />}>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
 

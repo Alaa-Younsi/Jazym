@@ -14,6 +14,12 @@ interface DrawerProps {
   title?: string;
   children: ReactNode;
   widthClass?: string;
+  /** Fires once the close (exit) animation has actually finished. A route
+      change firing in the SAME tick as the close can otherwise leave
+      framer-motion's exit tracking stuck — the element never gets removed.
+      Defer any navigation triggered by closing this drawer to here instead
+      of doing it inline with the close. */
+  onExitComplete?: () => void;
 }
 
 export function Drawer({
@@ -23,6 +29,7 @@ export function Drawer({
   title,
   children,
   widthClass = "w-full max-w-md",
+  onExitComplete,
 }: DrawerProps) {
   const { dir } = useI18n();
   const reduced = usePrefersReducedMotion();
@@ -46,7 +53,7 @@ export function Drawer({
     side === "end" ? (dir === "rtl" ? "-100%" : "100%") : dir === "rtl" ? "100%" : "-100%";
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={onExitComplete}>
       {open && (
         <>
           <motion.div

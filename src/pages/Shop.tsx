@@ -11,6 +11,7 @@ import { useProducts, type ProductSort } from "@/hooks/useProducts";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { childrenOf, pathTo } from "@/lib/categoryTree";
+import { responsiveSrcSet } from "@/lib/image";
 import { pick } from "@/lib/utils";
 import { cn } from "@/lib/cn";
 
@@ -113,6 +114,8 @@ export default function Shop() {
                 {c.image_url && (
                   <img
                     src={c.image_url}
+                    srcSet={responsiveSrcSet(c.image_url)}
+                    sizes="64px"
                     alt=""
                     loading="lazy"
                     decoding="async"

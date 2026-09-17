@@ -1,12 +1,14 @@
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminCard, AdminPageHeader, LoadError } from "@/components/admin/AdminUI";
 import { ProductThumb } from "@/components/product/ProductThumb";
-import { NativeSelect } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { NativeSelect, Textarea } from "@/components/ui/Field";
 import { Price } from "@/components/ui/Price";
 import { PageLoader } from "@/components/ui/Spinner";
-import { useAdminOrder, useUpdateOrderStatus } from "@/hooks/useOrders";
+import { useAdminOrder, useUpdateOrderNotes, useUpdateOrderStatus } from "@/hooks/useOrders";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { formatDateTime, variantSummary } from "@/lib/format";
 import { ORDER_STATUSES, orderStatusKey } from "@/lib/orderStatus";
@@ -19,6 +21,12 @@ export default function OrderDetail() {
   const toast = useAdminToast();
   const { data: order, isLoading, isError } = useAdminOrder(id);
   const updateStatus = useUpdateOrderStatus();
+  const updateNotes = useUpdateOrderNotes();
+  const [notesDraft, setNotesDraft] = useState("");
+
+  useEffect(() => {
+    if (order) setNotesDraft(order.notes ?? "");
+  }, [order]);
 
   if (isLoading) return <PageLoader />;
   if (isError || !order) return <LoadError message={t("adminLoadError")} />;
@@ -27,6 +35,16 @@ export default function OrderDetail() {
     if (!order) return;
     try {
       await updateStatus.mutateAsync({ id: order.id, status: next });
+      toast.success(t("adminSaved"));
+    } catch {
+      toast.error(t("adminSaveError"));
+    }
+  }
+
+  async function onSaveNotes() {
+    if (!order) return;
+    try {
+      await updateNotes.mutateAsync({ id: order.id, notes: notesDraft.trim() || null });
       toast.success(t("adminSaved"));
     } catch {
       toast.error(t("adminSaveError"));
@@ -143,9 +161,30 @@ export default function OrderDetail() {
                     : t("checkoutDeliveryHome")
                 }
               />
-              {order.notes && <Info label={t("checkoutNotes")} value={order.notes} />}
               <Info label={t("ordDate")} value={formatDateTime(order.created_at, lang)} />
             </dl>
+          </AdminCard>
+
+          <AdminCard className="flex flex-col gap-2">
+            <h2 className="text-sm font-semibold text-ink">{t("ordNotesTitle")}</h2>
+            <Textarea
+              rows={4}
+              value={notesDraft}
+              placeholder={t("ordNotesPlaceholder")}
+              onChange={(e) => setNotesDraft(e.target.value)}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={onSaveNotes}
+              disabled={updateNotes.isPending || notesDraft === (order.notes ?? "")}
+            >
+              {updateNotes.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                t("ordNotesSave")
+              )}
+            </Button>
           </AdminCard>
         </div>
       </div>

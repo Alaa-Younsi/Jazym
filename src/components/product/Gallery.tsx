@@ -1,4 +1,5 @@
-import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import { animate, motion, useMotionValue, type PanInfo } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
@@ -19,13 +20,48 @@ interface GalleryProps {
   placeholderName: string;
 }
 
-const SWIPE_THRESHOLD = 60;
+const SWIPE_DISTANCE_RATIO = 0.2; // fraction of the container's width
+const SWIPE_VELOCITY = 500;
 
-/** Standalone, state-free gallery: a swatch click, a thumb click and a swipe all
-    drive the SAME index from the parent. See skill Phase 6. */
+/** Standalone, state-free gallery: a swatch click, a thumb click and a
+    hold-and-drag swipe all drive the SAME index from the parent. The track
+    visually follows the pointer while dragging (not just a gesture detector
+    that jumps at release) — that live tracking is what makes it read as a
+    slider instead of doing nothing until you let go. */
 export function Gallery({ images, activeIndex, onActiveChange, placeholderName }: GalleryProps) {
   const { dir } = useI18n();
   const reduced = usePrefersReducedMotion();
+  const isRtl = dir === "rtl";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const x = useMotionValue(0);
+
+  const safeIndex = images.length > 0 ? Math.max(0, Math.min(activeIndex, images.length - 1)) : 0;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setWidth(el.offsetWidth);
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w) setWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Re-settle the track whenever the active index changes for ANY reason
+  // (drag, thumbnail click, swatch selection) or the container resizes.
+  useEffect(() => {
+    if (width === 0) return;
+    const target = isRtl ? safeIndex * width : -safeIndex * width;
+    const controls = animate(
+      x,
+      target,
+      reduced ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 38 },
+    );
+    return () => controls.stop();
+  }, [safeIndex, width, isRtl, reduced, x]);
 
   if (images.length === 0) {
     return (
@@ -36,45 +72,57 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
     );
   }
 
-  const safeIndex = Math.max(0, Math.min(activeIndex, images.length - 1));
-  const image = images[safeIndex];
-
   function onDragEnd(_: unknown, info: PanInfo) {
-    const offset = dir === "rtl" ? -info.offset.x : info.offset.x;
-    if (Math.abs(offset) < SWIPE_THRESHOLD) return;
-    const delta = offset < 0 ? 1 : -1;
+    if (width === 0) return;
+    const offset = isRtl ? -info.offset.x : info.offset.x;
+    const velocity = isRtl ? -info.velocity.x : info.velocity.x;
+    let delta = 0;
+    if (offset < -width * SWIPE_DISTANCE_RATIO || velocity < -SWIPE_VELOCITY) delta = 1;
+    else if (offset > width * SWIPE_DISTANCE_RATIO || velocity > SWIPE_VELOCITY) delta = -1;
+
+    if (delta === 0) {
+      const target = isRtl ? safeIndex * width : -safeIndex * width;
+      animate(x, target, { type: "spring", stiffness: 380, damping: 38 });
+      return;
+    }
     onActiveChange((safeIndex + delta + images.length) % images.length);
   }
 
+  const dragConstraints = isRtl
+    ? { left: 0, right: (images.length - 1) * width }
+    : { left: -(images.length - 1) * width, right: 0 };
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-square w-full overflow-hidden rounded-card border border-line bg-panel">
+      <div
+        ref={containerRef}
+        className="relative aspect-square w-full touch-pan-y overflow-hidden rounded-card border border-line bg-panel"
+      >
         <motion.div
-          className="h-full w-full"
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.25}
+          className={cn("flex h-full", images.length > 1 && "cursor-grab active:cursor-grabbing")}
+          style={{ x, width: `${images.length * 100}%` }}
+          drag={images.length > 1 ? "x" : false}
+          dragConstraints={dragConstraints}
+          dragElastic={0.15}
+          dragMomentum={false}
           onDragEnd={onDragEnd}
-          style={{ touchAction: "pan-y" }}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={image.key}
-              initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.99 }}
-              transition={{ duration: 0.28 }}
-              className="h-full w-full"
+          {images.map((img, i) => (
+            <div
+              key={img.key}
+              className="h-full shrink-0"
+              style={{ width: `${100 / images.length}%` }}
             >
               <SmartImage
-                src={image.url}
-                alt={image.alt ?? placeholderName}
+                src={img.url}
+                alt={img.alt ?? placeholderName}
                 sizes="(max-width: 1024px) 100vw, 520px"
-                eager
+                eager={i === 0}
+                draggable={false}
                 className="h-full w-full object-cover"
               />
-            </motion.div>
-          </AnimatePresence>
+            </div>
+          ))}
         </motion.div>
       </div>
 

@@ -1,11 +1,10 @@
-import { Download, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Download, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminPageHeader, EmptyState, LoadError } from "@/components/admin/AdminUI";
 import { DeleteAllOrdersModal } from "@/components/admin/DeleteAllOrdersModal";
-import { Button } from "@/components/ui/Button";
-import { NativeSelect } from "@/components/ui/Field";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { PageLoader } from "@/components/ui/Spinner";
 import { useAdminOrders, useDeleteAllOrders } from "@/hooks/useOrders";
@@ -14,24 +13,30 @@ import { formatDateTime } from "@/lib/format";
 import { exportOrdersToXlsx } from "@/lib/exportOrders";
 import { ORDER_STATUSES, orderStatusKey, orderStatusTone } from "@/lib/orderStatus";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import type { OrderStatus } from "@/types/db";
+import type { Order, OrderStatus } from "@/types/db";
 
 export default function Orders() {
   const { t, lang } = useI18n();
   const toast = useAdminToast();
-  const [status, setStatus] = useState<OrderStatus | "all">("all");
-  const { data, isLoading, isError } = useAdminOrders(status);
+  const { data, isLoading, isError } = useAdminOrders("all");
   const deleteAll = useDeleteAllOrders();
   const [modalOpen, setModalOpen] = useState(false);
+
+  const orders = data?.rows ?? [];
+
+  const groups = useMemo(() => {
+    const map = new Map<OrderStatus, Order[]>();
+    for (const s of ORDER_STATUSES) map.set(s, []);
+    for (const o of orders) map.get(o.status)?.push(o);
+    return map;
+  }, [orders]);
 
   if (isLoading) return <PageLoader />;
   if (isError || !data) return <LoadError message={t("adminLoadError")} />;
 
-  const orders = data.rows;
-
-  async function onExport() {
+  async function onExport(rows: Order[]) {
     try {
-      await exportOrdersToXlsx(orders);
+      await exportOrdersToXlsx(rows);
     } catch {
       toast.error(t("adminExportError"));
     }
@@ -56,7 +61,16 @@ export default function Orders() {
         title={t("ordListTitle")}
         actions={
           <>
-            <Button variant="secondary" size="sm" onClick={onExport} disabled={orders.length === 0}>
+            <ButtonLink to="/admin/orders/new" size="sm" variant="secondary">
+              <Plus size={14} />
+              {t("ordNewOrder")}
+            </ButtonLink>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onExport(orders)}
+              disabled={orders.length === 0}
+            >
               <Download size={14} />
               {t("ordExport")}
             </Button>
@@ -73,22 +87,6 @@ export default function Orders() {
         }
       />
 
-      <div className="mb-4 flex items-center gap-3">
-        <span className="text-sm text-muted">{t("ordFilterStatus")}</span>
-        <NativeSelect
-          value={status}
-          onChange={(e) => setStatus(e.target.value as OrderStatus | "all")}
-          className="h-9 w-auto py-0 text-sm"
-        >
-          <option value="all">{t("all")}</option>
-          {ORDER_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {t(orderStatusKey(s))}
-            </option>
-          ))}
-        </NativeSelect>
-      </div>
-
       {data.capped && (
         <p className="mb-3 rounded-lg bg-gold/15 px-3 py-2 text-xs text-ink">
           {t("ordShowingRecent", { count: orders.length })}
@@ -98,58 +96,83 @@ export default function Orders() {
       {orders.length === 0 ? (
         <EmptyState title={t("dashNoOrders")} />
       ) : (
-        <div className="overflow-x-auto rounded-card border border-line">
-          <table className="w-full text-sm">
-            <thead className="bg-panel-2 text-xs uppercase text-muted">
-              <tr>
-                {[
-                  t("ordNumber"),
-                  t("ordCustomer"),
-                  t("ordPhone"),
-                  t("ordWilaya"),
-                  t("ordTotal"),
-                  t("ordFilterStatus"),
-                  t("ordDate"),
-                ].map((h) => (
-                  <th key={h} className="whitespace-nowrap px-4 py-3 text-start">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {orders.map((o) => (
-                <tr key={o.id} className="hover:bg-panel-2/40">
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <Link
-                      to={`/admin/orders/${o.id}`}
-                      className="font-mono text-xs text-brand hover:underline"
-                    >
-                      {o.order_number}
-                    </Link>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-ink">{o.customer_name}</td>
-                  <td className="num-ltr whitespace-nowrap px-4 py-3 text-muted">
-                    {o.customer_phone}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted">{o.wilaya}</td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <Price value={o.total} className="text-ink" />
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
+        <div className="flex flex-col gap-8">
+          {ORDER_STATUSES.map((status) => {
+            const rows = groups.get(status) ?? [];
+            if (rows.length === 0) return null;
+            return (
+              <section key={status}>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${orderStatusTone(o.status)}`}
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${orderStatusTone(status)}`}
                     >
-                      {t(orderStatusKey(o.status))}
+                      {t(orderStatusKey(status))}
                     </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-muted">
-                    {formatDateTime(o.created_at, lang)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <span className="text-xs text-muted">
+                      {t("ordSectionCount", { count: rows.length })}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onExport(rows)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand"
+                  >
+                    <Download size={13} />
+                    {t("ordExportStatus")}
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto rounded-card border border-line">
+                  <table className="w-full text-sm">
+                    <thead className="bg-panel-2 text-xs uppercase text-muted">
+                      <tr>
+                        {[
+                          t("ordNumber"),
+                          t("ordCustomer"),
+                          t("ordPhone"),
+                          t("ordWilaya"),
+                          t("ordTotal"),
+                          t("ordDate"),
+                        ].map((h) => (
+                          <th key={h} className="whitespace-nowrap px-4 py-3 text-start">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
+                      {rows.map((o) => (
+                        <tr key={o.id} className="hover:bg-panel-2/40">
+                          <td className="whitespace-nowrap px-4 py-3">
+                            <Link
+                              to={`/admin/orders/${o.id}`}
+                              className="font-mono text-xs text-brand hover:underline"
+                            >
+                              {o.order_number}
+                            </Link>
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-3 text-ink">
+                            {o.customer_name}
+                          </td>
+                          <td className="num-ltr whitespace-nowrap px-4 py-3 text-muted">
+                            {o.customer_phone}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-3 text-muted">{o.wilaya}</td>
+                          <td className="whitespace-nowrap px-4 py-3">
+                            <Price value={o.total} className="text-ink" />
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-3 text-muted">
+                            {formatDateTime(o.created_at, lang)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
 

@@ -1,4 +1,5 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PanelSlot } from "@/components/panels/PanelSlot";
 import { Button } from "@/components/ui/Button";
@@ -15,10 +16,16 @@ export function CartDrawer() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const { lines, isOpen, closeCart, removeLine, setQuantity } = useCart();
+  // A route change firing in the same tick as closing this drawer can leave
+  // framer-motion's exit animation stuck (the drawer never actually leaves
+  // the DOM, even though isOpen correctly becomes false — confirmed live).
+  // So closing-and-navigating defers the navigation to Drawer's
+  // onExitComplete, once the close animation has genuinely finished.
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
-  function goToCheckout() {
+  function goTo(href: string) {
+    setPendingHref(href);
     closeCart();
-    navigate("/commander");
   }
 
   const subtotal = lines.reduce(
@@ -32,13 +39,24 @@ export function CartDrawer() {
   const count = lines.reduce((s, l) => s + l.quantity, 0);
 
   return (
-    <Drawer open={isOpen} onClose={closeCart} side="end" title={t("cartTitle")}>
+    <Drawer
+      open={isOpen}
+      onClose={closeCart}
+      side="end"
+      title={t("cartTitle")}
+      onExitComplete={() => {
+        if (!pendingHref) return;
+        const href = pendingHref;
+        setPendingHref(null);
+        navigate(href);
+      }}
+    >
       {lines.length === 0 ? (
         <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
           <FlowerMark className="h-10 w-10 text-brand/40" />
           <p className="text-sm text-muted">{t("cartEmpty")}</p>
-          <Button variant="secondary" size="sm" onClick={closeCart}>
-            <Link to="/boutique">{t("cartEmptyCta")}</Link>
+          <Button variant="secondary" size="sm" onClick={() => goTo("/boutique")}>
+            {t("cartEmptyCta")}
           </Button>
         </div>
       ) : (
@@ -62,7 +80,13 @@ export function CartDrawer() {
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <Link
                       to={`/produit/${line.slug}`}
-                      onClick={closeCart}
+                      onClick={(e) => {
+                        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+                          return;
+                        }
+                        e.preventDefault();
+                        goTo(`/produit/${line.slug}`);
+                      }}
                       className="line-clamp-2 text-sm font-medium text-ink hover:text-brand"
                     >
                       {lang === "ar" ? line.name_ar : line.name_fr}
@@ -128,7 +152,7 @@ export function CartDrawer() {
               </div>
             )}
             <p className="mt-1 text-xs text-muted">{t("cartShippingNote")}</p>
-            <Button fullWidth className="mt-4" onClick={goToCheckout}>
+            <Button fullWidth className="mt-4" onClick={() => goTo("/commander")}>
               {t("cartCheckout")}
             </Button>
             <button
