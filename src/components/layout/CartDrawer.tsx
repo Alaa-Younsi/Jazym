@@ -1,7 +1,7 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PanelSlot } from "@/components/panels/PanelSlot";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Price } from "@/components/ui/Price";
@@ -13,7 +13,13 @@ import { useCart } from "@/store/cart";
 
 export function CartDrawer() {
   const { t, lang } = useI18n();
+  const navigate = useNavigate();
   const { lines, isOpen, closeCart, removeLine, setQuantity } = useCart();
+
+  function goToCheckout() {
+    closeCart();
+    navigate("/commander");
+  }
 
   const subtotal = lines.reduce(
     (sum, l) => sum + lineTotal(l.unitPrice, l.quantity, l.quantity_offers),
@@ -122,9 +128,9 @@ export function CartDrawer() {
               </div>
             )}
             <p className="mt-1 text-xs text-muted">{t("cartShippingNote")}</p>
-            <ButtonLink to="/commander" fullWidth className="mt-4" onClick={closeCart}>
+            <Button fullWidth className="mt-4" onClick={goToCheckout}>
               {t("cartCheckout")}
-            </ButtonLink>
+            </Button>
             <button
               type="button"
               onClick={closeCart}
