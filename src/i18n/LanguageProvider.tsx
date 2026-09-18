@@ -22,14 +22,15 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function readInitialLang(): Lang {
-  if (typeof window === "undefined") return "fr";
+  if (typeof window === "undefined") return "ar";
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored === "ar" || stored === "fr") return stored;
   } catch {
     /* private mode */
   }
-  return "fr";
+  // Arabic is the storefront default for first-time visitors.
+  return "ar";
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {

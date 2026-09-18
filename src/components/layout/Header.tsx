@@ -80,24 +80,24 @@ export function Header() {
         )}
       >
         <Container className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-2 lg:contents">
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label={t("navMenu")}
-              className="-ms-2 rounded-full p-2 text-ink"
+              className="-ms-2 rounded-full p-2 text-ink lg:hidden"
             >
               <Menu size={20} />
             </button>
-          </div>
 
-          <Link
-            to="/"
-            className="shrink-0 transition-transform duration-300 hover:scale-[1.03]"
-            aria-label={t("brandName")}
-          >
-            <Wordmark eager />
-          </Link>
+            <Link
+              to="/"
+              className="shrink-0 transition-transform duration-300 hover:scale-[1.03]"
+              aria-label={t("brandName")}
+            >
+              <Wordmark eager />
+            </Link>
+          </div>
 
           <nav className="hidden items-center gap-7 lg:flex">
             {navItems.map((item) => (
@@ -126,7 +126,7 @@ export function Header() {
             >
               <Search size={16} />
             </button>
-            <ThemeToggle className="hidden sm:inline-flex" />
+            <ThemeToggle />
             <LangToggle />
             <button
               type="button"

@@ -293,13 +293,13 @@ input[type="number"]::-webkit-inner-spin-button {
     transform: translate3d(0, 0, 0);
   }
   to {
-    /* the track renders its content twice — half a track is one seamless loop */
-    transform: translate3d(-50%, 0, 0);
+    /* the track renders N copies of its content — 1/N of the track is one seamless loop */
+    transform: translate3d(var(--marquee-shift, -50%), 0, 0);
   }
 }
 @keyframes fx-marquee-rtl {
   from {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(var(--marquee-shift, -50%), 0, 0);
   }
   to {
     transform: translate3d(0, 0, 0);

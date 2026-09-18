@@ -28,7 +28,8 @@ function readInitialTheme(): Theme {
   } catch {
     /* private mode */
   }
-  if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return "dark";
+  // Light is the storefront default for first-time visitors, regardless of
+  // OS preference — the client wants light mode as the default look.
   return "light";
 }
 
