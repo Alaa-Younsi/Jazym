@@ -14,6 +14,8 @@ export interface PlaceOrderItem {
   size?: string | null;
   variants?: CartVariantPick[];
   variant_id?: string | null;
+  /** optional per-line note the shopper attached to this product */
+  note?: string | null;
 }
 
 export interface PlaceOrderCustomer {
@@ -84,6 +86,7 @@ export interface GuestOrder {
     size: string | null;
     variants: CartVariantPick[];
     image_url: string | null;
+    note: string | null;
   }[];
 }
 

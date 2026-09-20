@@ -85,6 +85,7 @@ export default function Checkout() {
           color: l.color,
           size: l.size,
           variants: l.variants,
+          note: l.note,
         })),
         customer: {
           customer_name: parsed.customer_name,
@@ -92,7 +93,7 @@ export default function Checkout() {
           wilaya: parsed.wilaya,
           city: parsed.city,
           address: parsed.address || null,
-          notes: parsed.notes || null,
+          notes: null,
           delivery_type: parsed.delivery_type,
           language: lang,
           elapsed_ms: elapsedMs(),
@@ -158,6 +159,9 @@ export default function Checkout() {
                       <p className="text-xs text-muted">
                         {summary ? `${summary} · ` : ""}× {l.quantity}
                       </p>
+                      {l.note && (
+                        <p className="mt-0.5 line-clamp-1 text-xs italic text-muted">"{l.note}"</p>
+                      )}
                     </div>
                     <Price
                       value={quote.lines[l.key]?.net ?? l.unitPrice * l.quantity}

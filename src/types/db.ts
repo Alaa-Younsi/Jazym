@@ -39,12 +39,21 @@ export interface VariantOption {
   value_fr: string;
   value_ar: string;
   image_url?: string | null;
+  /** small color dot rendered in the picker pill (e.g. theme swatches) */
+  swatch_hex?: string | null;
+  /** customer must type free text (e.g. a name to print on the cover) */
+  requires_text?: boolean;
+  /** customer must upload an image (e.g. a custom cover design) */
+  requires_upload?: boolean;
 }
 
 export interface VariantGroup {
   name_fr: string;
   name_ar: string;
   values: VariantOption[];
+  /** render this group before the priced/stocked product_variants picker
+      (e.g. pages) instead of after it, which is the default. */
+  before_price_variant?: boolean;
 }
 
 export type QuantityOffer =
@@ -116,6 +125,10 @@ export interface CartVariantPick {
   name_ar: string;
   value_fr: string;
   value_ar: string;
+  /** free text the shopper typed for this pick (e.g. a name for the cover) */
+  custom_text?: string | null;
+  /** URL of a file the shopper uploaded for this pick (e.g. a custom cover) */
+  custom_upload_url?: string | null;
 }
 
 export interface OrderItem {
@@ -131,6 +144,8 @@ export interface OrderItem {
   size: string | null;
   variants: CartVariantPick[];
   image_url: string | null;
+  /** optional per-line note the shopper attached to this product */
+  note: string | null;
 }
 
 export interface Order {

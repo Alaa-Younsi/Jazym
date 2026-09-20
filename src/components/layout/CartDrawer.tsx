@@ -86,6 +86,9 @@ export function CartDrawer() {
                       {lang === "ar" ? line.name_ar : line.name_fr}
                     </Link>
                     {summary && <p className="text-xs text-muted">{summary}</p>}
+                    {line.note && (
+                      <p className="line-clamp-1 text-xs italic text-muted">"{line.note}"</p>
+                    )}
                     <div className="mt-1 flex items-center justify-between gap-2">
                       <div className="inline-flex items-center rounded-full border border-line">
                         <button

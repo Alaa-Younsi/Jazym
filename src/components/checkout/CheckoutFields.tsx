@@ -1,6 +1,6 @@
 import { Home, Store } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import { Field, Input, NativeSelect, Textarea } from "@/components/ui/Field";
+import { Field, Input, NativeSelect } from "@/components/ui/Field";
 import { useDeliveryPrices } from "@/hooks/useDeliveryPrices";
 import { useI18n } from "@/i18n/LanguageProvider";
 import type { CheckoutFormValues } from "@/lib/checkoutSchema";
@@ -124,10 +124,6 @@ export function CheckoutFields({ form, idPrefix = "co" }: CheckoutFieldsProps) {
 
       <Field label={t("checkoutAddress")} htmlFor={`${idPrefix}-address`}>
         <Input id={`${idPrefix}-address`} autoComplete="street-address" {...register("address")} />
-      </Field>
-
-      <Field label={t("checkoutNotes")} htmlFor={`${idPrefix}-notes`}>
-        <Textarea id={`${idPrefix}-notes`} rows={2} {...register("notes")} />
       </Field>
 
       {/* honeypot — visually hidden, never announced */}

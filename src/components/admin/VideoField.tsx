@@ -3,10 +3,10 @@ import { useRef, useState } from "react";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { Input } from "@/components/ui/Field";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
-import { uploadToBucket } from "@/hooks/useAdminData";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { formatBytes, MAX_VIDEO_BYTES, resolveVideo, WARN_VIDEO_BYTES } from "@/lib/video";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { uploadToBucket } from "@/lib/storage";
 import { cn } from "@/lib/cn";
 
 interface Props {

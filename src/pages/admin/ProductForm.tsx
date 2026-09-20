@@ -271,13 +271,11 @@ export default function ProductForm() {
             basePrice={form.price}
             productId={isNew ? null : (id ?? null)}
           />
-          {variantRows.length === 0 && (
-            <VariantsEditor
-              value={form.variants}
-              onChange={(v) => set("variants", v)}
-              productId={isNew ? null : (id ?? null)}
-            />
-          )}
+          <VariantsEditor
+            value={form.variants}
+            onChange={(v) => set("variants", v)}
+            productId={isNew ? null : (id ?? null)}
+          />
           <OffersEditor value={form.quantity_offers} onChange={(v) => set("quantity_offers", v)} />
         </div>
 
@@ -797,6 +795,14 @@ function VariantsEditor({
                 value={group.name_ar}
                 onChange={(e) => updateGroup(gi, { name_ar: e.target.value })}
               />
+              <label className="inline-flex items-center gap-1.5 text-xs text-muted">
+                <input
+                  type="checkbox"
+                  checked={!!group.before_price_variant}
+                  onChange={(e) => updateGroup(gi, { before_price_variant: e.target.checked })}
+                />
+                {t("prodVariantBeforePrice")}
+              </label>
               <button
                 type="button"
                 onClick={() => onChange(value.filter((_, idx) => idx !== gi))}
@@ -808,7 +814,10 @@ function VariantsEditor({
             </div>
             <div className="flex flex-col gap-2 ps-2">
               {group.values.map((opt, vi) => (
-                <div key={vi} className="flex flex-wrap items-center gap-2">
+                <div
+                  key={vi}
+                  className="flex flex-wrap items-center gap-2 rounded-md border border-line/60 p-2"
+                >
                   <Input
                     className="w-32"
                     placeholder={t("prodVariantValue")}
@@ -822,11 +831,54 @@ function VariantsEditor({
                     value={opt.value_ar}
                     onChange={(e) => updateValue(gi, vi, { value_ar: e.target.value })}
                   />
+                  <input
+                    type="color"
+                    value={opt.swatch_hex || "#ffffff"}
+                    onChange={(e) => updateValue(gi, vi, { swatch_hex: e.target.value })}
+                    className="h-9 w-9 rounded"
+                    aria-label={t("prodVariantSwatch")}
+                    title={t("prodVariantSwatch")}
+                  />
+                  {opt.swatch_hex && (
+                    <button
+                      type="button"
+                      onClick={() => updateValue(gi, vi, { swatch_hex: null })}
+                      className="text-xs text-muted hover:text-danger"
+                    >
+                      {t("prodVariantSwatchClear")}
+                    </button>
+                  )}
                   <SingleImageUpload
                     value={opt.image_url ?? null}
                     onChange={(url) => updateValue(gi, vi, { image_url: url })}
                     prefix={productId ? `variants/${productId}/` : "variants/"}
                   />
+                  <label className="inline-flex items-center gap-1.5 text-xs text-muted">
+                    <input
+                      type="checkbox"
+                      checked={!!opt.requires_text}
+                      onChange={(e) =>
+                        updateValue(gi, vi, {
+                          requires_text: e.target.checked,
+                          requires_upload: e.target.checked ? false : opt.requires_upload,
+                        })
+                      }
+                    />
+                    {t("prodVariantRequiresText")}
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 text-xs text-muted">
+                    <input
+                      type="checkbox"
+                      checked={!!opt.requires_upload}
+                      onChange={(e) =>
+                        updateValue(gi, vi, {
+                          requires_upload: e.target.checked,
+                          requires_text: e.target.checked ? false : opt.requires_text,
+                        })
+                      }
+                    />
+                    {t("prodVariantRequiresUpload")}
+                  </label>
                   <button
                     type="button"
                     onClick={() =>
@@ -834,7 +886,7 @@ function VariantsEditor({
                         values: group.values.filter((_, idx) => idx !== vi),
                       })
                     }
-                    className="text-muted hover:text-danger"
+                    className="ms-auto text-muted hover:text-danger"
                     aria-label={t("delete")}
                   >
                     <Trash2 size={14} />

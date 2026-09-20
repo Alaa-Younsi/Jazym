@@ -60,7 +60,8 @@ export function variantSummary(picks: CartVariantPick[] | null | undefined, lang
           ? p.value_ar || p.value_fr || legacyValue || ""
           : p.value_fr || legacyValue || p.value_ar || "";
       if (!name || !value) return "";
-      return `${name}: ${value}`;
+      const label = p.custom_text ? `${value} (${p.custom_text})` : value;
+      return `${name}: ${label}`;
     })
     .filter(Boolean)
     .join(" · ");

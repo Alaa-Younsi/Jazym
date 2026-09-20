@@ -27,6 +27,8 @@ interface InlineCheckoutProps {
   selectionComplete: boolean;
   onBlockedSubmit: () => void;
   variantId?: string | null;
+  /** optional per-line note the shopper attached to this product */
+  note?: string | null;
   /** effective stock to cap quantity against — defaults to product.stock */
   stock?: number;
 }
@@ -40,6 +42,7 @@ export function InlineCheckout({
   selectionComplete,
   onBlockedSubmit,
   variantId = null,
+  note = null,
   stock,
 }: InlineCheckoutProps) {
   const { t, lang } = useI18n();
@@ -114,6 +117,7 @@ export function InlineCheckout({
             color,
             size,
             variants,
+            note,
           },
         ],
         customer: {
@@ -122,7 +126,7 @@ export function InlineCheckout({
           wilaya: parsed.wilaya,
           city: parsed.city,
           address: parsed.address || null,
-          notes: parsed.notes || null,
+          notes: null,
           delivery_type: parsed.delivery_type,
           language: lang,
           elapsed_ms: elapsedMs(),

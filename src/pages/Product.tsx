@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Minus, Plus } from "lucide-react";
+import { Check, ChevronRight, ImagePlus, Loader2, Minus, Plus, Upload } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { InlineCheckout } from "@/components/checkout/InlineCheckout";
@@ -10,15 +10,18 @@ import { Container } from "@/components/ui/Container";
 import { FlowerMark } from "@/components/ui/FlowerMark";
 import { Price } from "@/components/ui/Price";
 import { PageLoader } from "@/components/ui/Spinner";
+import { Textarea } from "@/components/ui/Field";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { usePixel } from "@/components/TrackingProvider";
 import { useProduct, useRelatedProducts } from "@/hooks/useProducts";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
+import { compressImage } from "@/lib/image";
 import { SITE_URL } from "@/lib/seo";
+import { uploadToBucket } from "@/lib/storage";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
-import type { CartVariantPick, ProductVariant } from "@/types/db";
+import type { CartVariantPick, ProductVariant, VariantGroup, VariantOption } from "@/types/db";
 
 interface AxisOption {
   fr: string;
@@ -55,6 +58,9 @@ export default function Product() {
   const [size, setSize] = useState<string | null>(null);
   const [variantPicks, setVariantPicks] = useState<Record<string, string>>({});
   const [optionPicks, setOptionPicks] = useState<{ option1?: string; option2?: string }>({});
+  const [customTexts, setCustomTexts] = useState<Record<string, string>>({});
+  const [customUploads, setCustomUploads] = useState<Record<string, string>>({});
+  const [note, setNote] = useState("");
   const [showGate, setShowGate] = useState(false);
   const [added, setAdded] = useState(false);
   const viewedRef = useRef<string | null>(null);
@@ -134,8 +140,14 @@ export default function Product() {
         extra.push({ key: `variant-${v.id}`, url: v.image_url });
       }
     }
+    for (const [groupName, url] of Object.entries(customUploads)) {
+      if (url && !seen.has(url)) {
+        seen.add(url);
+        extra.push({ key: `upload-${groupName}`, url });
+      }
+    }
     return [...base, ...extra];
-  }, [product]);
+  }, [product, customUploads]);
 
   if (isLoading) return <PageLoader />;
   if (!product || isError) return <Navigate to="/boutique" replace />;
@@ -173,7 +185,19 @@ export default function Product() {
 
   const needsColor = product.colors.length > 0 && !color;
   const needsSize = product.sizes.length > 0 && !size;
-  const missingGroups = product.variants.filter((g) => !variantPicks[g.name_fr]);
+
+  const groupIncomplete = (g: VariantGroup) => {
+    const pickedValue = variantPicks[g.name_fr];
+    if (!pickedValue) return true;
+    const opt = g.values.find((v) => v.value_fr === pickedValue);
+    if (opt?.requires_text && !customTexts[g.name_fr]?.trim()) return true;
+    if (opt?.requires_upload && !customUploads[g.name_fr]) return true;
+    return false;
+  };
+  const missingGroups = product.variants.filter(groupIncomplete);
+  const groupsBeforePrice = product.variants.filter((g) => g.before_price_variant);
+  const groupsAfterPrice = product.variants.filter((g) => !g.before_price_variant);
+
   const selectionComplete =
     !needsColor &&
     !needsSize &&
@@ -196,6 +220,8 @@ export default function Product() {
         name_ar: g.name_ar,
         value_fr: opt?.value_fr ?? variantPicks[g.name_fr],
         value_ar: opt?.value_ar ?? variantPicks[g.name_fr],
+        custom_text: opt?.requires_text ? customTexts[g.name_fr]?.trim() || undefined : undefined,
+        custom_upload_url: opt?.requires_upload ? customUploads[g.name_fr] || undefined : undefined,
       };
     });
 
@@ -226,6 +252,7 @@ export default function Product() {
       image_url: image0,
       variantId: resolvedVariant?.id ?? null,
       stockOverride: hasVariantRows ? effectiveStock : undefined,
+      note: note.trim() || null,
     });
     setAdded(true);
     track("add_to_cart", {
@@ -290,6 +317,38 @@ export default function Product() {
           <OfferBadges product={product} />
 
           {description && <p className="text-sm leading-relaxed text-muted">{description}</p>}
+
+          {/* custom variant groups pinned before the priced picker (e.g. theme, stage) */}
+          {groupsBeforePrice.map((group) => (
+            <VariantGroupPicker
+              key={group.name_fr}
+              group={group}
+              picked={variantPicks[group.name_fr]}
+              onPick={(opt) => {
+                setVariantPicks((prev) => ({ ...prev, [group.name_fr]: opt.value_fr }));
+                if (!opt.requires_text) {
+                  setCustomTexts((prev) => ({ ...prev, [group.name_fr]: "" }));
+                }
+                if (!opt.requires_upload) {
+                  setCustomUploads((prev) => {
+                    const next = { ...prev };
+                    delete next[group.name_fr];
+                    return next;
+                  });
+                }
+                swapToImage(opt.image_url);
+              }}
+              customText={customTexts[group.name_fr] ?? ""}
+              onCustomText={(v) => setCustomTexts((prev) => ({ ...prev, [group.name_fr]: v }))}
+              customUpload={customUploads[group.name_fr]}
+              onCustomUpload={(url) => {
+                setCustomUploads((prev) => ({ ...prev, [group.name_fr]: url }));
+                swapToImage(url);
+              }}
+              showGate={showGate}
+              incomplete={groupIncomplete(group)}
+            />
+          ))}
 
           {/* priced/stocked variants (e.g. page-count options) */}
           {hasVariantRows && axis1Values.length > 0 && (
@@ -437,46 +496,49 @@ export default function Product() {
             </Picker>
           )}
 
-          {/* custom variant groups */}
-          {product.variants.map((group) => {
-            const invalid = showGate && !variantPicks[group.name_fr];
-            return (
-              <Picker
-                key={group.name_fr}
-                label={lang === "ar" ? group.name_ar : group.name_fr}
-                required
-                invalid={invalid}
-              >
-                <div className="flex flex-wrap gap-2">
-                  {group.values.map((opt) => {
-                    const label = lang === "ar" ? opt.value_ar : opt.value_fr;
-                    const picked = variantPicks[group.name_fr] === opt.value_fr;
-                    return (
-                      <button
-                        key={opt.value_fr}
-                        type="button"
-                        onClick={() => {
-                          setVariantPicks((prev) => ({
-                            ...prev,
-                            [group.name_fr]: opt.value_fr,
-                          }));
-                          swapToImage(opt.image_url);
-                        }}
-                        className={cn(
-                          "rounded-lg border px-3 py-1.5 text-sm transition",
-                          picked
-                            ? "border-brand ring-2 ring-brand/30"
-                            : "border-line hover:border-brand/50",
-                        )}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Picker>
-            );
-          })}
+          {/* custom variant groups pinned after the priced picker (e.g. personalization) */}
+          {groupsAfterPrice.map((group) => (
+            <VariantGroupPicker
+              key={group.name_fr}
+              group={group}
+              picked={variantPicks[group.name_fr]}
+              onPick={(opt) => {
+                setVariantPicks((prev) => ({ ...prev, [group.name_fr]: opt.value_fr }));
+                if (!opt.requires_text) {
+                  setCustomTexts((prev) => ({ ...prev, [group.name_fr]: "" }));
+                }
+                if (!opt.requires_upload) {
+                  setCustomUploads((prev) => {
+                    const next = { ...prev };
+                    delete next[group.name_fr];
+                    return next;
+                  });
+                }
+                swapToImage(opt.image_url);
+              }}
+              customText={customTexts[group.name_fr] ?? ""}
+              onCustomText={(v) => setCustomTexts((prev) => ({ ...prev, [group.name_fr]: v }))}
+              customUpload={customUploads[group.name_fr]}
+              onCustomUpload={(url) => {
+                setCustomUploads((prev) => ({ ...prev, [group.name_fr]: url }));
+                swapToImage(url);
+              }}
+              showGate={showGate}
+              incomplete={groupIncomplete(group)}
+            />
+          ))}
+
+          {/* optional per-product note — never required */}
+          <div>
+            <span className="mb-2 block text-sm font-medium text-ink">{t("productNoteLabel")}</span>
+            <Textarea
+              rows={2}
+              maxLength={300}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t("productNotePlaceholder")}
+            />
+          </div>
 
           {showGate && !selectionComplete && (
             <p className="rounded-lg bg-brand-soft/50 px-3 py-2 text-sm text-brand">
@@ -552,6 +614,7 @@ export default function Product() {
               selectionComplete={selectionComplete}
               onBlockedSubmit={() => setShowGate(true)}
               variantId={resolvedVariant?.id ?? null}
+              note={note.trim() || null}
               stock={hasVariantRows ? effectiveStock : undefined}
             />
           )}
@@ -590,6 +653,154 @@ function Picker({
         {required && <span className="ms-0.5 text-brand">*</span>}
       </span>
       {children}
+    </div>
+  );
+}
+
+function VariantGroupPicker({
+  group,
+  picked,
+  onPick,
+  customText,
+  onCustomText,
+  customUpload,
+  onCustomUpload,
+  showGate,
+  incomplete,
+}: {
+  group: VariantGroup;
+  picked: string | undefined;
+  onPick: (opt: VariantOption) => void;
+  customText: string;
+  onCustomText: (v: string) => void;
+  customUpload: string | undefined;
+  onCustomUpload: (url: string) => void;
+  showGate: boolean;
+  incomplete: boolean;
+}) {
+  const { t, lang } = useI18n();
+  const pickedOption = group.values.find((v) => v.value_fr === picked);
+
+  return (
+    <Picker
+      label={lang === "ar" ? group.name_ar : group.name_fr}
+      required
+      invalid={showGate && incomplete}
+    >
+      <div className="flex flex-wrap gap-2">
+        {group.values.map((opt) => {
+          const label = lang === "ar" ? opt.value_ar : opt.value_fr;
+          const isPicked = picked === opt.value_fr;
+          return (
+            <button
+              key={opt.value_fr}
+              type="button"
+              onClick={() => onPick(opt)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition",
+                isPicked
+                  ? "border-brand ring-2 ring-brand/30"
+                  : "border-line hover:border-brand/50",
+              )}
+            >
+              {opt.swatch_hex && (
+                <span
+                  className="h-3.5 w-3.5 shrink-0 rounded-full border border-line"
+                  style={{ backgroundColor: opt.swatch_hex }}
+                />
+              )}
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      {pickedOption?.requires_text && (
+        <input
+          type="text"
+          value={customText}
+          onChange={(e) => onCustomText(e.target.value)}
+          placeholder={t("productCustomTextPlaceholder")}
+          maxLength={60}
+          className={cn(
+            "mt-2 h-10 w-full rounded-lg border bg-transparent px-3 text-sm text-ink outline-none placeholder:text-muted",
+            showGate && !customText.trim() ? "border-danger" : "border-line focus:border-brand",
+          )}
+        />
+      )}
+
+      {pickedOption?.requires_upload && (
+        <CustomCoverUpload
+          value={customUpload}
+          onChange={onCustomUpload}
+          invalid={showGate && !customUpload}
+        />
+      )}
+    </Picker>
+  );
+}
+
+function CustomCoverUpload({
+  value,
+  onChange,
+  invalid,
+}: {
+  value: string | undefined;
+  onChange: (url: string) => void;
+  invalid?: boolean;
+}) {
+  const { t } = useI18n();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function handleFile(file: File | undefined) {
+    if (!file) return;
+    setBusy(true);
+    setError(false);
+    try {
+      const compressed = await compressImage(file);
+      const url = await uploadToBucket("customer-uploads", compressed, "custom-covers/");
+      onChange(url);
+    } catch {
+      setError(true);
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-3">
+      {value ? (
+        <img src={value} alt="" className="h-14 w-14 rounded-lg border border-line object-cover" />
+      ) : (
+        <span
+          className={cn(
+            "grid h-14 w-14 place-items-center rounded-lg border border-dashed text-muted",
+            invalid ? "border-danger" : "border-line",
+          )}
+        >
+          <ImagePlus size={18} />
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={busy}
+        className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-ink hover:border-brand hover:text-brand disabled:opacity-50"
+      >
+        {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+        {value ? t("productReplaceUpload") : t("productUploadCover")}
+      </button>
+      {error && <span className="text-xs text-danger">{t("adminUploadError")}</span>}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        hidden
+        onChange={(e) => handleFile(e.target.files?.[0])}
+      />
     </div>
   );
 }

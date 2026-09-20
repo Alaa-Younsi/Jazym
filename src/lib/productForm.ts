@@ -34,11 +34,16 @@ export function sanitizeVariantGroups(groups: VariantGroup[]): VariantGroup[] {
     .map((g) => ({
       name_fr: g.name_fr.trim(),
       name_ar: (g.name_ar || g.name_fr).trim(),
+      before_price_variant: !!g.before_price_variant,
       values: g.values
         .map((v) => ({
           value_fr: v.value_fr.trim(),
           value_ar: (v.value_ar || v.value_fr).trim(),
           image_url: v.image_url || null,
+          swatch_hex: v.swatch_hex || null,
+          // A value needs at most one of these — text wins if both were set.
+          requires_text: !!v.requires_text,
+          requires_upload: !v.requires_text && !!v.requires_upload,
         }))
         .filter((v) => v.value_fr.length > 0),
     }))

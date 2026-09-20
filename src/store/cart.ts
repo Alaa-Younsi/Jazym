@@ -20,6 +20,8 @@ export interface CartLine {
   color: string | null;
   size: string | null;
   variants: CartVariantPick[];
+  /** optional per-line note the shopper attached to this product */
+  note: string | null;
   quantity_offers: QuantityOffer[];
   /** max quantity that can be ordered (product/variant stock at add time) */
   maxQuantity: number;
@@ -34,6 +36,8 @@ export interface AddLineInput {
   variants: CartVariantPick[];
   image_url: string | null;
   variantId?: string | null;
+  /** optional per-line note the shopper attached to this product */
+  note?: string | null;
   /** effective stock to cap quantity against — defaults to product.stock;
       pass the resolved variant's stock when variantId is set */
   stockOverride?: number;
@@ -45,8 +49,16 @@ function lineKey(
   color: string | null,
   size: string | null,
   variants: CartVariantPick[],
+  note: string | null,
 ): string {
-  return [productId, variantId ?? "", color ?? "", size ?? "", variantPickKey(variants)].join("::");
+  return [
+    productId,
+    variantId ?? "",
+    color ?? "",
+    size ?? "",
+    variantPickKey(variants),
+    note ?? "",
+  ].join("::");
 }
 
 interface CartState {
@@ -68,7 +80,15 @@ export const useCart = create<CartState>()(
       isOpen: false,
       addLine: (input) => {
         const variantId = input.variantId ?? null;
-        const key = lineKey(input.product.id, variantId, input.color, input.size, input.variants);
+        const note = input.note?.trim() || null;
+        const key = lineKey(
+          input.product.id,
+          variantId,
+          input.color,
+          input.size,
+          input.variants,
+          note,
+        );
         const effectiveStock = input.stockOverride ?? input.product.stock;
         set((state) => {
           const existing = state.lines.find((l) => l.key === key);
@@ -99,6 +119,7 @@ export const useCart = create<CartState>()(
             color: input.color,
             size: input.size,
             variants: input.variants,
+            note,
             quantity_offers: input.product.quantity_offers,
             maxQuantity: Math.max(1, Math.min(effectiveStock || 20, 20)),
           };
@@ -119,13 +140,14 @@ export const useCart = create<CartState>()(
     }),
     {
       name: "jazym-cart",
-      version: 2,
+      version: 3,
       partialize: (state) => ({ lines: state.lines }),
-      // A cart persisted before categoryId existed would price category-wide
-      // promotions as if the product had no category. Drop it rather than
-      // silently under-discounting someone's basket.
+      // A cart persisted before categoryId/note existed would price
+      // category-wide promotions as if the product had no category, or send
+      // an untyped `note`. Drop it rather than silently miscomputing or
+      // shipping a malformed line.
       migrate: (persisted, version) => {
-        if (version >= 2) return persisted as { lines: CartLine[] };
+        if (version >= 3) return persisted as { lines: CartLine[] };
         return { lines: [] };
       },
     },

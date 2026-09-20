@@ -70,6 +70,9 @@ export default function OrderConfirmation() {
                     {lang === "ar" ? item.name_ar : item.name_fr}
                     <span className="text-muted"> × {item.quantity}</span>
                     {parts && <span className="block text-xs text-muted">{parts}</span>}
+                    {item.note && (
+                      <span className="block text-xs italic text-muted">"{item.note}"</span>
+                    )}
                   </span>
                   <Price value={item.price * item.quantity} className="text-ink" />
                 </li>

@@ -82,6 +82,9 @@ export default function OrderDetail() {
             {(order.order_items ?? []).map((item) => {
               const summary = variantSummary(item.variants, lang);
               const parts = [item.color, item.size, summary].filter(Boolean).join(" · ");
+              const uploads = item.variants
+                .map((v) => v.custom_upload_url)
+                .filter((u): u is string => !!u);
               return (
                 <li key={item.id} className="flex gap-3 py-3">
                   <ProductThumb
@@ -96,6 +99,22 @@ export default function OrderDetail() {
                     </p>
                     {parts && <p className="text-xs text-muted">{parts}</p>}
                     <p className="text-xs text-muted">× {item.quantity}</p>
+                    {uploads.map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-block text-xs font-medium text-brand hover:underline"
+                      >
+                        {t("ordCustomUpload")}
+                      </a>
+                    ))}
+                    {item.note && (
+                      <p className="mt-1 rounded-md bg-panel-2 px-2 py-1 text-xs italic text-ink">
+                        "{item.note}"
+                      </p>
+                    )}
                   </div>
                   <Price value={item.price * item.quantity} className="text-sm text-ink" />
                 </li>

@@ -390,5 +390,197 @@ if (Number(quote.subtotal) === 2000 && Number(quote.discount) === 600) {
   console.log(`  FAIL  price_cart quote ${JSON.stringify(quote)}`);
 }
 
+/* ---------------- Cahier variant chain (theme/stage/personalization/note) --------------- */
+
+console.log("\nplace_order — required-group validation, custom_text/custom_upload, note\n");
+
+async function expectError(label: string, promise: Promise<unknown>, code: string) {
+  try {
+    await promise;
+    fail++;
+    console.log(`  FAIL  ${label}\n        expected an error containing ${code}, got success`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes(code)) {
+      pass++;
+      console.log(`  PASS  ${label}`);
+    } else {
+      fail++;
+      console.log(
+        `  FAIL  ${label}\n        expected error containing ${code}\n        got      ${msg}`,
+      );
+    }
+  }
+}
+
+function assertEqual(label: string, actual: unknown, expected: unknown) {
+  const ok = JSON.stringify(actual) === JSON.stringify(expected);
+  if (ok) {
+    pass++;
+    console.log(`  PASS  ${label}`);
+  } else {
+    fail++;
+    console.log(
+      `  FAIL  ${label}\n        expected ${JSON.stringify(expected)}\n        got      ${JSON.stringify(actual)}`,
+    );
+  }
+}
+
+const pD = "aaaaaaaa-0000-4000-8000-000000000004";
+
+await db.exec(`
+  insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status, quantity_offers, variants) values
+    ('${pD}', 'cahier-d', 'Cahier D', 'كراس د', 2000, 100, '${catOther}', 'active', '[]'::jsonb,
+     '[
+        {"name_fr":"Thème","name_ar":"الطابع","values":[
+          {"value_fr":"Violet","value_ar":"بنفسجي"},
+          {"value_fr":"Couverture personnalisée","value_ar":"غلاف مخصص","requires_upload":true}
+        ]},
+        {"name_fr":"Personnalisation","name_ar":"التخصيص","values":[
+          {"value_fr":"Sans nom","value_ar":"بدون اسم"},
+          {"value_fr":"Avec le nom","value_ar":"مع الاسم","requires_text":true}
+        ]}
+     ]'::jsonb);
+
+  insert into public.product_variants
+    (product_id, option1_name_fr, option1_name_ar, option1_value_fr, option1_value_ar, price, stock, sort_order) values
+    ('${pD}', 'Nombre de pages', 'عدد الصفحات', '120 pages', '120 صفحة', 2000, 50, 0),
+    ('${pD}', 'Nombre de pages', 'عدد الصفحات', '160 pages', '160 صفحة', 2500, 50, 1);
+`);
+
+const pdVariant = (
+  await db.query<{ id: string }>(
+    `select id from public.product_variants where product_id = $1 and option1_value_fr = '120 pages'`,
+    [pD],
+  )
+).rows[0].id;
+
+const pdCustomer = {
+  customer_name: "Test Cahier",
+  customer_phone: "0555987654",
+  wilaya: "Alger",
+  city: "Bab Ezzouar",
+  delivery_type: "home",
+  language: "fr",
+};
+
+function pdItem(overrides: Record<string, unknown>) {
+  return { product_id: pD, variant_id: pdVariant, quantity: 1, variants: [], ...overrides };
+}
+
+async function pdPlaceOrder(overrides: Record<string, unknown>) {
+  return db.query<{ place_order: string }>(
+    `select public.place_order($1::jsonb, $2::jsonb) as place_order`,
+    [JSON.stringify([pdItem(overrides)]), JSON.stringify(pdCustomer)],
+  );
+}
+
+await expectError(
+  "missing required variant groups rejected",
+  pdPlaceOrder({ variants: [] }),
+  "ERR_MISSING_SELECTION: variants",
+);
+
+await expectError(
+  "requires_upload value without custom_upload_url rejected",
+  pdPlaceOrder({
+    variants: [
+      { name_fr: "Thème", name_ar: "الطابع", value_fr: "Couverture personnalisée", value_ar: "غلاف مخصص" },
+      { name_fr: "Personnalisation", name_ar: "التخصيص", value_fr: "Sans nom", value_ar: "بدون اسم" },
+    ],
+  }),
+  "ERR_MISSING_SELECTION: custom_upload",
+);
+
+await expectError(
+  "requires_text value without custom_text rejected",
+  pdPlaceOrder({
+    variants: [
+      { name_fr: "Thème", name_ar: "الطابع", value_fr: "Violet", value_ar: "بنفسجي" },
+      { name_fr: "Personnalisation", name_ar: "التخصيص", value_fr: "Avec le nom", value_ar: "مع الاسم" },
+    ],
+  }),
+  "ERR_MISSING_SELECTION: custom_text",
+);
+
+await expectError(
+  "forged variant value rejected",
+  pdPlaceOrder({
+    variants: [
+      { name_fr: "Thème", name_ar: "الطابع", value_fr: "Couleur Inexistante", value_ar: "لون غير موجود" },
+      { name_fr: "Personnalisation", name_ar: "التخصيص", value_fr: "Sans nom", value_ar: "بدون اسم" },
+    ],
+  }),
+  "ERR_INVALID_INPUT: variant value",
+);
+
+// Fully valid: requires_text satisfied + an optional per-line note.
+const orderNo5 = (
+  await pdPlaceOrder({
+    variants: [
+      { name_fr: "Thème", name_ar: "الطابع", value_fr: "Violet", value_ar: "بنفسجي" },
+      {
+        name_fr: "Personnalisation",
+        name_ar: "التخصيص",
+        value_fr: "Avec le nom",
+        value_ar: "مع الاسم",
+        custom_text: "Youcef Benali",
+      },
+    ],
+    note: "Livrer avant 18h",
+  })
+).rows[0].place_order;
+
+const item5 = (
+  await db.query<{ note: string | null; price: string; variant_id: string; variants: unknown }>(
+    `select oi.note, oi.price, oi.variant_id, oi.variants
+       from public.order_items oi join public.orders o on o.id = oi.order_id
+      where o.order_number = $1`,
+    [orderNo5],
+  )
+).rows[0];
+
+assertEqual("valid order: note stored", item5.note, "Livrer avant 18h");
+assertEqual("valid order: priced variant resolved", item5.variant_id, pdVariant);
+assertEqual("valid order: price from the picked page-count row", Number(item5.price), 2000);
+assertEqual(
+  "valid order: custom_text propagated into variants jsonb",
+  (item5.variants as { custom_text?: string }[]).find((v) => v.custom_text)?.custom_text,
+  "Youcef Benali",
+);
+
+// Fully valid: requires_upload satisfied, note omitted (stays optional).
+const orderNo6 = (
+  await pdPlaceOrder({
+    variants: [
+      {
+        name_fr: "Thème",
+        name_ar: "الطابع",
+        value_fr: "Couverture personnalisée",
+        value_ar: "غلاف مخصص",
+        custom_upload_url: "https://example.supabase.co/storage/v1/object/public/customer-uploads/custom-covers/abc.webp",
+      },
+      { name_fr: "Personnalisation", name_ar: "التخصيص", value_fr: "Sans nom", value_ar: "بدون اسم" },
+    ],
+  })
+).rows[0].place_order;
+
+const item6 = (
+  await db.query<{ note: string | null; variants: unknown }>(
+    `select oi.note, oi.variants
+       from public.order_items oi join public.orders o on o.id = oi.order_id
+      where o.order_number = $1`,
+    [orderNo6],
+  )
+).rows[0];
+
+assertEqual("note omitted stays null", item6.note, null);
+assertEqual(
+  "custom_upload_url propagated into variants jsonb",
+  (item6.variants as { custom_upload_url?: string }[]).find((v) => v.custom_upload_url)
+    ?.custom_upload_url,
+  "https://example.supabase.co/storage/v1/object/public/customer-uploads/custom-covers/abc.webp",
+);
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

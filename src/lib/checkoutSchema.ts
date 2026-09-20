@@ -13,7 +13,6 @@ export const checkoutSchema = z.object({
   wilaya: z.string().min(1, "valWilaya"),
   city: z.string().trim().min(1, "valCity").max(80, "valCity"),
   address: z.string().trim().max(200).optional().or(z.literal("")),
-  notes: z.string().trim().max(500).optional().or(z.literal("")),
   delivery_type: z.enum(["home", "office"]),
   /** honeypot — must stay empty */
   company: z.string().max(0).optional().or(z.literal("")),

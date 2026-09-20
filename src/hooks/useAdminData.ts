@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Category, ClientReview, DeliveryPrice, Product, ProductVariant } from "@/types/db";
 import { DEMO_CATEGORIES, DEMO_DELIVERY_PRICES, DEMO_PRODUCTS, DEMO_REVIEWS } from "@/data/demo";
-import { IMMUTABLE_CACHE_CONTROL } from "@/lib/image";
 import { normalizeProduct } from "@/lib/normalize";
 import { invalidateProductCaches, invalidateTaxonomyCaches } from "@/lib/queryCache";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
@@ -301,20 +300,4 @@ export function useUpdateDeliveryPrice() {
       qc.invalidateQueries({ queryKey: ["delivery-prices"] });
     },
   });
-}
-
-/* ---------------- image upload ---------------- */
-
-export async function uploadToBucket(bucket: string, file: File, prefix = ""): Promise<string> {
-  const ext = file.name.split(".").pop() || "webp";
-  const path = `${prefix}${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(bucket).upload(path, file, {
-    // A year of CDN cache: the path is a fresh uuid on every upload, so a
-    // replaced image is a NEW url and can never be served stale.
-    cacheControl: IMMUTABLE_CACHE_CONTROL,
-    upsert: false,
-    contentType: file.type,
-  });
-  if (error) throw error;
-  return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }

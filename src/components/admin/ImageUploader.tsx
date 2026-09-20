@@ -2,9 +2,9 @@ import { ChevronLeft, ChevronRight, ImagePlus, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { SmartImage } from "@/components/ui/SmartImage";
-import { uploadToBucket } from "@/hooks/useAdminData";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { compressImage } from "@/lib/image";
+import { uploadToBucket } from "@/lib/storage";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { cn } from "@/lib/cn";
 

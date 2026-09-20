@@ -133,6 +133,7 @@ export function normalizeOrderItem(row: Record<string, unknown>): OrderItem {
     size: (row.size as string | null) ?? null,
     variants: picks,
     image_url: (row.image_url as string | null) ?? null,
+    note: (row.note as string | null) ?? null,
   };
 }
 
