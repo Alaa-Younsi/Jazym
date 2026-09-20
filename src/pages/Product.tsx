@@ -16,12 +16,12 @@ import { usePixel } from "@/components/TrackingProvider";
 import { useProduct, useRelatedProducts } from "@/hooks/useProducts";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
-import { compressImage } from "@/lib/image";
 import { SITE_URL } from "@/lib/seo";
-import { uploadToBucket } from "@/lib/storage";
+import { compressUntrustedImage, UntrustedImageError, uploadToBucket } from "@/lib/storage";
 import { cn } from "@/lib/cn";
 import { useCart } from "@/store/cart";
 import type { CartVariantPick, ProductVariant, VariantGroup, VariantOption } from "@/types/db";
+import type { TranslationKey } from "@/i18n/translations";
 
 interface AxisOption {
   fr: string;
@@ -752,18 +752,27 @@ function CustomCoverUpload({
   const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorKey, setErrorKey] = useState<TranslationKey | null>(null);
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
     setBusy(true);
-    setError(false);
+    setErrorKey(null);
     try {
-      const compressed = await compressImage(file);
+      const compressed = await compressUntrustedImage(file);
       const url = await uploadToBucket("customer-uploads", compressed, "custom-covers/");
       onChange(url);
-    } catch {
-      setError(true);
+    } catch (err) {
+      if (err instanceof UntrustedImageError && err.reason === "invalid-type") {
+        setErrorKey("productUploadInvalidType");
+      } else if (
+        err instanceof UntrustedImageError &&
+        (err.reason === "too-large" || err.reason === "too-large-after-compress")
+      ) {
+        setErrorKey("productUploadTooLarge");
+      } else {
+        setErrorKey("adminUploadError");
+      }
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -771,36 +780,46 @@ function CustomCoverUpload({
   }
 
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-3">
-      {value ? (
-        <img src={value} alt="" className="h-14 w-14 rounded-lg border border-line object-cover" />
-      ) : (
-        <span
-          className={cn(
-            "grid h-14 w-14 place-items-center rounded-lg border border-dashed text-muted",
-            invalid ? "border-danger" : "border-line",
-          )}
+    <div className="mt-2 flex flex-col gap-1.5">
+      <div className="flex flex-wrap items-center gap-3">
+        {value ? (
+          <img
+            src={value}
+            alt=""
+            className="h-14 w-14 rounded-lg border border-line object-cover"
+          />
+        ) : (
+          <span
+            className={cn(
+              "grid h-14 w-14 place-items-center rounded-lg border border-dashed text-muted",
+              invalid ? "border-danger" : "border-line",
+            )}
+          >
+            <ImagePlus size={18} />
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={busy}
+          className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-ink hover:border-brand hover:text-brand disabled:opacity-50"
         >
-          <ImagePlus size={18} />
-        </span>
+          {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+          {value ? t("productReplaceUpload") : t("productUploadCover")}
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={(e) => handleFile(e.target.files?.[0])}
+        />
+      </div>
+      {errorKey ? (
+        <span className="text-xs text-danger">{t(errorKey)}</span>
+      ) : (
+        <span className="text-xs text-muted">{t("productUploadHint")}</span>
       )}
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={busy}
-        className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-ink hover:border-brand hover:text-brand disabled:opacity-50"
-      >
-        {busy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-        {value ? t("productReplaceUpload") : t("productUploadCover")}
-      </button>
-      {error && <span className="text-xs text-danger">{t("adminUploadError")}</span>}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        hidden
-        onChange={(e) => handleFile(e.target.files?.[0])}
-      />
     </div>
   );
 }

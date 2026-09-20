@@ -125,6 +125,9 @@ export const translations = {
     productCustomTextPlaceholder: "Nom à imprimer sur la couverture",
     productUploadCover: "Téléverser un visuel",
     productReplaceUpload: "Remplacer le visuel",
+    productUploadHint: "JPG, PNG ou WEBP — 15 Mo max.",
+    productUploadTooLarge: "Image trop lourde (max 15 Mo).",
+    productUploadInvalidType: "Format non supporté — utilisez JPG, PNG ou WEBP.",
 
     /* ---------- cart ---------- */
     cartTitle: "Votre panier",
@@ -825,6 +828,9 @@ export const translations = {
     productCustomTextPlaceholder: "الاسم المراد طباعته على الغلاف",
     productUploadCover: "رفع صورة",
     productReplaceUpload: "استبدال الصورة",
+    productUploadHint: "JPG أو PNG أو WEBP — 15 م.ب كحد أقصى.",
+    productUploadTooLarge: "الصورة كبيرة جدًا (15 م.ب كحد أقصى).",
+    productUploadInvalidType: "صيغة غير مدعومة — استخدم JPG أو PNG أو WEBP.",
 
     /* ---------- cart ---------- */
     cartTitle: "سلّتك",

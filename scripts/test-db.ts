@@ -493,6 +493,23 @@ await expectError(
 );
 
 await expectError(
+  "requires_upload value with a URL outside our bucket rejected",
+  pdPlaceOrder({
+    variants: [
+      {
+        name_fr: "Thème",
+        name_ar: "الطابع",
+        value_fr: "Couverture personnalisée",
+        value_ar: "غلاف مخصص",
+        custom_upload_url: "https://evil.example.com/not-our-bucket.png",
+      },
+      { name_fr: "Personnalisation", name_ar: "التخصيص", value_fr: "Sans nom", value_ar: "بدون اسم" },
+    ],
+  }),
+  "ERR_INVALID_INPUT: custom_upload_url",
+);
+
+await expectError(
   "requires_text value without custom_text rejected",
   pdPlaceOrder({
     variants: [
