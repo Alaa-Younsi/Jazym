@@ -9,9 +9,11 @@ const PRODUCT_SELECT = "*, category:categories(*), product_images(*), product_va
 
 /* ---------------- products ---------------- */
 
-export function useAdminProducts() {
+/** @param enabled false when the viewer holds no section that can read products. */
+export function useAdminProducts(enabled = true) {
   return useQuery({
     queryKey: ["admin-products"],
+    enabled,
     queryFn: async (): Promise<Product[]> => {
       if (!isSupabaseConfigured) return DEMO_PRODUCTS;
       const { data, error } = await supabase

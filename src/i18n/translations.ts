@@ -184,6 +184,7 @@ export const translations = {
     orderErrRateLimit: "Trop de commandes depuis ce numéro. Réessayez plus tard.",
     orderErrInvalidInput: "Certaines informations sont invalides. Vérifiez le formulaire.",
     orderErrGeneric: "Impossible d'enregistrer la commande. Réessayez.",
+    orderErrTooFast: "Un instant — vérifiez vos informations, puis validez à nouveau.",
 
     /* ---------- validation ---------- */
     valRequired: "Ce champ est obligatoire.",
@@ -887,6 +888,7 @@ export const translations = {
     orderErrRateLimit: "طلبات كثيرة من هذا الرقم. حاول لاحقًا.",
     orderErrInvalidInput: "بعض المعلومات غير صحيحة. تحقّق من النموذج.",
     orderErrGeneric: "تعذّر تسجيل الطلب. حاول من جديد.",
+    orderErrTooFast: "لحظة — تأكّد من معلوماتك ثم أعد التأكيد.",
 
     /* ---------- validation ---------- */
     valRequired: "هذا الحقل إجباري.",

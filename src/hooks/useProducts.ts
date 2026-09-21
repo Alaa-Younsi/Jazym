@@ -131,10 +131,12 @@ export function useProduct(slug: string | undefined) {
 export function useRelatedProducts(product: Product | null | undefined, limit = 4) {
   return useQuery({
     queryKey: ["related-products", product?.id, limit],
-    enabled: !!product,
+    // A product with no category has nothing to be related to, and passing ""
+    // where PostgREST expects a uuid is a 400, not an empty result.
+    enabled: !!product?.category_id,
     staleTime: 1000 * 60 * 5,
     queryFn: async (): Promise<Product[]> => {
-      if (!product) return [];
+      if (!product?.category_id) return [];
       if (!isSupabaseConfigured) {
         return DEMO_PRODUCTS.filter(
           (p) => p.id !== product.id && p.category_id === product.category_id,
@@ -144,7 +146,7 @@ export function useRelatedProducts(product: Product | null | undefined, limit = 
         .from("products")
         .select(SELECT)
         .eq("status", "active")
-        .eq("category_id", product.category_id ?? "")
+        .eq("category_id", product.category_id)
         .neq("id", product.id)
         .limit(limit);
       if (error) throw error;

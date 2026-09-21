@@ -16,11 +16,13 @@ export function slugify(input: string): string {
  * ILIKE wildcards, cap length. See skill Phase 6 (Shop search).
  */
 export function sanitizeSearchTerm(term: string): string {
+  // Truncate BEFORE escaping: slicing afterwards can cut an escape sequence in
+  // half and ship a dangling backslash to PostgREST.
   return term
-    .replace(/[,()]/g, "")
-    .replace(/[\\%_]/g, "\\$&")
+    .trim()
     .slice(0, 100)
-    .trim();
+    .replace(/[,()]/g, "")
+    .replace(/[\\%_]/g, "\\$&");
 }
 
 /** Pick a `${base}_fr` / `${base}_ar` field off a row, FR-fallback. */
@@ -56,4 +58,24 @@ export function variantPickKey(
     .map((p) => `${p.name_fr}:${p.value_fr ?? p.value ?? ""}`)
     .sort()
     .join("|");
+}
+
+/**
+ * Admin-supplied link guard. A panel `link_url` or a landing-page CTA `href`
+ * is typed by staff and rendered straight into an `<a href>`; without this a
+ * worker holding only the `panels` (or `landing`) section could store a
+ * `javascript:` URL and run script in the owner's session. Allows a
+ * same-site path, a hash/query target, http(s), and tel:/mailto:.
+ */
+export function safeLinkHref(raw: string | null | undefined): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+  if (/^[/#?]/.test(value)) return value;
+  try {
+    const { protocol } = new URL(value);
+    return ["http:", "https:", "tel:", "mailto:"].includes(protocol) ? value : null;
+  } catch {
+    // Not an absolute URL and not a path — a bare "example.com" or worse.
+    return null;
+  }
 }

@@ -31,7 +31,10 @@ export function lineTotal(
     } else if (offer.type === "price") {
       const bundleQty = Math.max(0, Math.floor(safe(offer.qty)));
       const bundlePrice = Math.max(0, safe(offer.price));
-      if (bundleQty <= 0 || bundlePrice <= 0) continue;
+      // > 1, not > 0 — a "bundle of 1" is just a price override and the SQL
+      // engine ignores it. Accepting it here would quote a total the server
+      // never charges.
+      if (bundleQty <= 1 || bundlePrice <= 0) continue;
       const bundles = Math.floor(safe(qty) / bundleQty);
       const remainder = safe(qty) % bundleQty;
       best = Math.min(best, bundles * bundlePrice + remainder * safe(unitPrice));

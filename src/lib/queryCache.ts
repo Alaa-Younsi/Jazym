@@ -8,10 +8,14 @@ import type { QueryClient } from "@tanstack/react-query";
 export function invalidateProductCaches(qc: QueryClient): void {
   for (const key of [
     "admin-products",
+    // the edit form's own row — "product" does NOT match ["admin-product", id]
+    "admin-product",
     "products",
     "product",
     "related-products",
     "featured-products",
+    // a price change moves the cart total, so the server quote must re-run
+    "cart-quote",
   ]) {
     qc.invalidateQueries({ queryKey: [key] });
   }

@@ -62,6 +62,11 @@ export default function Product() {
   const [customUploads, setCustomUploads] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [showGate, setShowGate] = useState(false);
+  // An image that only EXISTS once state has settled (a just-uploaded custom
+  // cover). swapToImage runs against the gallery of the render it was called
+  // in, where that url is not there yet, so the focus is deferred to the
+  // effect below instead of silently doing nothing.
+  const [pendingFocusUrl, setPendingFocusUrl] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
   const viewedRef = useRef<string | null>(null);
 
@@ -149,6 +154,13 @@ export default function Product() {
     return [...base, ...extra];
   }, [product, customUploads]);
 
+  useEffect(() => {
+    if (!pendingFocusUrl) return;
+    const idx = galleryImages.findIndex((g) => g.url === pendingFocusUrl);
+    if (idx >= 0) setActiveImage(idx);
+    setPendingFocusUrl(null);
+  }, [pendingFocusUrl, galleryImages]);
+
   if (isLoading) return <PageLoader />;
   if (!product || isError) return <Navigate to="/boutique" replace />;
 
@@ -210,6 +222,9 @@ export default function Product() {
   const allVariantsSoldOut = hasVariantRows && variantRows.every((v) => v.stock <= 0);
   const soldOut = hasVariantRows ? allVariantsSoldOut || comboSoldOut : product.stock <= 0;
   const maxQty = Math.max(1, Math.min(effectiveStock || 20, 20));
+  // Switching to a thinner-stocked variant must not leave a quantity the cart
+  // will silently clamp — show the real number the shopper is about to add.
+  const effectiveQty = Math.min(qty, maxQty);
 
   const picks: CartVariantPick[] = product.variants
     .filter((g) => variantPicks[g.name_fr])
@@ -245,7 +260,7 @@ export default function Product() {
     addLine({
       product,
       unitPrice: effectivePrice,
-      quantity: qty,
+      quantity: effectiveQty,
       color,
       size,
       variants: picks,
@@ -258,9 +273,9 @@ export default function Product() {
     track("add_to_cart", {
       content_ids: [product.id],
       content_type: "product",
-      value: effectivePrice * qty,
+      value: effectivePrice * effectiveQty,
       currency: "DZD",
-      num_items: qty,
+      num_items: effectiveQty,
     });
     setTimeout(() => setAdded(false), 1800);
   };
@@ -343,7 +358,7 @@ export default function Product() {
               customUpload={customUploads[group.name_fr]}
               onCustomUpload={(url) => {
                 setCustomUploads((prev) => ({ ...prev, [group.name_fr]: url }));
-                swapToImage(url);
+                setPendingFocusUrl(url);
               }}
               showGate={showGate}
               incomplete={groupIncomplete(group)}
@@ -521,7 +536,7 @@ export default function Product() {
               customUpload={customUploads[group.name_fr]}
               onCustomUpload={(url) => {
                 setCustomUploads((prev) => ({ ...prev, [group.name_fr]: url }));
-                swapToImage(url);
+                setPendingFocusUrl(url);
               }}
               showGate={showGate}
               incomplete={groupIncomplete(group)}
@@ -552,17 +567,17 @@ export default function Product() {
               <button
                 type="button"
                 aria-label="-"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                onClick={() => setQty(Math.max(1, effectiveQty - 1))}
                 className="grid h-11 w-11 place-items-center text-muted hover:text-ink"
               >
                 <Minus size={15} />
               </button>
-              <span className="num-ltr w-10 text-center text-sm">{qty}</span>
+              <span className="num-ltr w-10 text-center text-sm">{effectiveQty}</span>
               <button
                 type="button"
                 aria-label="+"
-                onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
-                disabled={qty >= maxQty}
+                onClick={() => setQty(Math.min(maxQty, effectiveQty + 1))}
+                disabled={effectiveQty >= maxQty}
                 className="grid h-11 w-11 place-items-center text-muted hover:text-ink disabled:opacity-40"
               >
                 <Plus size={15} />
@@ -610,7 +625,6 @@ export default function Product() {
               color={color}
               size={size}
               variants={picks}
-              image_url={image0}
               selectionComplete={selectionComplete}
               onBlockedSubmit={() => setShowGate(true)}
               variantId={resolvedVariant?.id ?? null}

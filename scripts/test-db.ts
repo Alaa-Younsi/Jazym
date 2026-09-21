@@ -599,5 +599,133 @@ assertEqual(
   "https://example.supabase.co/storage/v1/object/public/customer-uploads/custom-covers/abc.webp",
 );
 
+/* ---------------- stock integrity across duplicate cart lines --------------- */
+
+/* The cart keys a line by product + variant + colour + size + picks + note, so
+   one product can legitimately occupy several lines (two personalised cahiers
+   of the same page-count differ only by their note). Before 0023, place_order
+   checked stock per line and decremented per line: stock 5 with two lines of 5
+   was accepted and left the row at -5, and cancelling that order restocked one
+   line instead of both. */
+
+console.log("\nstock integrity — one product across several cart lines\n");
+
+const pStock = "aaaaaaaa-0000-4000-8000-000000000005";
+const pVarStock = "aaaaaaaa-0000-4000-8000-000000000006";
+const vRow = "cccccccc-0000-4000-8000-000000000001";
+
+await db.exec(`
+  delete from public.promotions;
+  insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status)
+    values ('${pStock}', 'prod-stock', 'Stock', 'مخزون', 1000, 5, '${catOther}', 'active');
+  insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status)
+    values ('${pVarStock}', 'prod-var-stock', 'StockV', 'مخزون ع', 1000, 0, '${catOther}', 'active');
+  insert into public.product_variants (id, product_id, option1_name_fr, option1_value_fr, price, stock, sort_order)
+    values ('${vRow}', '${pVarStock}', 'Pages', '120 pages', 1000, 5, 0);
+`);
+
+const stockCustomer = (phone: string) => ({
+  customer_name: "Test Client",
+  customer_phone: phone,
+  wilaya: "Alger",
+  city: "Bab Ezzouar",
+  delivery_type: "home",
+  language: "fr",
+});
+
+function placeStockOrder(items: unknown[], phone: string) {
+  return db.query<{ place_order: string }>(
+    "select public.place_order($1::jsonb, $2::jsonb) as place_order",
+    [JSON.stringify(items), JSON.stringify(stockCustomer(phone))],
+  );
+}
+
+// Product-level: two lines of 5 against a stock of 5 must be refused outright.
+await expectError(
+  "two lines of the same product are summed against stock",
+  placeStockOrder(
+    [
+      { product_id: pStock, quantity: 5, note: "Amine" },
+      { product_id: pStock, quantity: 5, note: "Sara" },
+    ],
+    "0555100001",
+  ),
+  "ERR_STOCK",
+);
+
+assertEqual(
+  "refused order left stock untouched",
+  (await db.query<{ stock: number }>("select stock from public.products where id=$1", [pStock]))
+    .rows[0].stock,
+  5,
+);
+
+// Variant-level: same rule on the priced variant row.
+await expectError(
+  "two lines of the same variant are summed against variant stock",
+  placeStockOrder(
+    [
+      { product_id: pVarStock, variant_id: vRow, quantity: 3, note: "Amine" },
+      { product_id: pVarStock, variant_id: vRow, quantity: 3, note: "Sara" },
+    ],
+    "0555100002",
+  ),
+  "ERR_STOCK",
+);
+
+// What DOES fit across several lines still goes through, and decrements once
+// per line for the full amount.
+const splitOrder = (
+  await placeStockOrder(
+    [
+      { product_id: pStock, quantity: 2, note: "Amine" },
+      { product_id: pStock, quantity: 3, note: "Sara" },
+    ],
+    "0555100003",
+  )
+).rows[0].place_order;
+
+assertEqual(
+  "a cart that does fit decrements every line (5 → 0)",
+  (await db.query<{ stock: number }>("select stock from public.products where id=$1", [pStock]))
+    .rows[0].stock,
+  0,
+);
+
+// Cancelling it must give back BOTH lines, not one.
+await db.exec(`update public.orders set status='cancelled' where order_number='${splitOrder}'`);
+assertEqual(
+  "cancelling restocks every line (0 → 5)",
+  (await db.query<{ stock: number }>("select stock from public.products where id=$1", [pStock]))
+    .rows[0].stock,
+  5,
+);
+
+// Same for variant-level restock.
+const varOrder = (
+  await placeStockOrder(
+    [
+      { product_id: pVarStock, variant_id: vRow, quantity: 2, note: "Amine" },
+      { product_id: pVarStock, variant_id: vRow, quantity: 3, note: "Sara" },
+    ],
+    "0555100004",
+  )
+).rows[0].place_order;
+assertEqual(
+  "variant stock decremented across both lines (5 → 0)",
+  (await db.query<{ stock: number }>("select stock from public.product_variants where id=$1", [
+    vRow,
+  ])).rows[0].stock,
+  0,
+);
+await db.exec(`update public.orders set status='cancelled' where order_number='${varOrder}'`);
+assertEqual(
+  "cancelling restocks both variant lines (0 → 5)",
+  (await db.query<{ stock: number }>("select stock from public.product_variants where id=$1", [
+    vRow,
+  ])).rows[0].stock,
+  5,
+);
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

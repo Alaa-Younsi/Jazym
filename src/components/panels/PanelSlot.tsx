@@ -6,6 +6,7 @@ import { usePanel } from "@/hooks/usePromoPanels";
 import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { responsiveSrcSet } from "@/lib/image";
+import { safeLinkHref } from "@/lib/utils";
 import type { PanelSlot as PanelSlotKey } from "@/types/db";
 
 /** Admin-managed promo banner at a fixed, code-defined slot. Renders nothing
@@ -22,7 +23,9 @@ export function PanelSlot({ slot }: { slot: PanelSlotKey }) {
   const hasText = !!(title || subtitle);
   if (!panel.image_url && !hasText) return null;
 
-  const isLink = !!panel.link_url;
+  // The admin types this by hand — never render it as an href unmodified.
+  const linkHref = safeLinkHref(panel.link_url);
+  const isLink = !!linkHref;
 
   const content = (
     <div
@@ -72,22 +75,17 @@ export function PanelSlot({ slot }: { slot: PanelSlotKey }) {
     </div>
   );
 
-  if (!isLink) return content;
+  if (!linkHref) return content;
   const linkClassName = "block transition hover:-translate-y-0.5 hover:shadow-lift";
-  if (panel.link_url?.startsWith("/")) {
+  if (linkHref.startsWith("/")) {
     return (
-      <Link to={panel.link_url} className={linkClassName}>
+      <Link to={linkHref} className={linkClassName}>
         {content}
       </Link>
     );
   }
   return (
-    <a
-      href={panel.link_url ?? undefined}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={linkClassName}
-    >
+    <a href={linkHref} target="_blank" rel="noopener noreferrer" className={linkClassName}>
       {content}
     </a>
   );

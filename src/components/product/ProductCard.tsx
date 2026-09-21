@@ -27,11 +27,31 @@ export function ProductCard({ product, eager }: ProductCardProps) {
   // Second photo, revealed on hover — the classic apparel-shop "show me the
   // other angle" move. Only when there genuinely is one.
   const hoverImage = images[1]?.url ?? null;
-  const onSale = product.compare_at_price != null && product.compare_at_price > product.price;
+  // Priced/stocked variant rows (page counts, formats…). When a product sells
+  // through them, THEY carry the price and the stock — products.price/stock is
+  // only a fallback for variant-less products, and reading it here is what made
+  // every cahier render "sold out" the moment its stock column sat at 0.
+  const variantRows = product.product_variants ?? [];
+  const sellsByVariant = variantRows.length > 0;
+  const inStockVariants = variantRows.filter((v) => v.stock > 0);
+  const cheapest = (inStockVariants.length > 0 ? inStockVariants : variantRows).reduce<
+    (typeof variantRows)[number] | null
+  >((best, v) => (best === null || v.price < best.price ? v : best), null);
+
+  const displayPrice = cheapest?.price ?? product.price;
+  const displayCompareAt = sellsByVariant
+    ? (cheapest?.compare_at_price ?? null)
+    : product.compare_at_price;
+  const onSale = displayCompareAt != null && displayCompareAt > displayPrice;
+  // A variant product ALWAYS needs a choice — adding it straight to the cart
+  // sends variant_id: null and place_order rejects it with ERR_MISSING_SELECTION.
   const needsChoice =
-    product.colors.length > 0 || product.sizes.length > 0 || product.variants.length > 0;
-  const soldOut = product.stock <= 0;
-  const priceRange = product.variants.length > 0 || onSale ? t("from") : null;
+    sellsByVariant ||
+    product.colors.length > 0 ||
+    product.sizes.length > 0 ||
+    product.variants.length > 0;
+  const soldOut = sellsByVariant ? inStockVariants.length === 0 : product.stock <= 0;
+  const priceRange = sellsByVariant || product.variants.length > 0 || onSale ? t("from") : null;
 
   return (
     <motion.article
@@ -137,9 +157,9 @@ export function ProductCard({ product, eager }: ProductCardProps) {
         </Link>
         <div className="mt-auto flex items-baseline gap-2 pt-1">
           {priceRange && <span className="text-xs text-muted">{priceRange}</span>}
-          <Price value={product.price} className="text-sm font-semibold text-ink" />
-          {onSale && product.compare_at_price != null && (
-            <Price value={product.compare_at_price} className="text-xs text-muted line-through" />
+          <Price value={displayPrice} className="text-sm font-semibold text-ink" />
+          {onSale && displayCompareAt != null && (
+            <Price value={displayCompareAt} className="text-xs text-muted line-through" />
           )}
         </div>
       </div>

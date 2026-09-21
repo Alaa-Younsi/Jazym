@@ -41,3 +41,9 @@ node_modules/.tmp
 
 # Brand source assets (kept locally, not deployed)
 /_brand
+
+# Generated at build time by scripts/generate-sitemap.mjs (prebuild). Both
+# embed VITE_SITE_URL, so a committed copy is a committed localhost URL —
+# Vercel regenerates them on every deploy from its own env.
+/public/sitemap.xml
+/public/robots.txt

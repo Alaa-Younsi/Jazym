@@ -2,6 +2,14 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { canonicalUrl, DEFAULT_OG_IMAGE, SITE_NAME } from "@/lib/seo";
 
+/* Fallback copy for a route that sets no description of its own. Without it,
+   navigating Product → Checkout leaves the PRODUCT's description sitting in
+   <meta name="description"> and in the og: tags — these are mutations on a
+   shared <head>, so anything not overwritten on the next route simply stays.
+   Matches the static copy in index.html. */
+const DEFAULT_DESCRIPTION =
+  "Cahiers de l'enseignant, accessoires et kits de stratégies pédagogiques. Paiement à la livraison partout en Algérie.";
+
 interface SeoInput {
   title: string;
   description?: string;
@@ -44,11 +52,11 @@ export function useSeo({ title, description, image, jsonLd, noindex }: SeoInput)
     // Always set og:image / twitter:image explicitly (skill Phase 7).
     const ogImage = image || DEFAULT_OG_IMAGE;
 
-    if (description) {
-      upsertMeta("name", "description", description);
-      upsertMeta("property", "og:description", description);
-      upsertMeta("name", "twitter:description", description);
-    }
+    // Always written, never conditionally — see DEFAULT_DESCRIPTION above.
+    const desc = description?.trim() || DEFAULT_DESCRIPTION;
+    upsertMeta("name", "description", desc);
+    upsertMeta("property", "og:description", desc);
+    upsertMeta("name", "twitter:description", desc);
     upsertMeta("property", "og:title", fullTitle);
     upsertMeta("name", "twitter:title", fullTitle);
     upsertMeta("property", "og:url", url);

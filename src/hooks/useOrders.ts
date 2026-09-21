@@ -27,7 +27,6 @@ export interface PlaceOrderCustomer {
   notes?: string | null;
   delivery_type: "home" | "office";
   language: Lang;
-  elapsed_ms?: number;
 }
 
 /**
@@ -109,9 +108,13 @@ export function useOrderByNumber(orderNumber: string | undefined) {
 
 /* ---------------- admin ---------------- */
 
-export function useAdminOrders(status: OrderStatus | "all" = "all") {
+/** @param enabled false for a staff member without the `orders` section — RLS
+    would hand back an empty set, which reads as "0 orders" rather than
+    "not yours to see". */
+export function useAdminOrders(status: OrderStatus | "all" = "all", enabled = true) {
   return useQuery({
     queryKey: ["orders", status],
+    enabled,
     queryFn: async (): Promise<{ rows: Order[]; capped: boolean }> => {
       if (!isSupabaseConfigured) return { rows: [], capped: false };
       let query = supabase

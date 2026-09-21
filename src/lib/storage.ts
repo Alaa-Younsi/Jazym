@@ -38,8 +38,9 @@ const UNTRUSTED_ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"
 /** Reject before even attempting to decode — keeps a malicious or oversized
     upload from hanging a customer's (often low-end) phone browser. */
 const UNTRUSTED_MAX_RAW_BYTES = 15 * 1024 * 1024;
-/** Matches the `customer-uploads` bucket's own `file_size_limit`, so a file
-    that passes here is never rejected again at the Storage API. */
+/** Deliberately UNDER the `customer-uploads` bucket's own `file_size_limit`
+    (5 MB, migration 0022), so a file that passes here is never rejected again
+    at the Storage API. Raise the bucket first if this ever goes up. */
 const UNTRUSTED_MAX_OUTPUT_BYTES = 4 * 1024 * 1024;
 const UNTRUSTED_MAX_EDGE = 1400;
 

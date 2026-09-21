@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Search, ShoppingBag } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Container } from "@/components/ui/Container";
 import { Drawer } from "@/components/ui/Drawer";
@@ -34,8 +34,14 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [term, setTerm] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMenuOpen(false), [pathname]);
+  // Focus once, when the panel opens. An inline `ref={(el) => el?.focus()}` is
+  // a new function on every render, so React re-invokes it on every keystroke.
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -152,7 +158,7 @@ export function Header() {
                 <form onSubmit={submitSearch} className="flex items-center gap-2">
                   <Search size={16} className="text-muted" />
                   <input
-                    ref={(el) => el?.focus()}
+                    ref={searchInputRef}
                     value={term}
                     onChange={(e) => setTerm(e.target.value)}
                     placeholder={t("shopSearchPlaceholder")}

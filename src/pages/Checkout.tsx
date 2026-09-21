@@ -25,7 +25,7 @@ export default function Checkout() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const { track } = usePixel();
-  const { isSpam, elapsedMs } = useHoneypot();
+  const { check: honeypot } = useHoneypot();
   const { lines, clear } = useCart();
   const { data: settings } = useStoreSettings();
   const { data: deliveryPrices = [] } = useDeliveryPrices(true);
@@ -74,7 +74,15 @@ export default function Checkout() {
   async function onSubmit(values: CheckoutFormValues) {
     setServerError(null);
     const parsed = checkoutSchema.parse(values);
-    if (isSpam(parsed.company)) return;
+    const verdict = honeypot(parsed.company);
+    // A filled honeypot is a bot — drop it without a word. The time gate also
+    // catches genuine fast submissions, so those get told to try again rather
+    // than losing the order to a silent no-op.
+    if (verdict === "bot") return;
+    if (verdict === "too-fast") {
+      setServerError(t("orderErrTooFast"));
+      return;
+    }
 
     try {
       const orderNumber = await placeOrder.mutateAsync({
@@ -96,7 +104,6 @@ export default function Checkout() {
           notes: null,
           delivery_type: parsed.delivery_type,
           language: lang,
-          elapsed_ms: elapsedMs(),
         },
       });
       track(

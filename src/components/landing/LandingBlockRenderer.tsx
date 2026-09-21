@@ -9,6 +9,7 @@ import { Stars } from "@/components/ui/Stars";
 import { useReviews } from "@/hooks/useReviews";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { responsiveSrcSet } from "@/lib/image";
+import { safeLinkHref } from "@/lib/utils";
 import type { LandingBlock, Product } from "@/types/db";
 import { list, localized, num, str } from "./blockData";
 
@@ -263,7 +264,8 @@ function diff(target: string): number {
 
 function CtaBlock({ data }: { data: Record<string, unknown> }) {
   const { lang } = useI18n();
-  const href = str(data, "href") || "#commander";
+  // Admin-typed — a javascript: URL here would run in every visitor's page.
+  const href = safeLinkHref(str(data, "href")) ?? "#commander";
   return (
     <Container className="py-12">
       <div className="mx-auto max-w-2xl rounded-card border border-line bg-brand-soft/40 p-8 text-center">
@@ -343,7 +345,6 @@ function ProductBlock({
               color={null}
               size={null}
               variants={[]}
-              image_url={product.product_images?.[0]?.url ?? null}
               selectionComplete
               onBlockedSubmit={() => {}}
             />
