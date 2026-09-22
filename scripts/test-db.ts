@@ -15,6 +15,7 @@ import { pgcrypto } from "@electric-sql/pglite/contrib/pgcrypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { normalizeProduct } from "@/lib/normalize";
 import { quoteCart, type QuoteLineInput } from "@/lib/promotions";
 import type { Category, Promotion } from "@/types/db";
 
@@ -726,6 +727,44 @@ assertEqual(
   ])).rows[0].stock,
   5,
 );
+
+/* ---------------- read-side normaliser round-trip --------------- */
+
+/* Every flag on a variant group/value is OPTIONAL in types/db.ts, so a mapper
+   that forgets one still type-checks and still lints — it just silently drops
+   the field at runtime. That is exactly how requires_upload went missing: the
+   storefront never rendered the upload control, yet place_order kept demanding
+   the cover, so 104 products could not be ordered at all. Pin the round-trip. */
+
+console.log("\nnormalizeProduct — variant flags survive the DB round-trip\n");
+
+const pFlags = "aaaaaaaa-0000-4000-8000-000000000007";
+await db.exec(`
+  insert into public.products (id, slug, name_fr, name_ar, price, stock, status, variants) values
+    ('${pFlags}', 'prod-flags', 'Flags', 'أعلام', 1000, 10, 'active',
+     '[
+        {"name_fr":"Thème","name_ar":"الطابع","before_price_variant":true,"values":[
+          {"value_fr":"Violet","value_ar":"بنفسجي","swatch_hex":"#7c5cff"},
+          {"value_fr":"Couverture personnalisée","value_ar":"غلاف مخصص","requires_upload":true}
+        ]},
+        {"name_fr":"Personnalisation","name_ar":"التخصيص","values":[
+          {"value_fr":"Avec le nom","value_ar":"مع الاسم","requires_text":true}
+        ]}
+      ]'::jsonb);
+`);
+
+const rawFlags = (
+  await db.query<Record<string, unknown>>("select * from public.products where id = $1", [pFlags])
+).rows[0];
+const flagGroups = normalizeProduct(rawFlags).variants;
+
+assertEqual("group count preserved", flagGroups.length, 2);
+assertEqual("before_price_variant survives", flagGroups[0].before_price_variant, true);
+assertEqual("before_price_variant defaults to false", flagGroups[1].before_price_variant, false);
+assertEqual("swatch_hex survives", flagGroups[0].values[0].swatch_hex, "#7c5cff");
+assertEqual("requires_upload survives", flagGroups[0].values[1].requires_upload, true);
+assertEqual("requires_upload defaults to false", flagGroups[0].values[0].requires_upload, false);
+assertEqual("requires_text survives", flagGroups[1].values[0].requires_text, true);
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

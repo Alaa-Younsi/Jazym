@@ -16,7 +16,19 @@ function toOptions(raw: unknown): VariantOption[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((v): VariantOption | null => {
-      if (typeof v === "string") return { value_fr: v, value_ar: v, image_url: null };
+      // Legacy `variants: string[]` shape. Same field set as the object branch
+      // below, so both paths hand consumers an identical object — never a mix
+      // of `false` and `undefined` for the same flag.
+      if (typeof v === "string") {
+        return {
+          value_fr: v,
+          value_ar: v,
+          image_url: null,
+          swatch_hex: null,
+          requires_text: false,
+          requires_upload: false,
+        };
+      }
       if (v && typeof v === "object") {
         const o = v as Record<string, unknown>;
         const value_fr = typeof o.value_fr === "string" ? o.value_fr : "";
@@ -26,6 +38,12 @@ function toOptions(raw: unknown): VariantOption[] {
           value_fr: value_fr || value_ar,
           value_ar: value_ar || value_fr,
           image_url: typeof o.image_url === "string" ? o.image_url : null,
+          // Every field below is OPTIONAL on VariantOption, so omitting one
+          // here compiles cleanly and fails silently at runtime. Keep this
+          // mapper in step with the interface in types/db.ts.
+          swatch_hex: typeof o.swatch_hex === "string" ? o.swatch_hex : null,
+          requires_text: o.requires_text === true,
+          requires_upload: o.requires_upload === true,
         };
       }
       return null;
@@ -43,7 +61,13 @@ function toVariantGroups(raw: unknown): VariantGroup[] {
       const name_ar = typeof o.name_ar === "string" ? o.name_ar : name_fr;
       const values = toOptions(o.values);
       if (!name_fr || values.length === 0) return null;
-      return { name_fr, name_ar: name_ar || name_fr, values };
+      return {
+        name_fr,
+        name_ar: name_ar || name_fr,
+        values,
+        // Same trap as in toOptions — optional, so dropping it type-checks.
+        before_price_variant: o.before_price_variant === true,
+      };
     })
     .filter((g): g is VariantGroup => g !== null);
 }
