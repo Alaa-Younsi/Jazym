@@ -766,5 +766,137 @@ assertEqual("requires_upload survives", flagGroups[0].values[1].requires_upload,
 assertEqual("requires_upload defaults to false", flagGroups[0].values[0].requires_upload, false);
 assertEqual("requires_text survives", flagGroups[1].values[0].requires_text, true);
 
+/* ---------------- order notifications (0025) --------------- */
+
+/* The claim RPC is the security boundary for a feature an ANONYMOUS browser
+   triggers: it must hand out an order exactly once, and it must be unreachable
+   from the anon/authenticated roles (granting it, by copying place_order's
+   grant line, leaks the customer's phone number AND lets a prober permanently
+   suppress the real notification). Both halves are pinned here. */
+
+console.log("\norder notifications — claim is single-shot and service-role only\n");
+
+const pNotif = "aaaaaaaa-0000-4000-8000-000000000008";
+await db.exec(`
+  delete from public.promotions;
+  insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status)
+    values ('${pNotif}', 'prod-notif', 'Notif', 'إشعار', 1000, 50, '${catOther}', 'active');
+`);
+
+const notifOrder = (
+  await db.query<{ place_order: string }>(
+    "select public.place_order($1::jsonb,$2::jsonb) as place_order",
+    [
+      JSON.stringify([{ product_id: pNotif, quantity: 1 }]),
+      JSON.stringify({
+        customer_name: "Notif Client",
+        customer_phone: "0555200001",
+        wilaya: "Alger",
+        city: "Bab Ezzouar",
+        delivery_type: "home",
+        language: "fr",
+      }),
+    ],
+  )
+).rows[0].place_order;
+
+// A brand-new order is unclaimed, and the first claim returns its payload.
+interface ClaimRow {
+  order_number: string;
+  customer_name: string;
+  customer_phone: string;
+  item_count: number;
+  total: string;
+}
+const firstClaim = (
+  await db.query<ClaimRow>("select * from public.claim_order_notification($1)", [notifOrder])
+).rows;
+assertEqual("first claim returns the order", firstClaim.length, 1);
+assertEqual("claim carries the line count", firstClaim[0]?.item_count, 1);
+assertEqual("claim carries the customer", firstClaim[0]?.customer_name, "Notif Client");
+
+// Second claim — a replay, a double-invoke, or a prober — gets nothing.
+const secondClaim = (
+  await db.query<ClaimRow>("select * from public.claim_order_notification($1)", [notifOrder])
+).rows;
+assertEqual("second claim returns nothing (single-shot)", secondClaim.length, 0);
+
+// An order number that does not exist is indistinguishable from a claimed one.
+const bogusClaim = (
+  await db.query<ClaimRow>("select * from public.claim_order_notification($1)", [
+    "JZ-20260101-DEADBEEF01",
+  ])
+).rows;
+assertEqual("unknown order number returns nothing", bogusClaim.length, 0);
+
+// A freshly placed order must start unclaimed, or it would never be sent.
+// (The migration's backfill of pre-existing orders can't be exercised here —
+// it runs at migration time, against an empty harness database.)
+const freshOrder = (
+  await db.query<{ place_order: string }>(
+    "select public.place_order($1::jsonb,$2::jsonb) as place_order",
+    [
+      JSON.stringify([{ product_id: pNotif, quantity: 1 }]),
+      JSON.stringify({
+        customer_name: "Fresh Client",
+        customer_phone: "0555200002",
+        wilaya: "Alger",
+        city: "Bab Ezzouar",
+        delivery_type: "home",
+        language: "fr",
+      }),
+    ],
+  )
+).rows[0].place_order;
+assertEqual(
+  "a new order starts unclaimed",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.orders where order_number = $1 and notified_at is null",
+      [freshOrder],
+    )
+  ).rows[0].n,
+  1,
+);
+
+// The grant surface: anon and authenticated must NOT be able to execute it.
+// The owner (postgres) always retains EXECUTE and is listed here; what
+// matters is that neither PostgREST-facing role can reach it.
+const grants = (
+  await db.query<{ grantee: string }>(
+    `select grantee from information_schema.role_routine_grants
+      where routine_name = 'claim_order_notification' and privilege_type = 'EXECUTE'`,
+  )
+).rows.map((r) => r.grantee);
+assertEqual("anon cannot execute the claim", grants.includes("anon"), false);
+assertEqual("authenticated cannot execute the claim", grants.includes("authenticated"), false);
+assertEqual("service_role can execute the claim", grants.includes("service_role"), true);
+
+// And the prefs table is per-account, with no owner-reads-everyone policy.
+const prefPolicies = (
+  await db.query<{ policyname: string; cmd: string }>(
+    `select policyname, cmd from pg_policies
+      where schemaname = 'public' and tablename = 'admin_notification_prefs'`,
+  )
+).rows;
+assertEqual("prefs expose exactly one self-scoped policy", prefPolicies.length, 1);
+
+// 0026 removed the WhatsApp/CallMeBot channel. The columns must be gone, not
+// merely unused — a dormant `callmebot_apikey` is a credential store nobody
+// maintains, and a leftover column is what a later copy-paste revives.
+const prefColumns = (
+  await db.query<{ column_name: string }>(
+    `select column_name from information_schema.columns
+      where table_schema = 'public' and table_name = 'admin_notification_prefs'
+      order by column_name`,
+  )
+).rows.map((r) => r.column_name);
+assertEqual("email is the only channel left", prefColumns, [
+  "email_enabled",
+  "notify_email",
+  "updated_at",
+  "user_id",
+]);
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

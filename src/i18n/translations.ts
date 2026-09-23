@@ -680,6 +680,14 @@ export const translations = {
     teamPasswordUpdated: "Mot de passe mis à jour. Communiquez-le au membre.",
 
     /* ---------- admin: account ---------- */
+    notifTitle: "Notifications de commande",
+    notifIntro: "Recevez un e-mail dès qu'une commande arrive. Chaque compte règle la sienne.",
+    notifEmailChannel: "Alertes par e-mail",
+    notifEmailHint: "Adresse qui recevra les alertes de commande.",
+    notifEmailAddress: "Adresse e-mail",
+    notifSaved: "Préférences enregistrées.",
+    notifErrEmail: "Indiquez une adresse e-mail valide.",
+    notifNotConfigured: "Connectez Supabase pour gérer les notifications.",
     accTitle: "Mon compte",
     accEmail: "E-mail",
     accRoleOwner: "Propriétaire",
@@ -1373,6 +1381,14 @@ export const translations = {
     teamPasswordUpdated: "تم تحديث كلمة المرور. أبلغها للعضو.",
 
     /* ---------- admin: account ---------- */
+    notifTitle: "إشعارات الطلبات",
+    notifIntro: "تصلك رسالة فور وصول طلب. كل حساب يضبط إعداده الخاص.",
+    notifEmailChannel: "تنبيهات بالبريد الإلكتروني",
+    notifEmailHint: "العنوان الذي سيتلقى تنبيهات الطلبات.",
+    notifEmailAddress: "عنوان البريد الإلكتروني",
+    notifSaved: "تم حفظ التفضيلات.",
+    notifErrEmail: "أدخل عنوان بريد إلكتروني صالح.",
+    notifNotConfigured: "اربط Supabase لإدارة الإشعارات.",
     accTitle: "حسابي",
     accEmail: "البريد الإلكتروني",
     accRoleOwner: "المالك",

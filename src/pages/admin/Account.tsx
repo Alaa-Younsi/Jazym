@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { AdminCard, AdminPageHeader } from "@/components/admin/AdminUI";
+import { NotificationPrefsPanel } from "@/components/admin/NotificationPrefsPanel";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
 import { useAdminProfile } from "@/hooks/useAdminProfile";
@@ -83,6 +84,8 @@ export default function Account() {
             {isOwner ? t("accRoleOwner") : t("accRoleStaff")}
           </span>
         </AdminCard>
+
+        <NotificationPrefsPanel />
 
         <AdminCard>
           <h2 className="mb-4 text-sm font-semibold text-ink">{t("accChangePassword")}</h2>

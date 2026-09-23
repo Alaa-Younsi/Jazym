@@ -6,7 +6,7 @@ import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { formatBytes, MAX_VIDEO_BYTES, resolveVideo, WARN_VIDEO_BYTES } from "@/lib/video";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { uploadToBucket } from "@/lib/storage";
+import { uploadErrorMessage, uploadToBucket } from "@/lib/storage";
 import { cn } from "@/lib/cn";
 
 interface Props {
@@ -55,8 +55,8 @@ export function VideoField({ value, onChange, bucket = "product-videos", prefix 
       const url = await uploadToBucket(bucket, file, prefix);
       onChange(url);
       if (file.size > WARN_VIDEO_BYTES) toast.error(t("vidWarnHeavy"));
-    } catch {
-      toast.error(t("adminUploadError"));
+    } catch (err) {
+      toast.error(uploadErrorMessage(err));
     } finally {
       setBusy(false);
       setProgressNote(null);

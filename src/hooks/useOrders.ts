@@ -49,7 +49,18 @@ export async function placeOrder(
     customer,
   });
   if (error) throw error;
-  return String(data);
+  const orderNumber = String(data);
+
+  // Best-effort ping to whoever turned notifications on. Deliberately NOT
+  // awaited and deliberately not error-checked: the order is already on disk,
+  // and a dead Resend key or a rate-limited CallMeBot must never surface to
+  // the shopper or hold up the confirmation page. The edge function claims the
+  // order atomically, so a double-invoke cannot double-send. Skill Phase 8.9.
+  void supabase.functions
+    .invoke("notify", { body: { kind: "order", order_number: orderNumber } })
+    .catch(() => undefined);
+
+  return orderNumber;
 }
 
 export function usePlaceOrder() {

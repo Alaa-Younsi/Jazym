@@ -20,6 +20,29 @@ export async function uploadToBucket(bucket: string, file: File, prefix = ""): P
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
+/**
+ * Turn a Storage failure into something a human can act on. A bare
+ * `catch { toast.error("upload failed") }` is what hid a missing bucket and a
+ * missing RLS policy behind the same four words for the entire project.
+ */
+export function uploadErrorMessage(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err ?? "");
+  const m = raw.toLowerCase();
+  if (m.includes("bucket not found") || m.includes("nosuchbucket")) {
+    return "Bucket de stockage introuvable — appliquez la migration 0024.";
+  }
+  if (m.includes("row-level security") || m.includes("unauthorized") || m.includes("403")) {
+    return "Envoi refusé par la base (droits de stockage) — appliquez la migration 0024.";
+  }
+  if (m.includes("mime") || m.includes("content type")) {
+    return "Type de fichier refusé par le bucket.";
+  }
+  if (m.includes("maximum allowed size") || m.includes("payload too large") || m.includes("413")) {
+    return "Fichier trop volumineux pour le bucket.";
+  }
+  return raw || "Échec de l'envoi du fichier.";
+}
+
 export type UntrustedImageErrorReason =
   | "invalid-type"
   | "too-large"

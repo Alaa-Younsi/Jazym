@@ -4,7 +4,7 @@ import { useAdminToast } from "@/components/admin/AdminToast";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { compressImage } from "@/lib/image";
-import { uploadToBucket } from "@/lib/storage";
+import { uploadErrorMessage, uploadToBucket } from "@/lib/storage";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { cn } from "@/lib/cn";
 
@@ -41,8 +41,8 @@ export function SingleImageUpload({
       const compressed = await compressImage(file);
       const url = await uploadToBucket(bucket, compressed, prefix);
       onChange(url);
-    } catch {
-      toast.error(t("adminUploadError"));
+    } catch (err) {
+      toast.error(uploadErrorMessage(err));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -131,8 +131,8 @@ export function MultiImageUpload({
         uploaded.push(await uploadToBucket(bucket, compressed, prefix));
       }
       onChange([...value, ...uploaded]);
-    } catch {
-      toast.error(t("adminUploadError"));
+    } catch (err) {
+      toast.error(uploadErrorMessage(err));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
