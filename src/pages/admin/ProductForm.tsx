@@ -803,6 +803,14 @@ function VariantsEditor({
                 />
                 {t("prodVariantBeforePrice")}
               </label>
+              <label className="inline-flex items-center gap-1.5 text-xs text-muted">
+                <input
+                  type="checkbox"
+                  checked={!!group.optional}
+                  onChange={(e) => updateGroup(gi, { optional: e.target.checked })}
+                />
+                {t("prodVariantOptional")}
+              </label>
               <button
                 type="button"
                 onClick={() => onChange(value.filter((_, idx) => idx !== gi))}

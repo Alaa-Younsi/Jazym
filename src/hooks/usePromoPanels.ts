@@ -1,8 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { PanelSlot, PromoPanel } from "@/types/db";
+import type { PanelFile, PanelSlot, PromoPanel } from "@/types/db";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
-function normalizePanel(row: Record<string, unknown>): PromoPanel {
+function normalizePanelFiles(raw: unknown): PanelFile[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((f): PanelFile | null => {
+      if (!f || typeof f !== "object") return null;
+      const o = f as Record<string, unknown>;
+      const url = typeof o.url === "string" ? o.url : "";
+      if (!url) return null;
+      const name_fr = typeof o.name_fr === "string" ? o.name_fr : "";
+      const name_ar = typeof o.name_ar === "string" ? o.name_ar : name_fr;
+      return {
+        url,
+        name_fr: name_fr || name_ar,
+        name_ar: name_ar || name_fr,
+        mime: typeof o.mime === "string" ? o.mime : null,
+        size_bytes: typeof o.size_bytes === "number" ? o.size_bytes : null,
+      };
+    })
+    .filter((f): f is PanelFile => f !== null);
+}
+
+export function normalizePanel(row: Record<string, unknown>): PromoPanel {
   return {
     id: String(row.id ?? ""),
     slot: row.slot as PanelSlot,
@@ -13,6 +34,10 @@ function normalizePanel(row: Record<string, unknown>): PromoPanel {
     subtitle_ar: (row.subtitle_ar as string | null) ?? null,
     image_url: (row.image_url as string | null) ?? null,
     link_url: (row.link_url as string | null) ?? null,
+    // Every optional field on a row has to be mapped here explicitly or it is
+    // silently dropped on the way to the UI — see the variant-flag bug that
+    // cost a full debugging session.
+    files: normalizePanelFiles(row.files),
     start_at: (row.start_at as string | null) ?? null,
     end_at: (row.end_at as string | null) ?? null,
     sort_order: Number(row.sort_order ?? 0),
@@ -85,6 +110,7 @@ export function toPanelFormState(row: PromoPanel): PanelFormState {
     subtitle_ar: row.subtitle_ar,
     image_url: row.image_url,
     link_url: row.link_url,
+    files: row.files,
     start_at: row.start_at,
     end_at: row.end_at,
   };

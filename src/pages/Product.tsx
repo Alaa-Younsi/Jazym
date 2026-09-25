@@ -200,7 +200,10 @@ export default function Product() {
 
   const groupIncomplete = (g: VariantGroup) => {
     const pickedValue = variantPicks[g.name_fr];
-    if (!pickedValue) return true;
+    // An optional group the shopper ignored is fine. Once they DO pick, the
+    // value's own text/upload payload is required exactly as before — which
+    // mirrors place_order's rule (migration 0027).
+    if (!pickedValue) return !g.optional;
     const opt = g.values.find((v) => v.value_fr === pickedValue);
     if (opt?.requires_text && !customTexts[g.name_fr]?.trim()) return true;
     if (opt?.requires_upload && !customUploads[g.name_fr]) return true;
@@ -339,6 +342,19 @@ export default function Product() {
               key={group.name_fr}
               group={group}
               picked={variantPicks[group.name_fr]}
+              onClear={() => {
+                setVariantPicks((prev) => {
+                  const next = { ...prev };
+                  delete next[group.name_fr];
+                  return next;
+                });
+                setCustomTexts((prev) => ({ ...prev, [group.name_fr]: "" }));
+                setCustomUploads((prev) => {
+                  const next = { ...prev };
+                  delete next[group.name_fr];
+                  return next;
+                });
+              }}
               onPick={(opt) => {
                 setVariantPicks((prev) => ({ ...prev, [group.name_fr]: opt.value_fr }));
                 if (!opt.requires_text) {
@@ -517,6 +533,19 @@ export default function Product() {
               key={group.name_fr}
               group={group}
               picked={variantPicks[group.name_fr]}
+              onClear={() => {
+                setVariantPicks((prev) => {
+                  const next = { ...prev };
+                  delete next[group.name_fr];
+                  return next;
+                });
+                setCustomTexts((prev) => ({ ...prev, [group.name_fr]: "" }));
+                setCustomUploads((prev) => {
+                  const next = { ...prev };
+                  delete next[group.name_fr];
+                  return next;
+                });
+              }}
               onPick={(opt) => {
                 setVariantPicks((prev) => ({ ...prev, [group.name_fr]: opt.value_fr }));
                 if (!opt.requires_text) {
@@ -675,6 +704,7 @@ function VariantGroupPicker({
   group,
   picked,
   onPick,
+  onClear,
   customText,
   onCustomText,
   customUpload,
@@ -685,6 +715,8 @@ function VariantGroupPicker({
   group: VariantGroup;
   picked: string | undefined;
   onPick: (opt: VariantOption) => void;
+  /** Un-tick an optional group — onPick can only ever set a value. */
+  onClear: () => void;
   customText: string;
   onCustomText: (v: string) => void;
   customUpload: string | undefined;
@@ -694,16 +726,57 @@ function VariantGroupPicker({
 }) {
   const { t, lang } = useI18n();
   const pickedOption = group.values.find((v) => v.value_fr === picked);
+  const label = lang === "ar" ? group.name_ar : group.name_fr;
+
+  // A single-value optional group is an opt-in, not a choice between things —
+  // a lone pill that toggles reads as a broken radio. Render it as a checkbox
+  // and let the payload fields appear underneath once it is ticked.
+  const asCheckbox = !!group.optional && group.values.length === 1;
+  const only = group.values[0];
+
+  if (asCheckbox && only) {
+    const checked = picked === only.value_fr;
+    return (
+      <Picker label={label} invalid={showGate && incomplete}>
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm text-ink">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={() => (checked ? onClear() : onPick(only))}
+            className="h-4 w-4 shrink-0 accent-[rgb(var(--c-brand))]"
+          />
+          {lang === "ar" ? only.value_ar : only.value_fr}
+        </label>
+
+        {checked && only.requires_text && (
+          <input
+            type="text"
+            value={customText}
+            onChange={(e) => onCustomText(e.target.value)}
+            placeholder={t("productCustomTextPlaceholder")}
+            maxLength={60}
+            className={cn(
+              "mt-2 h-10 w-full rounded-lg border bg-transparent px-3 text-sm text-ink outline-none placeholder:text-muted",
+              showGate && !customText.trim() ? "border-danger" : "border-line focus:border-brand",
+            )}
+          />
+        )}
+        {checked && only.requires_upload && (
+          <CustomCoverUpload
+            value={customUpload}
+            onChange={onCustomUpload}
+            invalid={showGate && !customUpload}
+          />
+        )}
+      </Picker>
+    );
+  }
 
   return (
-    <Picker
-      label={lang === "ar" ? group.name_ar : group.name_fr}
-      required
-      invalid={showGate && incomplete}
-    >
+    <Picker label={label} required invalid={showGate && incomplete}>
       <div className="flex flex-wrap gap-2">
         {group.values.map((opt) => {
-          const label = lang === "ar" ? opt.value_ar : opt.value_fr;
+          const optLabel = lang === "ar" ? opt.value_ar : opt.value_fr;
           const isPicked = picked === opt.value_fr;
           return (
             <button
@@ -723,7 +796,7 @@ function VariantGroupPicker({
                   style={{ backgroundColor: opt.swatch_hex }}
                 />
               )}
-              {label}
+              {optLabel}
             </button>
           );
         })}

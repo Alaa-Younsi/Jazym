@@ -77,7 +77,9 @@ export function useProducts(filters: ProductFilters = {}) {
         default:
           query = query.order("created_at", { ascending: false });
       }
-      query = query.limit(200);
+      // The theme level (0028) multiplied the catalogue six times over, so a
+      // 200 cap now truncates an unfiltered /boutique. Category pages hold 8.
+      query = query.limit(1000);
 
       const { data, error } = await query;
       if (error) throw error;

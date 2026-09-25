@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminCard, AdminPageHeader, LoadError, Toggle } from "@/components/admin/AdminUI";
 import { SingleImageUpload } from "@/components/admin/ImageUploader";
+import { PanelFilesEditor } from "@/components/admin/PanelFilesEditor";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Field";
 import { PageLoader } from "@/components/ui/Spinner";
@@ -128,6 +129,10 @@ export default function PanelForm() {
               prefix="panels/"
             />
           </div>
+        </AdminCard>
+
+        <AdminCard>
+          <PanelFilesEditor value={form.files} onChange={(files) => set("files", files)} />
         </AdminCard>
 
         <AdminCard className="flex flex-col gap-4">

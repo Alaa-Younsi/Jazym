@@ -15,6 +15,8 @@ import { pgcrypto } from "@electric-sql/pglite/contrib/pgcrypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { normalizePanel } from "@/hooks/usePromoPanels";
+import { freebieDownloadUrl } from "@/lib/freebies";
 import { normalizeProduct } from "@/lib/normalize";
 import { quoteCart, type QuoteLineInput } from "@/lib/promotions";
 import type { Category, Promotion } from "@/types/db";
@@ -897,6 +899,386 @@ assertEqual("email is the only channel left", prefColumns, [
   "updated_at",
   "user_id",
 ]);
+
+/* ---------------- theme subcategories + optional groups (0027/0028) --------------- */
+
+/* 0028 is a destructive restructure that runs against real data, so it is
+   exercised here against the SHAPE of the live catalogue: a matiere holding
+   cahier kinds, each carrying the old mandatory "Theme" picker, plus one
+   matiere-less legacy product sitting directly on the parent. */
+
+console.log("\ntheme subcategories — restructure and optional custom cover\n");
+
+const cahiersId = "dddddddd-1111-4000-8000-000000000001";
+const matiereId = "dddddddd-1111-4000-8000-000000000002";
+const kindA = "dddddddd-1111-4000-8000-000000000003";
+const kindB = "dddddddd-1111-4000-8000-000000000004";
+const legacyId = "dddddddd-1111-4000-8000-000000000005";
+
+const LIVE_VARIANTS = JSON.stringify([
+  {
+    name_fr: "Thème",
+    name_ar: "الطابع",
+    before_price_variant: true,
+    values: [
+      { value_fr: "Violet", value_ar: "بنفسجي", swatch_hex: "#8B5CF6" },
+      { value_fr: "Couverture personnalisée", value_ar: "غلاف مخصص", requires_upload: true },
+    ],
+  },
+  {
+    name_fr: "Personnalisation",
+    name_ar: "التخصيص",
+    values: [
+      { value_fr: "Sans nom", value_ar: "بدون اسم" },
+      { value_fr: "Avec le nom", value_ar: "مع الاسم", requires_text: true },
+    ],
+  },
+]);
+
+// Order matters, and it mirrors the real history: enforce_category_leaf_only
+// refuses a product whose category already has children, so the 8 matiere-less
+// rows on "Cahiers de l'enseignant" can only have been inserted BEFORE the
+// matiere tree (0015) went in. Build the fixture the same way round.
+await db.query(
+  `insert into public.categories (id, slug, name_fr, name_ar, parent_id, sort_order)
+   values ($1, 'cahiers', 'Cahiers enseignant', 'دفاتر', null, 9)`,
+  [cahiersId],
+);
+await db.query(
+  `insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status, variants)
+   values ($1,'cahier-journal','Cahier journal','الدفتر اليومي',2200,10,$2,'active',$3::jsonb)`,
+  [legacyId, cahiersId, LIVE_VARIANTS],
+);
+await db.query(
+  `insert into public.categories (id, slug, name_fr, name_ar, parent_id, sort_order)
+   values ($1, 'langue-arabe', 'Langue arabe', 'اللغة العربية', $2, 1)`,
+  [matiereId, cahiersId],
+);
+await db.query(
+  `insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status, variants)
+   values ($1,'cahier-journal-langue-arabe','Cahier journal — Langue arabe','الدفتر اليومي',2200,40,$3,'active',$4::jsonb),
+          ($2,'cahier-de-notes-langue-arabe','Cahier de notes — Langue arabe','دفتر النقاط',2000,40,$3,'active',$4::jsonb)`,
+  [kindA, kindB, matiereId, LIVE_VARIANTS],
+);
+await db.query(
+  `insert into public.product_images (product_id, url, sort_order) values ($1,'https://x/a.webp',0)`,
+  [kindA],
+);
+await db.query(
+  `insert into public.product_variants (product_id, option1_name_fr, option1_value_fr, price, stock, sku, sort_order)
+   values ($1,'Nombre de pages','120 pages',2200,40,'JZ-120',0)`,
+  [kindA],
+);
+
+// Apply 0028 exactly as it will run in production.
+const MIG_0028 = readFileSync(join(MIG_DIR, "0028_theme_subcategories.sql"), "utf8");
+await db.exec(MIG_0028);
+
+assertEqual(
+  "six themes created under the matiere",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.categories where parent_id = $1",
+      [matiereId],
+    )
+  ).rows[0].n,
+  6,
+);
+
+assertEqual(
+  "parent category no longer holds products directly",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.products where category_id = $1",
+      [cahiersId],
+    )
+  ).rows[0].n,
+  0,
+);
+
+assertEqual(
+  "legacy product landed under Toutes matieres > Violet",
+  (
+    await db.query<{ slug: string }>(
+      `select c.slug from public.products p
+         join public.categories c on c.id = p.category_id where p.id = $1`,
+      [legacyId],
+    )
+  ).rows[0].slug,
+  "toutes-matieres-violet",
+);
+
+assertEqual(
+  "each kind fanned out across all six themes",
+  (
+    await db.query<{ n: number }>(
+      `select count(*)::int as n from public.products p
+         join public.categories c on c.id = p.category_id
+        where c.parent_id = $1`,
+      [matiereId],
+    )
+  ).rows[0].n,
+  12,
+);
+
+// The ORIGINAL row is reused, so order_items.product_id keeps resolving.
+const original = (
+  await db.query<{ slug: string; name_fr: string; cat: string }>(
+    `select p.slug, p.name_fr, c.slug as cat from public.products p
+       join public.categories c on c.id = p.category_id where p.id = $1`,
+    [kindA],
+  )
+).rows[0];
+assertEqual(
+  "original row reused as the violet one",
+  original.slug,
+  "cahier-journal-langue-arabe-violet",
+);
+assertEqual(
+  "theme carried in the name for the packing slip",
+  original.name_fr,
+  "Cahier journal — Langue arabe · Violet",
+);
+assertEqual("original moved into its theme category", original.cat, "langue-arabe-violet");
+
+const copy = (
+  await db.query<{ id: string }>("select id from public.products where slug = $1", [
+    "cahier-journal-langue-arabe-bleu",
+  ])
+).rows[0];
+assertEqual(
+  "copies carry the product images",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.product_images where product_id = $1",
+      [copy.id],
+    )
+  ).rows[0].n,
+  1,
+);
+assertEqual(
+  "copies get a per-theme SKU, not a duplicate",
+  (
+    await db.query<{ sku: string }>(
+      "select sku from public.product_variants where product_id = $1",
+      [copy.id],
+    )
+  ).rows[0].sku,
+  "JZ-120-BLE",
+);
+
+const groups = (
+  await db.query<{ variants: unknown }>("select variants from public.products where id = $1", [
+    kindA,
+  ])
+).rows[0].variants as { name_fr: string; optional?: boolean; values: unknown[] }[];
+assertEqual(
+  "Theme picker removed",
+  groups.some((g) => g.name_fr === "Thème"),
+  false,
+);
+assertEqual(
+  "other groups untouched",
+  groups.some((g) => g.name_fr === "Personnalisation"),
+  true,
+);
+const cover = groups.find((g) => g.name_fr === "Couverture personnalisée");
+assertEqual("custom cover group added", !!cover, true);
+assertEqual("custom cover is optional", cover?.optional, true);
+assertEqual("custom cover is a single-value checkbox", cover?.values.length, 1);
+
+// Re-running the restructure must be a no-op.
+await db.exec(MIG_0028);
+assertEqual(
+  "0028 is idempotent",
+  (
+    await db.query<{ n: number }>(
+      `select count(*)::int as n from public.products p
+         join public.categories c on c.id = p.category_id where c.parent_id = $1`,
+      [matiereId],
+    )
+  ).rows[0].n,
+  12,
+);
+
+/* ---- place_order: an optional group may be skipped, never half-filled ---- */
+
+await db.exec(
+  `insert into public.delivery_prices (wilaya, home_price, office_price, active)
+     values ('Oran', 500, 300, true) on conflict (wilaya) do nothing;`,
+);
+const themedProduct = (
+  await db.query<{ id: string }>("select id from public.products where slug = $1", [
+    "cahier-de-notes-langue-arabe-rouge",
+  ])
+).rows[0].id;
+
+function themedOrder(variants: unknown[], phone: string) {
+  return db.query<{ place_order: string }>(
+    "select public.place_order($1::jsonb,$2::jsonb) as place_order",
+    [
+      JSON.stringify([{ product_id: themedProduct, quantity: 1, variants }]),
+      JSON.stringify({
+        customer_name: "Theme Client",
+        customer_phone: phone,
+        wilaya: "Oran",
+        city: "Es Senia",
+        delivery_type: "home",
+        language: "fr",
+      }),
+    ],
+  );
+}
+
+const PERSO = {
+  name_fr: "Personnalisation",
+  name_ar: "التخصيص",
+  value_fr: "Sans nom",
+  value_ar: "بدون اسم",
+};
+
+assertEqual(
+  "order without the optional cover is accepted",
+  (await themedOrder([PERSO], "0555300001")).rows.length,
+  1,
+);
+
+await expectError(
+  "ticking the cover without uploading is rejected",
+  themedOrder(
+    [
+      PERSO,
+      { name_fr: "Couverture personnalisée", name_ar: "غلاف مخصص", value_fr: "Oui", value_ar: "نعم" },
+    ],
+    "0555300002",
+  ),
+  "ERR_MISSING_SELECTION: custom_upload",
+);
+
+await expectError(
+  "a mandatory group is still required",
+  themedOrder([], "0555300003"),
+  "ERR_MISSING_SELECTION: variants",
+);
+
+/* ---------------- panel freebies (0029) --------------- */
+
+console.log("\npanel freebies — downloadable files on a promo panel\n");
+
+// The 4 slots are seeded by 0012; they exist already.
+const freebiePanel = (
+  await db.query<{ id: string }>("select id from public.promo_panels where slot = 'home_mid'"),
+).rows[0].id;
+
+const FILES = JSON.stringify([
+  {
+    url: "https://x.supabase.co/storage/v1/object/public/freebies/panels/a.pdf",
+    name_fr: "Fiche de préparation",
+    name_ar: "بطاقة التحضير",
+    mime: "application/pdf",
+    size_bytes: 482000,
+  },
+  {
+    url: "https://x.supabase.co/storage/v1/object/public/freebies/panels/b.mp4",
+    name_fr: "Démo vidéo",
+    name_ar: "فيديو توضيحي",
+    mime: "video/mp4",
+    size_bytes: 3100000,
+  },
+]);
+
+await db.query("update public.promo_panels set files = $1::jsonb, active = true where id = $2", [
+  FILES,
+  freebiePanel,
+]);
+
+assertEqual(
+  "files persist on the panel",
+  (
+    await db.query<{ n: number }>(
+      "select jsonb_array_length(files)::int as n from public.promo_panels where id = $1",
+      [freebiePanel],
+    )
+  ).rows[0].n,
+  2,
+);
+
+assertEqual(
+  "panels default to an empty file list",
+  (
+    await db.query<{ n: number }>(
+      "select jsonb_array_length(files)::int as n from public.promo_panels where slot = 'cart_drawer'",
+    )
+  ).rows[0].n,
+  0,
+);
+
+// The cap is enforced in the database, not only in the editor.
+await expectError(
+  "more than 12 files is rejected",
+  db.query("update public.promo_panels set files = $1::jsonb where id = $2", [
+    JSON.stringify(
+      Array.from({ length: 13 }, (_, i) => ({
+        url: `https://x/${i}.pdf`,
+        name_fr: `f${i}`,
+        name_ar: `f${i}`,
+        mime: "application/pdf",
+        size_bytes: 1,
+      })),
+    ),
+    freebiePanel,
+  ]),
+  "promo_panels_files_check",
+);
+
+await expectError(
+  "a non-array files value is rejected",
+  db.query("update public.promo_panels set files = $1::jsonb where id = $2", [
+    JSON.stringify({ url: "nope" }),
+    freebiePanel,
+  ]),
+  "promo_panels_files_check",
+);
+
+/* The read-side mapper is the part that has silently eaten fields twice in
+   this project, so pin the round-trip rather than trusting the type. */
+const rawPanel = (
+  await db.query<Record<string, unknown>>("select * from public.promo_panels where id = $1", [
+    freebiePanel,
+  ])
+).rows[0];
+const mapped = normalizePanel(rawPanel);
+assertEqual("normalizePanel carries the files through", mapped.files.length, 2);
+assertEqual("file label survives", mapped.files[0]?.name_fr, "Fiche de préparation");
+assertEqual("file mime survives", mapped.files[1]?.mime, "video/mp4");
+assertEqual("file size survives", mapped.files[1]?.size_bytes, 3100000);
+
+// A malformed entry is dropped rather than crashing the storefront.
+await db.query("update public.promo_panels set files = $1::jsonb where id = $2", [
+  JSON.stringify([{ name_fr: "no url here" }, { url: "https://x/ok.pdf", name_fr: "Ok" }]),
+  freebiePanel,
+]);
+const cleaned = normalizePanel(
+  (
+    await db.query<Record<string, unknown>>("select * from public.promo_panels where id = $1", [
+      freebiePanel,
+    ])
+  ).rows[0],
+);
+assertEqual("an entry with no url is dropped", cleaned.files.length, 1);
+assertEqual("name_ar falls back to name_fr", cleaned.files[0]?.name_ar, "Ok");
+
+// The download URL has to force Content-Disposition, or a PDF just opens.
+const dl = freebieDownloadUrl(
+  { url: "https://x/a.pdf", name_fr: "F", name_ar: "F", mime: "application/pdf", size_bytes: 1 },
+  "Fiche de préparation",
+);
+assertEqual("download param is appended", dl.includes("?download="), true);
+assertEqual(
+  "saved filename keeps the extension",
+  decodeURIComponent(dl.split("download=")[1]),
+  "Fiche de preparation.pdf",
+);
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

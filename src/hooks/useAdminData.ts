@@ -20,7 +20,7 @@ export function useAdminProducts(enabled = true) {
         .from("products")
         .select(PRODUCT_SELECT)
         .order("created_at", { ascending: false })
-        .limit(500);
+        .limit(1500);
       if (error) throw error;
       return (data as Record<string, unknown>[]).map(normalizeProduct);
     },

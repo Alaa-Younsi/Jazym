@@ -54,6 +54,13 @@ export interface VariantGroup {
   /** render this group before the priced/stocked product_variants picker
       (e.g. pages) instead of after it, which is the default. */
   before_price_variant?: boolean;
+  /**
+   * The shopper may leave this group unpicked. Default (false) means every
+   * group is mandatory, which is what `place_order` enforces server-side.
+   * A single-value optional group renders as a checkbox — that is how the
+   * custom-cover opt-in works.
+   */
+  optional?: boolean;
 }
 
 export type QuantityOffer =
@@ -294,6 +301,16 @@ export interface LandingPage {
 /* ---- promo panels ---- */
 export type PanelSlot = "home_hero" | "home_mid" | "category_top" | "cart_drawer";
 
+/** One downloadable freebie attached to a panel (migration 0029). */
+export interface PanelFile {
+  url: string;
+  name_fr: string;
+  name_ar: string;
+  /** Content type as uploaded — drives the icon and the download filename. */
+  mime: string | null;
+  size_bytes: number | null;
+}
+
 export interface PromoPanel {
   id: string;
   slot: PanelSlot;
@@ -304,6 +321,8 @@ export interface PromoPanel {
   subtitle_ar: string | null;
   image_url: string | null;
   link_url: string | null;
+  /** Free downloads rendered as a strip under the banner. */
+  files: PanelFile[];
   start_at: string | null;
   end_at: string | null;
   sort_order: number;
