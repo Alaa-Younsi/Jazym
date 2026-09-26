@@ -1101,6 +1101,75 @@ assertEqual(
   12,
 );
 
+/* ---- 0030: the "Toutes matieres" branch is removed, nothing else ---- */
+
+// An order for one of the doomed products must survive the delete.
+const legacyOrder = "aaaaaaaa-0000-4000-8000-000000000030";
+await db.query(
+  `insert into public.orders (id, order_number, customer_name, customer_phone, wilaya, city, subtotal, shipping, total)
+   values ($1,'JZ-TEST-0030','Test','0555000000','16 - Alger','Alger',2200,0,2200)`,
+  [legacyOrder],
+);
+await db.query(
+  `insert into public.order_items (order_id, product_id, name_fr, name_ar, price, quantity)
+   values ($1,$2,'Cahier journal · Violet','الدفتر اليومي',2200,1)`,
+  [legacyOrder, legacyId],
+);
+
+const MIG_0030 = readFileSync(join(MIG_DIR, "0030_remove_toutes_matieres.sql"), "utf8");
+await db.exec(MIG_0030);
+
+assertEqual(
+  "Toutes matieres branch and its themes deleted",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.categories where slug like 'toutes-matieres%'",
+    )
+  ).rows[0].n,
+  0,
+);
+assertEqual(
+  "legacy products deleted",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.products where slug like 'cahier-journal-%' and slug not like '%langue-arabe%'",
+    )
+  ).rows[0].n,
+  0,
+);
+assertEqual(
+  "real matiere products untouched",
+  (
+    await db.query<{ n: number }>(
+      `select count(*)::int as n from public.products p
+         join public.categories c on c.id = p.category_id where c.parent_id = $1`,
+      [matiereId],
+    )
+  ).rows[0].n,
+  12,
+);
+const keptLine = (
+  await db.query<{ product_id: string | null; name_fr: string }>(
+    "select product_id, name_fr from public.order_items where order_id = $1",
+    [legacyOrder],
+  )
+).rows[0];
+assertEqual("past order line kept", keptLine?.name_fr, "Cahier journal · Violet");
+assertEqual("past order line unlinked, not deleted", keptLine?.product_id, null);
+
+await db.exec(MIG_0030);
+assertEqual(
+  "0030 is idempotent",
+  (
+    await db.query<{ n: number }>(
+      "select count(*)::int as n from public.categories where parent_id = $1",
+      [cahiersId],
+    )
+  ).rows[0].n,
+  1,
+);
+await db.query("delete from public.orders where id = $1", [legacyOrder]);
+
 /* ---- place_order: an optional group may be skipped, never half-filled ---- */
 
 await db.exec(
