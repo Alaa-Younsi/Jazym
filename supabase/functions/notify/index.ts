@@ -58,6 +58,16 @@ function money(n: number): string {
   return `${new Intl.NumberFormat("fr-FR").format(Math.round(n))} DA`;
 }
 
+/** RESEND_FROM as Resend expects it. Secrets pasted with their shell quotes
+ *  (`"Jazym <x@y>"`) arrive with the quotes and Resend rejects them with a 422,
+ *  so strip wrapping quotes/whitespace first. */
+function senderAddress(): string {
+  let raw = (Deno.env.get("RESEND_FROM") ?? "").trim();
+  const q = raw[0];
+  if (raw.length > 1 && (q === '"' || q === "'") && raw.endsWith(q)) raw = raw.slice(1, -1).trim();
+  return raw || DEFAULT_FROM;
+}
+
 async function sendEmail(to: string, payload: Payload): Promise<void> {
   const key = Deno.env.get("RESEND_API_KEY");
   // Not configured yet is a normal state, not an error — the client wires
@@ -68,7 +78,7 @@ async function sendEmail(to: string, payload: Payload): Promise<void> {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: Deno.env.get("RESEND_FROM") || DEFAULT_FROM,
+      from: senderAddress(),
       to: [to],
       subject: payload.subject,
       text: payload.text,

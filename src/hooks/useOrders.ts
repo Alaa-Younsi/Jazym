@@ -246,4 +246,31 @@ export function useDeleteAllOrders() {
   });
 }
 
+/** Statuses whose goods are still on the shelf — deleting one gives its stock back. */
+export function deleteRestocks(status: OrderStatus): boolean {
+  return status === "pending" || status === "confirmed";
+}
+
+export function useDeleteOrder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (order: Pick<Order, "id" | "status">) => {
+      // A pending/confirmed order still holds reserved stock. Cancelling it
+      // first fires the orders_restock_on_cancel trigger, so a deleted test
+      // order doesn't leave stock short. Shipped/delivered goods are gone and
+      // cancelled ones were already restocked — those are deleted as-is.
+      if (deleteRestocks(order.status)) {
+        const { error } = await supabase
+          .from("orders")
+          .update({ status: "cancelled" })
+          .eq("id", order.id);
+        if (error) throw error;
+      }
+      const { error } = await supabase.from("orders").delete().eq("id", order.id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateOrderCaches(qc),
+  });
+}
+
 export const ORDERS_PAGE_LIMIT = ORDERS_LIMIT;

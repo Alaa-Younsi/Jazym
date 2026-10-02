@@ -4,10 +4,16 @@ import { Link } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminPageHeader, EmptyState, LoadError } from "@/components/admin/AdminUI";
 import { DeleteAllOrdersModal } from "@/components/admin/DeleteAllOrdersModal";
+import { DeleteOrderModal } from "@/components/admin/DeleteOrderModal";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { PageLoader } from "@/components/ui/Spinner";
-import { useAdminOrders, useDeleteAllOrders, useUpdateOrderStatus } from "@/hooks/useOrders";
+import {
+  useAdminOrders,
+  useDeleteAllOrders,
+  useDeleteOrder,
+  useUpdateOrderStatus,
+} from "@/hooks/useOrders";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/format";
@@ -34,8 +40,10 @@ export default function Orders() {
   const toast = useAdminToast();
   const { data, isLoading, isError } = useAdminOrders("all");
   const deleteAll = useDeleteAllOrders();
+  const deleteOne = useDeleteOrder();
   const updateStatus = useUpdateOrderStatus();
   const [modalOpen, setModalOpen] = useState(false);
+  const [toDelete, setToDelete] = useState<Order | null>(null);
   const [focus, setFocus] = useState<OrderStatus | null>(null);
   const [collapsed, setCollapsed] = useState<Set<OrderStatus>>(new Set());
 
@@ -77,6 +85,19 @@ export default function Orders() {
     }
     try {
       await deleteAll.mutateAsync();
+      toast.success(t("adminDeleted"));
+    } catch {
+      toast.error(t("adminDeleteError"));
+    }
+  }
+
+  async function onDeleteOne(order: Order) {
+    if (!isSupabaseConfigured) {
+      toast.error(t("adminDeleteError"));
+      return;
+    }
+    try {
+      await deleteOne.mutateAsync(order);
       toast.success(t("adminDeleted"));
     } catch {
       toast.error(t("adminDeleteError"));
@@ -282,7 +303,15 @@ export default function Orders() {
                             <p className="mt-0.5 text-xs text-muted">
                               {formatDateTime(o.created_at, lang)}
                             </p>
-                            <StatusPicker order={o} onMove={onMove} label={t("ordMoveTo")} />
+                            <div className="flex items-end gap-2">
+                              <div className="min-w-0 flex-1">
+                                <StatusPicker order={o} onMove={onMove} label={t("ordMoveTo")} />
+                              </div>
+                              <DeleteRowButton
+                                label={t("ordDeleteOne")}
+                                onClick={() => setToDelete(o)}
+                              />
+                            </div>
                           </li>
                         ))}
                       </ul>
@@ -304,6 +333,9 @@ export default function Orders() {
                                   {h}
                                 </th>
                               ))}
+                              <th className="px-4 py-3">
+                                <span className="sr-only">{t("ordDeleteOne")}</span>
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-line">
@@ -335,6 +367,13 @@ export default function Orders() {
                                 <td className="whitespace-nowrap px-4 py-3">
                                   <StatusPicker order={o} onMove={onMove} compact />
                                 </td>
+                                <td className="px-4 py-3 text-end">
+                                  <DeleteRowButton
+                                    label={t("ordDeleteOne")}
+                                    onClick={() => setToDelete(o)}
+                                    compact
+                                  />
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -354,6 +393,12 @@ export default function Orders() {
         onClose={() => setModalOpen(false)}
         orders={orders}
         onConfirm={onDeleteAll}
+      />
+
+      <DeleteOrderModal
+        order={toDelete}
+        onClose={() => setToDelete(null)}
+        onConfirm={onDeleteOne}
       />
     </div>
   );
@@ -391,5 +436,30 @@ function StatusPicker({
         ))}
       </select>
     </label>
+  );
+}
+
+function DeleteRowButton({
+  label,
+  onClick,
+  compact,
+}: {
+  label: string;
+  onClick: () => void;
+  compact?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center rounded-full border border-line text-muted transition hover:border-danger hover:bg-danger/10 hover:text-danger",
+        compact ? "h-8 w-8" : "h-9 w-9",
+      )}
+    >
+      <Trash2 size={14} />
+    </button>
   );
 }
