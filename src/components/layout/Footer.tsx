@@ -6,13 +6,7 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { useCategories } from "@/hooks/useCategories";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { childrenOf } from "@/lib/categoryTree";
-import {
-  CONTACT_EMAIL,
-  CONTACT_EMAIL_HREF,
-  CONTACT_PHONE,
-  CONTACT_PHONE_HREF,
-  SOCIAL_LINKS,
-} from "@/lib/contact";
+import { CONTACT_PHONE, CONTACT_PHONE_HREF, SOCIAL_LINKS } from "@/lib/contact";
 import { pick } from "@/lib/utils";
 
 function TikTokIcon({ size = 18 }: { size?: number }) {
@@ -65,9 +59,6 @@ export function Footer() {
         <FooterCol title={t("footerContact")}>
           <a href={CONTACT_PHONE_HREF} className="text-sm text-muted transition hover:text-brand">
             {CONTACT_PHONE}
-          </a>
-          <a href={CONTACT_EMAIL_HREF} className="text-sm text-muted transition hover:text-brand">
-            {CONTACT_EMAIL}
           </a>
         </FooterCol>
       </Container>

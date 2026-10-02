@@ -1,12 +1,10 @@
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, MapPin, Phone } from "lucide-react";
 import { Container, SectionHeading } from "@/components/ui/Container";
 import { useSeo } from "@/hooks/useSeo";
 import { useI18n } from "@/i18n/LanguageProvider";
 import {
   CONTACT_ADDRESS_AR,
   CONTACT_ADDRESS_FR,
-  CONTACT_EMAIL,
-  CONTACT_EMAIL_HREF,
   CONTACT_PHONE,
   CONTACT_PHONE_HREF,
   CONTACT_WHATSAPP_HREF,
@@ -19,7 +17,6 @@ export default function Contact() {
 
   const rows = [
     { Icon: Phone, label: t("contactPhone"), value: CONTACT_PHONE, href: CONTACT_PHONE_HREF },
-    { Icon: Mail, label: t("contactEmail"), value: CONTACT_EMAIL, href: CONTACT_EMAIL_HREF },
     {
       Icon: MapPin,
       label: t("contactAddress"),

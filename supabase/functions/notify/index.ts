@@ -4,8 +4,8 @@
 //
 // Deploy:  supabase functions deploy notify
 // Secrets: supabase secrets set RESEND_API_KEY=re_...
-//          supabase secrets set RESEND_FROM="Jazym <commandes@yourdomain.dz>"   (optional)
-//          supabase secrets set SITE_ADMIN_URL="https://yourdomain.dz/admin"    (optional)
+//          supabase secrets set RESEND_FROM="Jazym <commandes@jazym.shop>"
+//          supabase secrets set SITE_ADMIN_URL="https://jazym.shop/admin"      (optional)
 //
 // Until the client's domain is verified in Resend, RESEND_FROM defaults to
 // Resend's sandbox sender, which ONLY delivers to the email address the Resend
@@ -113,7 +113,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const order = Array.isArray(data) ? data[0] : null;
     if (!order) return json({ ok: true, claimed: false });
 
-    const adminUrl = Deno.env.get("SITE_ADMIN_URL") || "";
+    const adminUrl = Deno.env.get("SITE_ADMIN_URL") || "https://jazym.shop/admin";
     const lines = [
       `Nouvelle commande ${order.order_number}`,
       `Client : ${order.customer_name}`,

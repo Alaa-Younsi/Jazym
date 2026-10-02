@@ -207,7 +207,6 @@ export const translations = {
     contactTitle: "Contact",
     contactBody: "Une question sur une commande ou une personnalisation ? Écrivez-nous.",
     contactPhone: "Téléphone",
-    contactEmail: "E-mail",
     contactAddress: "Adresse",
     contactWhatsapp: "WhatsApp",
 
@@ -933,7 +932,6 @@ export const translations = {
     contactTitle: "اتصل بنا",
     contactBody: "لديك سؤال حول طلب أو تخصيص؟ راسلنا.",
     contactPhone: "الهاتف",
-    contactEmail: "البريد الإلكتروني",
     contactAddress: "العنوان",
     contactWhatsapp: "واتساب",
 

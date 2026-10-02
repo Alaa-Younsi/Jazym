@@ -9,7 +9,7 @@ Checklist à suivre dans l'ordre. Chaque point coché = un défaut connu évité
    `VITE_SUPABASE_ANON_KEY`, `VITE_SITE_URL` (domaine de prod).
    **Ne jamais committer `.env`.**
 3. **Migrations** — dans le SQL Editor Supabase, exécuter dans l'ordre :
-   `supabase/migrations/0001` → `0020`.
+   `supabase/migrations/0001` → `0030`.
    - `bun run test:db` rejoue d'abord tout le dossier dans un Postgres jetable :
      si une migration ne s'applique plus, on le sait avant de coller quoi que ce
      soit dans le SQL Editor.
@@ -33,6 +33,7 @@ Checklist à suivre dans l'ordre. Chaque point coché = un défaut connu évité
 ```bash
 supabase functions deploy create-worker
 supabase functions deploy set-worker-password
+supabase functions deploy notify
 ```
 Les deux sont requises : sans `set-worker-password`, le bouton « changer le mot
 de passe » d'un membre échoue en erreur réseau générique.
@@ -55,14 +56,38 @@ de passe » d'un membre échoue en erreur réseau générique.
 
 ## 4. Domaine / SEO
 
-`grep -rn "PLACEHOLDER-DOMAIN.tld"` et remplacer partout par le domaine réel :
-`index.html`, `src/lib/seo.ts`, `middleware.ts`, `public/robots.txt`,
-`.env` (`VITE_SITE_URL`). Puis `bun run build` régénère `public/sitemap.xml`.
+Domaine de prod : **`https://jazym.shop`** (apex ; `www.jazym.shop` redirige
+dessus via `vercel.json`). C'est déjà la valeur de repli dans `src/lib/seo.ts`,
+`middleware.ts` et `scripts/generate-sitemap.mjs` ; `VITE_SITE_URL` dans Vercel
+doit valoir exactement `https://jazym.shop`. Chaque build régénère
+`public/sitemap.xml` et `public/robots.txt` avec ce domaine.
+
+- **Supabase → Authentication → URL Configuration** : Site URL
+  `https://jazym.shop`, Redirect URLs `https://jazym.shop/**`.
+- **Google Search Console** : propriété « Domaine » `jazym.shop` (TXT DNS),
+  puis soumettre `https://jazym.shop/sitemap.xml`.
+- **Meta Business → Domaines** : vérifier `jazym.shop` (TXT DNS) pour les
+  événements du pixel.
+
+## 4 bis. E-mails (Resend)
+
+1. resend.com → **Domains → Add** `jazym.shop` (région eu-west-1), copier les
+   enregistrements DKIM / SPF (sous-domaine `send`) / MX dans la zone DNS.
+2. Ajouter un DMARC : TXT `_dmarc` = `v=DMARC1; p=none;`.
+3. Une fois « Verified » :
+   ```bash
+   supabase secrets set RESEND_API_KEY=re_...
+   supabase secrets set RESEND_FROM="Jazym <commandes@jazym.shop>"
+   supabase functions deploy notify
+   ```
+4. Pas de boîte mail sur le domaine : le site n'affiche aucun e-mail, et les
+   notifications partent vers l'adresse personnelle saisie dans
+   `/admin/account` (préférences de notification).
 
 ## 5. Contenu
 
-- `grep -rn "TODO(client)" src/` → renseigner `src/lib/contact.ts` (téléphone
-  **format E.164** `+213…`, e-mail, adresse). Tester le lien `tel:` sur un vrai
+- `src/lib/contact.ts` : téléphone `0559 81 56 46` (`+213559815646`), adresse
+  El Eulma 19600, Sétif. Tester le lien `tel:` et WhatsApp sur un vrai
   téléphone.
 - Vérifier les liens réseaux sociaux dans `src/lib/contact.ts`
   (`SOCIAL_LINKS`).
@@ -110,4 +135,4 @@ Désactiver le compte jetable ensuite.
 - `bun run typecheck && bun run lint` — zéro erreur.
 - Compter les wilayas dans le select du checkout : **69**.
 - Vérifier l'aperçu de lien :
-  `curl -A "facebookexternalhit/1.1" https://<domaine>/produit/<slug>`.
+  `curl -A "facebookexternalhit/1.1" https://jazym.shop/produit/<slug>`.

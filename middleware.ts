@@ -12,7 +12,7 @@ export const config = {
   matcher: "/produit/:slug*",
 };
 
-const SITE_URL = (process.env.VITE_SITE_URL || "https://PLACEHOLDER-DOMAIN.tld").replace(/\/$/, "");
+const SITE_URL = (process.env.VITE_SITE_URL || "https://jazym.shop").replace(/\/$/, "");
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL ?? "";
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY ?? "";
 
