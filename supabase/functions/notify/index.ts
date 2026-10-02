@@ -109,9 +109,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const { data, error } = await admin.rpc("claim_order_notification", {
       p_order_number: orderNumber,
     });
-    if (error) return json({ code: "claim_failed" }, 500);
+    if (error) {
+      console.error("[notify] claim failed:", error.message);
+      return json({ code: "claim_failed" }, 500);
+    }
     const order = Array.isArray(data) ? data[0] : null;
-    if (!order) return json({ ok: true, claimed: false });
+    if (!order) {
+      console.log("[notify] nothing to claim (already notified or unknown order)");
+      return json({ ok: true, claimed: false });
+    }
 
     const adminUrl = Deno.env.get("SITE_ADMIN_URL") || "https://jazym.shop/admin";
     const lines = [
@@ -154,7 +160,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     .select("email_enabled, notify_email, admin_profiles!inner(active)")
     .eq("admin_profiles.active", true);
 
-  if (recipientsError) return json({ code: "recipients_failed" }, 500);
+  if (recipientsError) {
+    console.error("[notify] recipients query failed:", recipientsError.message);
+    return json({ code: "recipients_failed" }, 500);
+  }
 
   const jobs: Promise<void>[] = [];
   for (const r of (recipients ?? []) as unknown as Recipient[]) {
@@ -165,12 +174,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // allSettled, never all: one recipient's bounced address must not stop the
   // other four from being told an order came in.
+  if (jobs.length === 0) {
+    console.log("[notify] no recipient has email notifications enabled");
+  }
+
   const results = await Promise.allSettled(jobs);
   const failed = results.filter((r) => r.status === "rejected");
   for (const f of failed) {
     console.error("[notify] send failed:", (f as PromiseRejectedResult).reason);
   }
 
+  console.log(`[notify] ${body.order_number}: sent ${jobs.length - failed.length}/${jobs.length}`);
   return json({
     ok: true,
     claimed: true,

@@ -20,9 +20,10 @@ export const supabase: SupabaseClient = createClient(
       detectSessionInUrl: true,
       storageKey: "jazym-auth",
     },
-    global: {
-      headers: { "x-application-name": "jazym-store" },
-    },
+    // No custom global headers: every header rides along on functions.invoke
+    // too, and one missing from an edge function's Access-Control-Allow-Headers
+    // makes the browser drop the call after the preflight — silently, and
+    // only in the browser (curl has no CORS).
   },
 );
 
