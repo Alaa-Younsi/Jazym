@@ -181,6 +181,9 @@ export default function OrderDetail() {
                 }
               />
               <Info label={t("ordDate")} value={formatDateTime(order.created_at, lang)} />
+              {order.delivery_tracking && (
+                <Info label={t("dhdTracking")} value={order.delivery_tracking} ltr />
+              )}
             </dl>
           </AdminCard>
 

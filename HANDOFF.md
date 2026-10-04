@@ -34,6 +34,13 @@ Checklist à suivre dans l'ordre. Chaque point coché = un défaut connu évité
 supabase functions deploy create-worker
 supabase functions deploy set-worker-password
 supabase functions deploy notify
+supabase functions deploy dhd
+```
+`dhd` envoie les commandes sélectionnées à DHD (livraison). Il lui faut la
+migration `0031_delivery_dispatch.sql` et le jeton API du compte DHD, en secret
+— jamais dans le code ni dans `.env` côté client :
+```bash
+supabase secrets set DHD_API_TOKEN=<jeton du compte DHD>
 ```
 Les deux sont requises : sans `set-worker-password`, le bouton « changer le mot
 de passe » d'un membre échoue en erreur réseau générique.

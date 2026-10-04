@@ -1,10 +1,11 @@
-import { ChevronDown, Download, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Download, Plus, Trash2, Truck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminPageHeader, EmptyState, LoadError } from "@/components/admin/AdminUI";
 import { DeleteAllOrdersModal } from "@/components/admin/DeleteAllOrdersModal";
 import { DeleteOrderModal } from "@/components/admin/DeleteOrderModal";
+import { SendToDhdModal } from "@/components/admin/SendToDhdModal";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
 import { PageLoader } from "@/components/ui/Spinner";
@@ -29,7 +30,9 @@ import type { Order, OrderStatus } from "@/types/db";
  *    the money sitting in it, doubling as a filter;
  *  - one collapsible section per status below, each with its own export;
  *  - a per-row status picker, so an order is advanced from here without
- *    opening it.
+ *    opening it;
+ *  - checkboxes to send a batch of orders to DHD (the delivery company) —
+ *    see SendToDhdModal.
  *
  * Statuses are rendered in the ORDER_STATUSES pipeline order (pending →
  * confirmed → shipped → delivered → cancelled), which is the order the client
@@ -46,6 +49,8 @@ export default function Orders() {
   const [toDelete, setToDelete] = useState<Order | null>(null);
   const [focus, setFocus] = useState<OrderStatus | null>(null);
   const [collapsed, setCollapsed] = useState<Set<OrderStatus>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [dhdIds, setDhdIds] = useState<string[]>([]);
 
   const orders = useMemo(() => data?.rows ?? [], [data]);
 
@@ -127,7 +132,20 @@ export default function Orders() {
     });
   }
 
+  function toggleSelect(ids: string[], on: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (on) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
+
   const visibleStatuses = focus ? [focus] : ORDER_STATUSES;
+  // An order that left the list (deleted, already sent) can't stay selected.
+  const selectedIds = orders.filter((o) => selected.has(o.id) && canDispatch(o)).map((o) => o.id);
 
   return (
     <div>
@@ -160,6 +178,22 @@ export default function Orders() {
           </>
         }
       />
+
+      {selectedIds.length > 0 && (
+        <div className="sticky top-2 z-20 mb-4 flex flex-wrap items-center justify-between gap-2 rounded-card border border-brand/40 bg-panel px-3 py-2 shadow-soft">
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            className="text-xs font-medium text-muted hover:text-ink"
+          >
+            {t("dhdClearSelection")}
+          </button>
+          <Button size="sm" onClick={() => setDhdIds(selectedIds)}>
+            <Truck size={14} />
+            {t("dhdSendSelected", { count: selectedIds.length })}
+          </Button>
+        </div>
+      )}
 
       {data.capped && (
         <p className="mb-3 rounded-lg bg-gold/15 px-3 py-2 text-xs text-ink">
@@ -229,6 +263,9 @@ export default function Orders() {
               // gives feedback; without one, hide statuses that have nothing.
               if (rows.length === 0 && !focus) return null;
               const isCollapsed = collapsed.has(status);
+              const selectable = rows.filter(canDispatch).map((o) => o.id);
+              const allSelected =
+                selectable.length > 0 && selectable.every((id) => selected.has(id));
 
               return (
                 <section key={status}>
@@ -262,15 +299,28 @@ export default function Orders() {
                         <Price value={totals.get(status) ?? 0} />
                       </span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => onExport(rows)}
-                      disabled={rows.length === 0}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand disabled:opacity-40"
-                    >
-                      <Download size={13} />
-                      {t("ordExportStatus")}
-                    </button>
+                    <div className="flex shrink-0 items-center gap-3">
+                      {selectable.length > 0 && !isCollapsed && (
+                        <label className="flex items-center gap-1.5 text-xs text-muted">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={(e) => toggleSelect(selectable, e.target.checked)}
+                            className="h-4 w-4 accent-brand"
+                          />
+                          {t("dhdSelectAll")}
+                        </label>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => onExport(rows)}
+                        disabled={rows.length === 0}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium text-ink hover:border-brand hover:text-brand disabled:opacity-40"
+                      >
+                        <Download size={13} />
+                        {t("ordExportStatus")}
+                      </button>
+                    </div>
                   </div>
 
                   {isCollapsed ? null : rows.length === 0 ? (
@@ -288,12 +338,20 @@ export default function Orders() {
                             className="rounded-card border border-line bg-panel p-3 text-sm"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <Link
-                                to={`/admin/orders/${o.id}`}
-                                className="font-mono text-xs text-brand hover:underline"
-                              >
-                                {o.order_number}
-                              </Link>
+                              <div className="flex min-w-0 items-center gap-2">
+                                <SelectBox
+                                  order={o}
+                                  checked={selected.has(o.id)}
+                                  onChange={(on) => toggleSelect([o.id], on)}
+                                />
+                                <Link
+                                  to={`/admin/orders/${o.id}`}
+                                  className="font-mono text-xs text-brand hover:underline"
+                                >
+                                  {o.order_number}
+                                </Link>
+                                <TrackingBadge order={o} />
+                              </div>
                               <Price value={o.total} className="font-semibold text-ink" />
                             </div>
                             <p className="mt-1 truncate text-ink">{o.customer_name}</p>
@@ -320,6 +378,9 @@ export default function Orders() {
                         <table className="w-full text-sm">
                           <thead className="bg-panel-2 text-xs uppercase text-muted">
                             <tr>
+                              <th className="w-10 px-4 py-3">
+                                <span className="sr-only">{t("dhdSelectAll")}</span>
+                              </th>
                               {[
                                 t("ordNumber"),
                                 t("ordCustomer"),
@@ -340,7 +401,20 @@ export default function Orders() {
                           </thead>
                           <tbody className="divide-y divide-line">
                             {rows.map((o) => (
-                              <tr key={o.id} className="hover:bg-panel-2/40">
+                              <tr
+                                key={o.id}
+                                className={cn(
+                                  "hover:bg-panel-2/40",
+                                  selected.has(o.id) && "bg-brand-soft/30",
+                                )}
+                              >
+                                <td className="px-4 py-3">
+                                  <SelectBox
+                                    order={o}
+                                    checked={selected.has(o.id)}
+                                    onChange={(on) => toggleSelect([o.id], on)}
+                                  />
+                                </td>
                                 <td className="whitespace-nowrap px-4 py-3">
                                   <Link
                                     to={`/admin/orders/${o.id}`}
@@ -348,6 +422,7 @@ export default function Orders() {
                                   >
                                     {o.order_number}
                                   </Link>
+                                  <TrackingBadge order={o} className="ms-2" />
                                 </td>
                                 <td className="whitespace-nowrap px-4 py-3 text-ink">
                                   {o.customer_name}
@@ -395,12 +470,62 @@ export default function Orders() {
         onConfirm={onDeleteAll}
       />
 
+      <SendToDhdModal
+        orderIds={dhdIds}
+        onClose={() => setDhdIds([])}
+        onSent={(ids) => toggleSelect(ids, false)}
+      />
+
       <DeleteOrderModal
         order={toDelete}
         onClose={() => setToDelete(null)}
         onConfirm={onDeleteOne}
       />
     </div>
+  );
+}
+
+/** Already at DHD, or past the point of shipping — nothing to send. */
+function canDispatch(order: Order): boolean {
+  return !order.delivery_tracking && order.status !== "delivered" && order.status !== "cancelled";
+}
+
+function SelectBox({
+  order,
+  checked,
+  onChange,
+}: {
+  order: Order;
+  checked: boolean;
+  onChange: (on: boolean) => void;
+}) {
+  const { t } = useI18n();
+  if (!canDispatch(order)) return <span className="inline-block h-4 w-4 shrink-0" />;
+  return (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(e) => onChange(e.target.checked)}
+      aria-label={t("dhdSelectOrder", { number: order.order_number })}
+      className="h-4 w-4 shrink-0 accent-brand"
+    />
+  );
+}
+
+function TrackingBadge({ order, className }: { order: Order; className?: string }) {
+  const { t } = useI18n();
+  if (!order.delivery_tracking) return null;
+  return (
+    <span
+      title={`${t("dhdTracking")} : ${order.delivery_tracking}`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full bg-success/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-success",
+        className,
+      )}
+    >
+      <Truck size={11} />
+      {t("dhdSent")}
+    </span>
   );
 }
 

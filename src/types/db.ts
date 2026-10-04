@@ -172,6 +172,8 @@ export interface Order {
   language: string;
   delivery_type: DeliveryType;
   created_at: string;
+  /** DHD tracking number once the parcel was created there (migration 0031) */
+  delivery_tracking: string | null;
   order_items?: OrderItem[];
 }
 

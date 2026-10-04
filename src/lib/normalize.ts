@@ -180,6 +180,7 @@ export function normalizeOrder(row: Record<string, unknown>): Order {
     language: String(row.language ?? "fr"),
     delivery_type: row.delivery_type === "office" ? "office" : "home",
     created_at: String(row.created_at ?? ""),
+    delivery_tracking: (row.delivery_tracking as string | null) ?? null,
     order_items: Array.isArray(row.order_items)
       ? (row.order_items as Record<string, unknown>[]).map(normalizeOrderItem)
       : [],
