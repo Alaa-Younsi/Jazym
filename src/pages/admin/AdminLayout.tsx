@@ -150,7 +150,7 @@ export default function AdminLayout() {
 
   return (
     <AdminToastProvider>
-      <div className="flex h-dvh overflow-hidden bg-bg">
+      <div className="relative flex h-dvh overflow-hidden bg-bg">
         <aside className="hidden h-full w-64 shrink-0 border-e border-line bg-panel lg:block">
           <SidebarContent
             sections={visibleSections}
@@ -174,9 +174,13 @@ export default function AdminLayout() {
             <ThemeToggle />
           </header>
 
+          {/* `relative`: absolutely-positioned descendants (Tailwind's sr-only
+              labels in the order tables) must resolve against this scroller,
+              not the viewport — otherwise they stretch the whole document and
+              the page scrolls past the sidebar. */}
           <main
             ref={mainRef}
-            className="fx-scrollbar min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8"
+            className="fx-scrollbar relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8"
           >
             {/* Scoped to the outlet ONLY — see skill's "opens but won't close"
                 note: a lazy admin sub-page suspending here must never tear

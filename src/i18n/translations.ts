@@ -574,6 +574,8 @@ export const translations = {
     /* ---------- admin: DHD dispatch ---------- */
     dhdSendSelected: "Envoyer à DHD ({count})",
     dhdSelectAll: "Tout sélectionner",
+    dhdSelectHint:
+      "Cochez d'abord les commandes à envoyer (case à gauche du numéro). Seules les commandes en attente, confirmées ou expédiées, pas encore envoyées à DHD, ont une case — pas les annulées ni les livrées.",
     dhdSelectOrder: "Sélectionner la commande {number}",
     dhdClearSelection: "Désélectionner",
     dhdSent: "DHD",
@@ -1325,6 +1327,8 @@ export const translations = {
     /* ---------- admin: DHD dispatch ---------- */
     dhdSendSelected: "إرسال إلى DHD ({count})",
     dhdSelectAll: "تحديد الكل",
+    dhdSelectHint:
+      "حدّد أولًا الطلبات المراد إرسالها (المربع بجانب رقم الطلب). فقط الطلبات قيد الانتظار أو المؤكدة أو المشحونة غير المرسلة بعد إلى DHD لها مربع — وليس الملغاة أو المسلَّمة.",
     dhdSelectOrder: "تحديد الطلب {number}",
     dhdClearSelection: "إلغاء التحديد",
     dhdSent: "DHD",

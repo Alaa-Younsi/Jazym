@@ -51,6 +51,7 @@ export default function Orders() {
   const [collapsed, setCollapsed] = useState<Set<OrderStatus>>(new Set());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [dhdIds, setDhdIds] = useState<string[]>([]);
+  const [dhdHint, setDhdHint] = useState(false);
 
   const orders = useMemo(() => data?.rows ?? [], [data]);
 
@@ -153,6 +154,18 @@ export default function Orders() {
         title={t("ordListTitle")}
         actions={
           <>
+            <Button
+              size="sm"
+              onClick={() =>
+                selectedIds.length > 0 ? setDhdIds(selectedIds) : setDhdHint((v) => !v)
+              }
+              disabled={orders.length === 0}
+            >
+              <Truck size={14} />
+              {selectedIds.length > 0
+                ? t("dhdSendSelected", { count: selectedIds.length })
+                : t("dhdModalTitle")}
+            </Button>
             <ButtonLink to="/admin/orders/new" size="sm" variant="secondary">
               <Plus size={14} />
               {t("ordNewOrder")}
@@ -178,6 +191,12 @@ export default function Orders() {
           </>
         }
       />
+
+      {dhdHint && selectedIds.length === 0 && (
+        <p className="mb-4 rounded-lg bg-brand-soft/50 px-3 py-2 text-xs text-ink">
+          {t("dhdSelectHint")}
+        </p>
+      )}
 
       {selectedIds.length > 0 && (
         <div className="sticky top-2 z-20 mb-4 flex flex-wrap items-center justify-between gap-2 rounded-card border border-brand/40 bg-panel px-3 py-2 shadow-soft">
