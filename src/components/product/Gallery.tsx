@@ -127,7 +127,7 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
       </div>
 
       {images.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="fx-scrollbar fx-scrollbar-brand flex gap-2 overflow-x-auto pb-2">
           {images.map((img, i) => (
             <button
               key={img.key}

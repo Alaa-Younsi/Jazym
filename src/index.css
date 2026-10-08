@@ -348,3 +348,31 @@ input[type="number"]::-webkit-inner-spin-button {
 .fx-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgb(var(--c-brand) / 0.5);
 }
+
+/* Storefront variant (product gallery strip): a brand-tinted pill on a soft
+   rounded track, visible on both themes. Chrome/Edge draw the OS scrollbar —
+   arrow buttons included — whenever `scrollbar-color`/`scrollbar-width` are
+   set, so those are reset where ::-webkit-scrollbar exists and the pill below
+   applies instead; Firefox gets the standard properties. */
+.fx-scrollbar-brand {
+  scrollbar-color: rgb(var(--c-brand) / 0.55) rgb(var(--c-line) / 0.6);
+}
+@supports selector(::-webkit-scrollbar) {
+  .fx-scrollbar-brand {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+}
+.fx-scrollbar-brand::-webkit-scrollbar-button {
+  display: none;
+}
+.fx-scrollbar-brand::-webkit-scrollbar-track {
+  background-color: rgb(var(--c-line) / 0.6);
+  border-radius: 999px;
+}
+.fx-scrollbar-brand::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--c-brand) / 0.55);
+}
+.fx-scrollbar-brand::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--c-brand));
+}
