@@ -91,7 +91,7 @@ export default function OrderDetail() {
                     src={item.image_url}
                     name={item.name_fr}
                     sizes="56px"
-                    className="h-16 w-14 shrink-0 rounded-lg"
+                    className="h-[70px] w-14 shrink-0 rounded-lg"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-ink">

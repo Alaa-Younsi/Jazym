@@ -65,16 +65,14 @@ export function ProductCard({ product, eager }: ProductCardProps) {
         to={`/produit/${product.slug}`}
         className="relative block overflow-hidden rounded-card border border-line bg-panel transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-brand/40 hover:shadow-lift"
       >
-        {/* The frame takes the first photo's own shape, so it is never cropped. */}
-        <div className="fx-curl relative w-full overflow-hidden">
+        <div className="fx-curl relative aspect-[4/5] w-full overflow-hidden">
           <ProductThumb
             src={image}
             name={name}
             eager={eager}
-            natural
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 260px"
             className={cn(
-              "w-full transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
+              "h-full w-full transition-all duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
               hoverImage
                 ? "group-hover:scale-[1.06] group-hover:opacity-0"
                 : "group-hover:scale-[1.06]",
@@ -90,7 +88,7 @@ export function ProductCard({ product, eager }: ProductCardProps) {
                 src={hoverImage}
                 alt=""
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 260px"
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover"
               />
             </span>
           )}

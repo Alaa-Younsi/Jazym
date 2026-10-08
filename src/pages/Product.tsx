@@ -302,7 +302,7 @@ export default function Product() {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div className="lg:sticky lg:top-24 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <Gallery
             images={galleryImages}
             activeIndex={activeImage}
@@ -311,7 +311,7 @@ export default function Product() {
           />
         </div>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
           <div>
             {product.category && (
               <span className="text-xs font-medium uppercase tracking-wider text-brand">

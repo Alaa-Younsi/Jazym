@@ -156,7 +156,7 @@ export default function Checkout() {
                     <ProductThumb
                       src={l.image_url}
                       name={lang === "ar" ? l.name_ar : l.name_fr}
-                      className="h-16 w-14 shrink-0 rounded-lg"
+                      className="h-[70px] w-14 shrink-0 rounded-lg"
                       sizes="56px"
                     />
                     <div className="min-w-0 flex-1">
