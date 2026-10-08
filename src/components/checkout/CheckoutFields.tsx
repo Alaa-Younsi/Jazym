@@ -1,7 +1,10 @@
 import { Home, Store } from "lucide-react";
+import { useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { Field, Input, NativeSelect } from "@/components/ui/Field";
+import { useCommunes } from "@/hooks/useCommunes";
 import { useDeliveryPrices } from "@/hooks/useDeliveryPrices";
+import { wilayaCode } from "@/lib/wilayas";
 import { useI18n } from "@/i18n/LanguageProvider";
 import type { CheckoutFormValues } from "@/lib/checkoutSchema";
 import type { TranslationKey } from "@/i18n/translations";
@@ -23,6 +26,21 @@ export function CheckoutFields({ form, idPrefix = "co" }: CheckoutFieldsProps) {
   } = form;
 
   const deliveryType = watch("delivery_type");
+  const wilaya = watch("wilaya");
+  const { data: communes } = useCommunes();
+
+  // null → free-text commune: the table is still loading, or the admin priced
+  // a wilaya name that is not one of the 69. Delivery is priced by wilaya +
+  // home/office only — the commune never changes the total.
+  const wilayaCommunes = useMemo(() => {
+    if (!communes) return null;
+    if (!wilaya) return [];
+    const code = wilayaCode(wilaya);
+    if (code === null) return null;
+    const list = communes[code] ?? [];
+    return lang === "ar" ? [...list].sort((a, b) => a[1].localeCompare(b[1], "ar")) : list;
+  }, [communes, wilaya, lang]);
+
   const err = (k: keyof CheckoutFormValues) =>
     errors[k]?.message ? t(errors[k]?.message as TranslationKey) : undefined;
 
@@ -72,7 +90,10 @@ export function CheckoutFields({ form, idPrefix = "co" }: CheckoutFieldsProps) {
             id={`${idPrefix}-wilaya`}
             invalid={!!errors.wilaya}
             defaultValue=""
-            {...register("wilaya")}
+            {...register("wilaya", {
+              // A commune picked for the previous wilaya is never valid here.
+              onChange: () => setValue("city", ""),
+            })}
           >
             <option value="" disabled>
               {t("checkoutWilayaPlaceholder")}
@@ -86,12 +107,36 @@ export function CheckoutFields({ form, idPrefix = "co" }: CheckoutFieldsProps) {
         </Field>
 
         <Field label={t("checkoutCity")} htmlFor={`${idPrefix}-city`} required error={err("city")}>
-          <Input
-            id={`${idPrefix}-city`}
-            autoComplete="address-level2"
-            invalid={!!errors.city}
-            {...register("city")}
-          />
+          {wilayaCommunes === null ? (
+            <Input
+              id={`${idPrefix}-city`}
+              autoComplete="address-level2"
+              invalid={!!errors.city}
+              {...register("city")}
+            />
+          ) : (
+            // Remounted per wilaya so the DOM value follows the reset to "".
+            <NativeSelect
+              key={wilayaCode(wilaya ?? "") ?? "none"}
+              id={`${idPrefix}-city`}
+              autoComplete="address-level2"
+              invalid={!!errors.city}
+              disabled={!wilaya}
+              defaultValue=""
+              {...register("city")}
+            >
+              <option value="" disabled>
+                {wilaya ? t("checkoutCityPlaceholder") : t("checkoutCityPickWilaya")}
+              </option>
+              {wilayaCommunes.map(([fr, ar]) => (
+                // The French name is stored either way — it is what the admin
+                // reads and what DHD matches against.
+                <option key={fr} value={fr}>
+                  {lang === "ar" ? ar : fr}
+                </option>
+              ))}
+            </NativeSelect>
+          )}
         </Field>
       </div>
 

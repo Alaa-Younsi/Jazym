@@ -82,3 +82,20 @@ export const WILAYAS: Wilaya[] = [
 ];
 
 export const WILAYA_COUNT = WILAYAS.length; // 69
+
+/** Lowercase, accents and punctuation stripped: "Bordj Bou Arréridj" → "bordjbouarreridj". */
+function wilayaKey(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+const CODE_BY_NAME = new Map(WILAYAS.map((w) => [wilayaKey(w.name_fr), w.code]));
+
+/** The code of a `delivery_prices.wilaya` name, or null for a name an admin
+    typed that is not one of the 69 (its checkout falls back to free text). */
+export function wilayaCode(name: string): number | null {
+  return CODE_BY_NAME.get(wilayaKey(name)) ?? null;
+}

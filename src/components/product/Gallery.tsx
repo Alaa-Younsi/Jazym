@@ -22,6 +22,8 @@ interface GalleryProps {
 
 const SWIPE_DISTANCE_RATIO = 0.2; // fraction of the container's width
 const SWIPE_VELOCITY = 500;
+/** width / height assumed for a photo that has not loaded yet */
+const DEFAULT_RATIO = 1;
 
 /** Standalone, state-free gallery: a swatch click, a thumb click and a
     hold-and-drag swipe all drive the SAME index from the parent. The track
@@ -35,6 +37,10 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const x = useMotionValue(0);
+  // Each photo's own width/height, learned as it loads. The frame takes the
+  // ACTIVE photo's shape, so nothing is ever cropped (capped at 80vh — a very
+  // tall photo is shown whole inside that cap instead).
+  const [ratios, setRatios] = useState<Record<string, number>>({});
 
   const safeIndex = images.length > 0 ? Math.max(0, Math.min(activeIndex, images.length - 1)) : 0;
 
@@ -88,6 +94,9 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
     onActiveChange((safeIndex + delta + images.length) % images.length);
   }
 
+  const activeRatio = ratios[images[safeIndex]?.key ?? ""] ?? DEFAULT_RATIO;
+  const frameHeight = width > 0 ? `min(${Math.round(width / activeRatio)}px, 80vh)` : undefined;
+
   const dragConstraints = isRtl
     ? { left: 0, right: (images.length - 1) * width }
     : { left: -(images.length - 1) * width, right: 0 };
@@ -96,7 +105,12 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
     <div className="flex flex-col gap-3">
       <div
         ref={containerRef}
-        className="relative aspect-square w-full touch-pan-y overflow-hidden rounded-card border border-line bg-panel"
+        className={cn(
+          "relative w-full touch-pan-y overflow-hidden rounded-card border border-line bg-panel",
+          "transition-[height] duration-300 ease-out motion-reduce:transition-none",
+          !frameHeight && "aspect-square",
+        )}
+        style={{ height: frameHeight }}
       >
         <motion.div
           className={cn("flex h-full", images.length > 1 && "cursor-grab active:cursor-grabbing")}
@@ -119,7 +133,11 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
                 sizes="(max-width: 1024px) 100vw, 520px"
                 eager={i === 0}
                 draggable={false}
-                className="h-full w-full object-cover"
+                onLoad={(e) => {
+                  const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+                  if (w > 0 && h > 0) setRatios((r) => ({ ...r, [img.key]: w / h }));
+                }}
+                className="h-full w-full object-contain"
               />
             </div>
           ))}
@@ -135,7 +153,7 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
               onClick={() => onActiveChange(i)}
               aria-label={`${i + 1}`}
               className={cn(
-                "h-16 w-14 shrink-0 overflow-hidden rounded-lg border transition",
+                "h-16 w-14 shrink-0 overflow-hidden rounded-lg border bg-panel transition",
                 i === safeIndex ? "border-brand ring-2 ring-brand/30" : "border-line opacity-70",
               )}
             >
@@ -143,7 +161,7 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
                 src={img.url}
                 alt=""
                 sizes="56px"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             </button>
           ))}
