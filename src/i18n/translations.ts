@@ -433,6 +433,19 @@ export const translations = {
 
     /* ---------- admin: products ---------- */
     prodListTitle: "Produits",
+    sharedOptTitle: "Options communes",
+    sharedOptHint:
+      "Modifiez un groupe d'options une seule fois (noms, images de couverture…) et appliquez-le à tous les produits qui l'ont.",
+    sharedOptGroup: "Groupe d'options",
+    sharedOptCount: "{n} produits",
+    sharedOptVersions:
+      "{n} versions différentes de ce groupe existent — l'enregistrement les remplace toutes par celle-ci.",
+    sharedOptApply: "Appliquer à {n} produits",
+    sharedOptConfirm: "Remplacer ce groupe sur {n} produits ?",
+    sharedOptSaved: "Mis à jour sur {n} produits",
+    sharedOptEmpty: "Indiquez un nom et au moins une valeur.",
+    sharedOptDuplicate: "Ce nom est déjà utilisé par un autre groupe sur ces produits.",
+    sharedOptNone: "Aucun produit n'a de groupe d'options.",
     prodNew: "Nouveau produit",
     prodName: "Nom (FR)",
     prodNameAr: "Nom (AR)",
@@ -1190,6 +1203,18 @@ export const translations = {
 
     /* ---------- admin: products ---------- */
     prodListTitle: "المنتجات",
+    sharedOptTitle: "خيارات مشتركة",
+    sharedOptHint:
+      "عدّل مجموعة خيارات مرة واحدة (الأسماء، صور الغلاف…) وطبّقها على كل المنتجات التي تحتويها.",
+    sharedOptGroup: "مجموعة الخيارات",
+    sharedOptCount: "{n} منتج",
+    sharedOptVersions: "توجد {n} نسخ مختلفة من هذه المجموعة — الحفظ يستبدلها كلها بهذه النسخة.",
+    sharedOptApply: "تطبيق على {n} منتج",
+    sharedOptConfirm: "استبدال هذه المجموعة في {n} منتج؟",
+    sharedOptSaved: "تم التحديث في {n} منتج",
+    sharedOptEmpty: "أدخل اسمًا وقيمة واحدة على الأقل.",
+    sharedOptDuplicate: "هذا الاسم مستعمل لمجموعة أخرى في هذه المنتجات.",
+    sharedOptNone: "لا يوجد منتج يحتوي على مجموعة خيارات.",
     prodNew: "منتج جديد",
     prodName: "الاسم (FR)",
     prodNameAr: "الاسم (AR)",

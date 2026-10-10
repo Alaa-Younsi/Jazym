@@ -19,6 +19,7 @@ import { useI18n } from "@/i18n/LanguageProvider";
 import { SITE_URL } from "@/lib/seo";
 import { compressUntrustedImage, UntrustedImageError, uploadToBucket } from "@/lib/storage";
 import { cn } from "@/lib/cn";
+import { responsiveSrcSet } from "@/lib/image";
 import { useCart } from "@/store/cart";
 import type { CartVariantPick, ProductVariant, VariantGroup, VariantOption } from "@/types/db";
 import type { TranslationKey } from "@/i18n/translations";
@@ -784,17 +785,31 @@ function VariantGroupPicker({
               type="button"
               onClick={() => onPick(opt)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition",
+                "inline-flex items-center gap-1.5 rounded-lg border text-sm transition",
+                // A value with a photo (e.g. cover) renders as a picture tile.
+                opt.image_url ? "flex-col p-1.5 pb-1 text-xs" : "px-3 py-1.5",
                 isPicked
                   ? "border-brand ring-2 ring-brand/30"
                   : "border-line hover:border-brand/50",
               )}
             >
-              {opt.swatch_hex && (
-                <span
-                  className="h-3.5 w-3.5 shrink-0 rounded-full border border-line"
-                  style={{ backgroundColor: opt.swatch_hex }}
+              {opt.image_url ? (
+                <img
+                  src={opt.image_url}
+                  srcSet={responsiveSrcSet(opt.image_url)}
+                  sizes="64px"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-[4/5] w-14 rounded-md bg-panel-2 object-cover sm:w-16"
                 />
+              ) : (
+                opt.swatch_hex && (
+                  <span
+                    className="h-3.5 w-3.5 shrink-0 rounded-full border border-line"
+                    style={{ backgroundColor: opt.swatch_hex }}
+                  />
+                )
               )}
               {optLabel}
             </button>

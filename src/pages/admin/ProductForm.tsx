@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { AdminCard, AdminPageHeader, LoadError } from "@/components/admin/AdminUI";
 import { SingleImageUpload, MultiImageUpload } from "@/components/admin/ImageUploader";
+import { VariantGroupFields } from "@/components/admin/VariantGroupFields";
 import { VideoField } from "@/components/admin/VideoField";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, NativeSelect, Textarea } from "@/components/ui/Field";
@@ -758,13 +759,6 @@ function VariantsEditor({
 }) {
   const { t } = useI18n();
 
-  const updateGroup = (gi: number, patch: Partial<VariantGroup>) =>
-    onChange(value.map((g, idx) => (idx === gi ? { ...g, ...patch } : g)));
-  const updateValue = (gi: number, vi: number, patch: Partial<VariantGroup["values"][number]>) =>
-    updateGroup(gi, {
-      values: value[gi].values.map((v, idx) => (idx === vi ? { ...v, ...patch } : v)),
-    });
-
   return (
     <AdminCard>
       <div className="mb-3 flex items-center justify-between">
@@ -780,141 +774,13 @@ function VariantsEditor({
       </div>
       <div className="flex flex-col gap-4">
         {value.map((group, gi) => (
-          <div key={gi} className="rounded-lg border border-line p-3">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Input
-                className="w-40"
-                placeholder={t("prodVariantGroupName")}
-                value={group.name_fr}
-                onChange={(e) => updateGroup(gi, { name_fr: e.target.value })}
-              />
-              <Input
-                className="w-40"
-                dir="rtl"
-                placeholder={t("prodVariantGroupNameAr")}
-                value={group.name_ar}
-                onChange={(e) => updateGroup(gi, { name_ar: e.target.value })}
-              />
-              <label className="inline-flex items-center gap-1.5 text-xs text-muted">
-                <input
-                  type="checkbox"
-                  checked={!!group.before_price_variant}
-                  onChange={(e) => updateGroup(gi, { before_price_variant: e.target.checked })}
-                />
-                {t("prodVariantBeforePrice")}
-              </label>
-              <label className="inline-flex items-center gap-1.5 text-xs text-muted">
-                <input
-                  type="checkbox"
-                  checked={!!group.optional}
-                  onChange={(e) => updateGroup(gi, { optional: e.target.checked })}
-                />
-                {t("prodVariantOptional")}
-              </label>
-              <button
-                type="button"
-                onClick={() => onChange(value.filter((_, idx) => idx !== gi))}
-                className="ms-auto text-muted hover:text-danger"
-                aria-label={t("delete")}
-              >
-                <Trash2 size={15} />
-              </button>
-            </div>
-            <div className="flex flex-col gap-2 ps-2">
-              {group.values.map((opt, vi) => (
-                <div
-                  key={vi}
-                  className="flex flex-wrap items-center gap-2 rounded-md border border-line/60 p-2"
-                >
-                  <Input
-                    className="w-32"
-                    placeholder={t("prodVariantValue")}
-                    value={opt.value_fr}
-                    onChange={(e) => updateValue(gi, vi, { value_fr: e.target.value })}
-                  />
-                  <Input
-                    className="w-32"
-                    dir="rtl"
-                    placeholder={t("prodVariantValueAr")}
-                    value={opt.value_ar}
-                    onChange={(e) => updateValue(gi, vi, { value_ar: e.target.value })}
-                  />
-                  <input
-                    type="color"
-                    value={opt.swatch_hex || "#ffffff"}
-                    onChange={(e) => updateValue(gi, vi, { swatch_hex: e.target.value })}
-                    className="h-9 w-9 rounded"
-                    aria-label={t("prodVariantSwatch")}
-                    title={t("prodVariantSwatch")}
-                  />
-                  {opt.swatch_hex && (
-                    <button
-                      type="button"
-                      onClick={() => updateValue(gi, vi, { swatch_hex: null })}
-                      className="text-xs text-muted hover:text-danger"
-                    >
-                      {t("prodVariantSwatchClear")}
-                    </button>
-                  )}
-                  <SingleImageUpload
-                    value={opt.image_url ?? null}
-                    onChange={(url) => updateValue(gi, vi, { image_url: url })}
-                    prefix={productId ? `variants/${productId}/` : "variants/"}
-                  />
-                  <label className="inline-flex items-center gap-1.5 text-xs text-muted">
-                    <input
-                      type="checkbox"
-                      checked={!!opt.requires_text}
-                      onChange={(e) =>
-                        updateValue(gi, vi, {
-                          requires_text: e.target.checked,
-                          requires_upload: e.target.checked ? false : opt.requires_upload,
-                        })
-                      }
-                    />
-                    {t("prodVariantRequiresText")}
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 text-xs text-muted">
-                    <input
-                      type="checkbox"
-                      checked={!!opt.requires_upload}
-                      onChange={(e) =>
-                        updateValue(gi, vi, {
-                          requires_upload: e.target.checked,
-                          requires_text: e.target.checked ? false : opt.requires_text,
-                        })
-                      }
-                    />
-                    {t("prodVariantRequiresUpload")}
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      updateGroup(gi, {
-                        values: group.values.filter((_, idx) => idx !== vi),
-                      })
-                    }
-                    className="ms-auto text-muted hover:text-danger"
-                    aria-label={t("delete")}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  updateGroup(gi, {
-                    values: [...group.values, { value_fr: "", value_ar: "", image_url: null }],
-                  })
-                }
-                className="inline-flex w-fit items-center gap-1 text-xs text-brand"
-              >
-                <Plus size={12} />
-                {t("prodAddVariantValue")}
-              </button>
-            </div>
-          </div>
+          <VariantGroupFields
+            key={gi}
+            group={group}
+            onChange={(g) => onChange(value.map((x, idx) => (idx === gi ? g : x)))}
+            onDelete={() => onChange(value.filter((_, idx) => idx !== gi))}
+            uploadPrefix={productId ? `variants/${productId}/` : "variants/"}
+          />
         ))}
         {value.length === 0 && <p className="text-xs text-muted">{t("optional")}</p>}
       </div>

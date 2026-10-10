@@ -1349,5 +1349,82 @@ assertEqual(
   "Fiche de preparation.pdf",
 );
 
+/* ---------------- 0032: cover / content groups + bulk group edit ---------------- */
+
+console.log("\n0032 cover / content variant groups");
+
+const pCov1 = "aaaaaaaa-0000-4000-8000-000000000321";
+const pCov2 = "aaaaaaaa-0000-4000-8000-000000000322";
+const covGroups = JSON.stringify([
+  { name_fr: "Palier scolaire", name_ar: "x", values: [{ value_fr: "Primaire", value_ar: "x" }] },
+  { name_fr: "Personnalisation", name_ar: "x", values: [{ value_fr: "Sans nom", value_ar: "x" }] },
+]);
+await db.query(
+  `insert into public.products (id, slug, name_fr, name_ar, price, stock, category_id, status, variants)
+   values ($1, 'cov-1', 'Cov 1', 'x', 1000, 10, $3, 'active', $4::jsonb),
+          ($2, 'cov-2', 'Cov 2', 'x', 1000, 10, $3, 'active', $4::jsonb)`,
+  [pCov1, pCov2, catChild, covGroups],
+);
+// Re-run the migration against the new rows: it must insert after Palier and
+// be idempotent on a second run.
+const mig0032 = readFileSync(join(MIG_DIR, "0032_cover_content_variants.sql"), "utf8");
+await db.exec(mig0032);
+await db.exec(mig0032);
+const groupNames = async (id: string) =>
+  (
+    await db.query<{ n: string }>(
+      "select t.e->>'name_fr' as n from public.products, jsonb_array_elements(variants) with ordinality t(e, o) where id = $1 order by t.o",
+      [id],
+    )
+  ).rows.map((r) => r.n);
+assertEqual("cover + content inserted after Palier, once", await groupNames(pCov1), [
+  "Palier scolaire",
+  "Couverture",
+  "Contenu",
+  "Personnalisation",
+]);
+
+const adminUser = "bbbbbbbb-0000-4000-8000-000000000032";
+await db.query("insert into auth.users (id) values ($1)", [adminUser]);
+await db.query("insert into public.admin_profiles (user_id, sections) values ($1, '{products}')", [
+  adminUser,
+]);
+
+const newCover = {
+  name_fr: "Couverture",
+  name_ar: "الغلاف",
+  before_price_variant: true,
+  values: [
+    { value_fr: "Rigide", value_ar: "x", image_url: "https://x/a.webp" },
+    { value_fr: "Souple", value_ar: "x", image_url: "https://x/b.webp" },
+  ],
+};
+await expectError(
+  "bulk replace refused without the products section",
+  db.query("select public.bulk_replace_variant_group('Couverture', $1::jsonb)", [
+    JSON.stringify(newCover),
+  ]),
+  "ERR_FORBIDDEN",
+);
+await db.query("select set_config('request.jwt.claim.sub', $1, false)", [adminUser]);
+const replaced = await db.query<{ n: number }>(
+  "select public.bulk_replace_variant_group('Couverture', $1::jsonb) as n",
+  [JSON.stringify(newCover)],
+);
+assertEqual("bulk replace touches every product with the group", replaced.rows[0]?.n, 2);
+const cov2 = await db.query<{ same: boolean }>(
+  "select variants->1 = $2::jsonb as same from public.products where id = $1",
+  [pCov2, JSON.stringify(newCover)],
+);
+assertEqual("replaced group keeps its position and carries images", cov2.rows[0]?.same, true);
+await expectError(
+  "renaming onto another existing group name is refused",
+  db.query("select public.bulk_replace_variant_group('Couverture', $1::jsonb)", [
+    JSON.stringify({ ...newCover, name_fr: "Contenu" }),
+  ]),
+  "duplicate group name",
+);
+await db.query("select set_config('request.jwt.claim.sub', '', false)");
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail === 0 ? 0 : 1);

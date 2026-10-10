@@ -1,4 +1,4 @@
-import { Pencil, Plus } from "lucide-react";
+import { Layers, Pencil, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminToast } from "@/components/admin/AdminToast";
@@ -49,10 +49,16 @@ export default function AdminProducts() {
         title={t("prodListTitle")}
         description={lowCount > 0 ? `${lowCount} ${t("dashLowStock").toLowerCase()}` : undefined}
         actions={
-          <ButtonLink to="/admin/products/new" size="sm">
-            <Plus size={15} />
-            {t("prodNew")}
-          </ButtonLink>
+          <>
+            <ButtonLink to="/admin/products/shared-options" size="sm" variant="secondary">
+              <Layers size={15} />
+              {t("sharedOptTitle")}
+            </ButtonLink>
+            <ButtonLink to="/admin/products/new" size="sm">
+              <Plus size={15} />
+              {t("prodNew")}
+            </ButtonLink>
+          </>
         }
       />
 
