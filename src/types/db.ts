@@ -61,6 +61,8 @@ export interface VariantGroup {
    * custom-cover opt-in works.
    */
   optional?: boolean;
+  /** Render the values as a checkbox list (still one pick) instead of pills. */
+  as_checkboxes?: boolean;
 }
 
 export type QuantityOffer =

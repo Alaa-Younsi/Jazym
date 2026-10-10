@@ -36,6 +36,7 @@ export function sanitizeVariantGroups(groups: VariantGroup[]): VariantGroup[] {
       name_ar: (g.name_ar || g.name_fr).trim(),
       before_price_variant: !!g.before_price_variant,
       optional: !!g.optional,
+      as_checkboxes: !!g.as_checkboxes,
       values: g.values
         .map((v) => ({
           value_fr: v.value_fr.trim(),

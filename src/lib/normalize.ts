@@ -68,6 +68,7 @@ function toVariantGroups(raw: unknown): VariantGroup[] {
         // Same trap as in toOptions — optional, so dropping it type-checks.
         before_price_variant: o.before_price_variant === true,
         optional: o.optional === true,
+        as_checkboxes: o.as_checkboxes === true,
       };
     })
     .filter((g): g is VariantGroup => g !== null);

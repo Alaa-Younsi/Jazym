@@ -56,6 +56,14 @@ export function VariantGroupFields({
           />
           {t("prodVariantOptional")}
         </label>
+        <label className="inline-flex items-center gap-1.5 text-xs text-muted">
+          <input
+            type="checkbox"
+            checked={!!group.as_checkboxes}
+            onChange={(e) => updateGroup({ as_checkboxes: e.target.checked })}
+          />
+          {t("prodVariantAsCheckboxes")}
+        </label>
         {onDelete && (
           <button
             type="button"

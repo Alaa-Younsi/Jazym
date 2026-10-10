@@ -773,49 +773,86 @@ function VariantGroupPicker({
     );
   }
 
+  // Several values shown as a checkbox list (e.g. Couverture). Still a single
+  // pick: ticking one unticks the others, ticking the picked one clears it.
+  const choices = group.as_checkboxes ? (
+    <div className="flex flex-col gap-2">
+      {group.values.map((opt) => {
+        const isPicked = picked === opt.value_fr;
+        return (
+          <label
+            key={opt.value_fr}
+            className="flex cursor-pointer items-center gap-2.5 text-sm text-ink"
+          >
+            <input
+              type="checkbox"
+              checked={isPicked}
+              onChange={() => (isPicked ? onClear() : onPick(opt))}
+              className="h-4 w-4 shrink-0 accent-[rgb(var(--c-brand))]"
+            />
+            {opt.image_url && (
+              <img
+                src={opt.image_url}
+                srcSet={responsiveSrcSet(opt.image_url)}
+                sizes="48px"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="aspect-[4/5] w-10 rounded bg-panel-2 object-cover"
+              />
+            )}
+            {lang === "ar" ? opt.value_ar : opt.value_fr}
+          </label>
+        );
+      })}
+    </div>
+  ) : null;
+
   return (
-    <Picker label={label} required invalid={showGate && incomplete}>
-      <div className="flex flex-wrap gap-2">
-        {group.values.map((opt) => {
-          const optLabel = lang === "ar" ? opt.value_ar : opt.value_fr;
-          const isPicked = picked === opt.value_fr;
-          return (
-            <button
-              key={opt.value_fr}
-              type="button"
-              onClick={() => onPick(opt)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg border text-sm transition",
-                // A value with a photo (e.g. cover) renders as a picture tile.
-                opt.image_url ? "flex-col p-1.5 pb-1 text-xs" : "px-3 py-1.5",
-                isPicked
-                  ? "border-brand ring-2 ring-brand/30"
-                  : "border-line hover:border-brand/50",
-              )}
-            >
-              {opt.image_url ? (
-                <img
-                  src={opt.image_url}
-                  srcSet={responsiveSrcSet(opt.image_url)}
-                  sizes="64px"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-[4/5] w-14 rounded-md bg-panel-2 object-cover sm:w-16"
-                />
-              ) : (
-                opt.swatch_hex && (
-                  <span
-                    className="h-3.5 w-3.5 shrink-0 rounded-full border border-line"
-                    style={{ backgroundColor: opt.swatch_hex }}
+    <Picker label={label} required={!group.optional} invalid={showGate && incomplete}>
+      {choices ?? (
+        <div className="flex flex-wrap gap-2">
+          {group.values.map((opt) => {
+            const optLabel = lang === "ar" ? opt.value_ar : opt.value_fr;
+            const isPicked = picked === opt.value_fr;
+            return (
+              <button
+                key={opt.value_fr}
+                type="button"
+                onClick={() => onPick(opt)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border text-sm transition",
+                  // A value with a photo (e.g. cover) renders as a picture tile.
+                  opt.image_url ? "flex-col p-1.5 pb-1 text-xs" : "px-3 py-1.5",
+                  isPicked
+                    ? "border-brand ring-2 ring-brand/30"
+                    : "border-line hover:border-brand/50",
+                )}
+              >
+                {opt.image_url ? (
+                  <img
+                    src={opt.image_url}
+                    srcSet={responsiveSrcSet(opt.image_url)}
+                    sizes="64px"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="aspect-[4/5] w-14 rounded-md bg-panel-2 object-cover sm:w-16"
                   />
-                )
-              )}
-              {optLabel}
-            </button>
-          );
-        })}
-      </div>
+                ) : (
+                  opt.swatch_hex && (
+                    <span
+                      className="h-3.5 w-3.5 shrink-0 rounded-full border border-line"
+                      style={{ backgroundColor: opt.swatch_hex }}
+                    />
+                  )
+                )}
+                {optLabel}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {pickedOption?.requires_text && (
         <input
