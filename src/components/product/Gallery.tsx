@@ -1,5 +1,5 @@
 import { animate, motion, useMotionValue, type PanInfo } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { SmartImage } from "@/components/ui/SmartImage";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { usePrefersReducedMotion } from "@/hooks/useMediaFlags";
@@ -19,6 +19,18 @@ interface GalleryProps {
   /** shown when there are no images */
   placeholderName: string;
 }
+
+/** Width / height of the photo frame. Fixed 4:5 (the client delivers
+    1080x1350); photos of another ratio are letterboxed, never cropped. */
+const FRAME_RATIO = 4 / 5;
+
+/** The frame is capped by WIDTH so its height always fits the screen and the
+    whole photo is visible on first sight (skill: "Product page: the WHOLE photo
+    is visible"). Phones: full width unless the photo would exceed 80svh.
+    Tablets: 44svh so title + price stay above the fold. Desktop: viewport
+    minus header + thumbnails. `--r` is set inline from FRAME_RATIO. */
+const FIT_CLASS =
+  "mx-auto w-full max-w-[calc(80svh*var(--r))] sm:max-w-[calc(44svh*var(--r))] lg:max-w-[calc((100svh-15rem)*var(--r))]";
 
 const SWIPE_DISTANCE_RATIO = 0.2; // fraction of the container's width
 const SWIPE_VELOCITY = 500;
@@ -65,10 +77,12 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
 
   if (images.length === 0) {
     return (
-      <ProductPlaceholder
-        name={placeholderName}
-        className="aspect-[4/5] w-full rounded-card border border-line"
-      />
+      <div className={FIT_CLASS} style={{ "--r": FRAME_RATIO } as CSSProperties}>
+        <ProductPlaceholder
+          name={placeholderName}
+          className="aspect-[4/5] w-full rounded-card border border-line"
+        />
+      </div>
     );
   }
 
@@ -93,7 +107,10 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
     : { left: -(images.length - 1) * width, right: 0 };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className={cn("flex flex-col gap-3", FIT_CLASS)}
+      style={{ "--r": FRAME_RATIO } as CSSProperties}
+    >
       <div
         ref={containerRef}
         className="relative aspect-[4/5] w-full touch-pan-y overflow-hidden rounded-card border border-line bg-panel"
@@ -118,8 +135,9 @@ export function Gallery({ images, activeIndex, onActiveChange, placeholderName }
                 alt={img.alt ?? placeholderName}
                 sizes="(max-width: 1024px) 100vw, 520px"
                 eager={i === 0}
+                original
                 draggable={false}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             </div>
           ))}

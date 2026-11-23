@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 import { TrackingProvider } from "@/components/TrackingProvider";
+import { CookieConsent } from "@/components/layout/CookieConsent";
 import { StoreLayout } from "@/components/layout/StoreLayout";
 import { PageLoader } from "@/components/ui/Spinner";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -17,6 +18,7 @@ const Checkout = lazy(() => import("@/pages/Checkout"));
 const OrderConfirmation = lazy(() => import("@/pages/OrderConfirmation"));
 const Policy = lazy(() => import("@/pages/Policy"));
 const Contact = lazy(() => import("@/pages/Contact"));
+const Legal = lazy(() => import("@/pages/Legal"));
 const LandingPageView = lazy(() => import("@/pages/LandingPageView"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
@@ -56,6 +58,7 @@ function AppRoutes() {
   return (
     <>
       <ScrollToTop />
+      <CookieConsent />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<StoreLayout />}>
@@ -67,6 +70,10 @@ function AppRoutes() {
             <Route path="/commande/:orderNumber" element={<OrderConfirmation />} />
             <Route path="/politique" element={<Policy />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/mentions-legales" element={<Legal slug="mentions-legales" />} />
+            <Route path="/cgv" element={<Legal slug="cgv" />} />
+            <Route path="/confidentialite" element={<Legal slug="confidentialite" />} />
+            <Route path="/cookies" element={<Legal slug="cookies" />} />
           </Route>
 
           <Route path="/lp/:slug" element={<LandingPageView />} />

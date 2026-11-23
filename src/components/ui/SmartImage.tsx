@@ -7,6 +7,9 @@ interface SmartImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   /** REQUIRED — match the real rendered size or the srcset is defeated. */
   sizes: string;
   eager?: boolean;
+  /** Serve the original file only, no resized srcset — for the one image
+      where full quality matters more than bytes (the product-page photo). */
+  original?: boolean;
 }
 
 /**
@@ -19,6 +22,7 @@ export function SmartImage({
   src,
   sizes,
   eager,
+  original,
   className,
   alt = "",
   onLoad,
@@ -27,7 +31,7 @@ export function SmartImage({
 }: SmartImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [useSrcSet, setUseSrcSet] = useState(true);
-  const srcSet = useSrcSet ? responsiveSrcSet(src) : undefined;
+  const srcSet = useSrcSet && !original ? responsiveSrcSet(src) : undefined;
 
   return (
     <img
@@ -49,7 +53,7 @@ export function SmartImage({
         onLoad?.(e);
       }}
       onError={(e) => {
-        if (useSrcSet && responsiveSrcSet(src)) {
+        if (srcSet) {
           setUseSrcSet(false);
           return;
         }

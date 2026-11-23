@@ -16,6 +16,7 @@ import {
   type PixelContext,
   type TrackEventKey,
 } from "@/lib/tracking";
+import { useAdsAllowed } from "@/store/consent";
 
 interface TrackingContextValue {
   track: (key: TrackEventKey, params?: Record<string, unknown>, eventId?: string) => void;
@@ -33,11 +34,17 @@ export function TrackingProvider({ children }: { children: ReactNode }) {
     ids: new Set(),
   });
 
+  // No consent = no pixels at all: nothing is initialised or loaded, and
+  // every track() below is a no-op over an empty list.
+  const adsAllowed = useAdsAllowed();
   const isAdmin = pathname.startsWith("/admin");
 
   const ctx: PixelContext = useMemo(() => ({ pathname, ...routeCtx }), [pathname, routeCtx]);
 
-  const matched = useMemo(() => (isAdmin ? [] : matchPixels(pixels, ctx)), [pixels, ctx, isAdmin]);
+  const matched = useMemo(
+    () => (isAdmin || !adsAllowed ? [] : matchPixels(pixels, ctx)),
+    [pixels, ctx, isAdmin, adsAllowed],
+  );
 
   // Init matched pixels.
   useEffect(() => {

@@ -13,7 +13,16 @@ const DOMAIN = (process.env.VITE_SITE_URL || "https://jazym.shop").replace(/\/$/
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
-const STATIC_ROUTES = ["/", "/boutique", "/politique", "/contact"];
+const STATIC_ROUTES = [
+  "/",
+  "/boutique",
+  "/politique",
+  "/contact",
+  "/mentions-legales",
+  "/cgv",
+  "/confidentialite",
+  "/cookies",
+];
 
 async function fetchRows(path, params) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL.includes("YOUR-PROJECT")) {

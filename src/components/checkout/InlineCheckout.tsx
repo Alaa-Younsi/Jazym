@@ -16,6 +16,7 @@ import { checkoutSchema, type CheckoutFormValues } from "@/lib/checkoutSchema";
 import { orderErrorKey } from "@/lib/orderErrors";
 import type { CartVariantPick, Product } from "@/types/db";
 import { CheckoutFields } from "./CheckoutFields";
+import { LegalAcceptLine } from "@/components/checkout/LegalAcceptLine";
 
 interface InlineCheckoutProps {
   product: Product;
@@ -229,6 +230,7 @@ export function InlineCheckout({
         <ShieldCheck size={13} />
         {t("checkoutSecure")}
       </p>
+      <LegalAcceptLine />
     </form>
   );
 }

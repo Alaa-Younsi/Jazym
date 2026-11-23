@@ -17,3 +17,24 @@ export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/jazym.dz",
   tiktok: "https://www.tiktok.com/@jazym.dz",
 } as const;
+
+/* Legal identity published on /mentions-legales (loi 18-05, art. 11: an online
+   seller must show its trade-register and tax numbers). TODO(client): fill in
+   each number from the registre du commerce / carte fiscale. An empty value is
+   simply not rendered, so the page never shows a fake number. */
+export const LEGAL_IDENTITY = {
+  tradeName: "Jazym",
+  /** Nom et prénom de l'exploitant ou raison sociale. */
+  owner: "",
+  /** Numéro du registre du commerce (RC). */
+  rc: "",
+  /** Numéro d'identification fiscale (NIF). */
+  nif: "",
+  /** Numéro d'identification statistique (NIS). */
+  nis: "",
+  /** Article d'imposition (AI). */
+  ai: "",
+} as const;
+
+export const DEVELOPER_NAME = "Alaa Younsi";
+export const DEVELOPER_URL = "https://alaayounsi.vercel.app/";

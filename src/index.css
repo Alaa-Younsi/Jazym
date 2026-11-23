@@ -328,6 +328,14 @@ input[type="number"]::-webkit-inner-spin-button {
   unicode-bidi: isolate;
 }
 
+/* Hide the scrollbar on a one-line overflow row (product breadcrumb). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Themed scrollbar for scroll containers that would otherwise show the OS
    default (admin sidebar nav, drawers, long dropdowns). */
 .fx-scrollbar {

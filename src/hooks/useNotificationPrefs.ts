@@ -73,3 +73,70 @@ export function useSaveNotificationPrefs() {
     },
   });
 }
+
+/** One alert recipient as the OWNER sees it (migration 0034). */
+export interface NotificationRecipient {
+  user_id: string;
+  email_enabled: boolean;
+  notify_email: string | null;
+  /** The admin account the address is saved on (its login e-mail). */
+  account_email: string | null;
+  account_active: boolean;
+  is_owner: boolean;
+}
+
+interface RecipientRow {
+  user_id: string;
+  email_enabled: boolean;
+  notify_email: string | null;
+  admin_profiles: { email: string | null; active: boolean; is_owner: boolean } | null;
+}
+
+/**
+ * Every account's alert address — owner only. This is the list the `notify`
+ * edge function actually sends to (enabled rows of active accounts), so it is
+ * the answer to "who is receiving the order e-mails?".
+ */
+export function useNotificationRecipients(enabled: boolean) {
+  return useQuery({
+    queryKey: ["notification-recipients"],
+    enabled: enabled && isSupabaseConfigured,
+    retry: 0,
+    queryFn: async (): Promise<NotificationRecipient[]> => {
+      const { data, error } = await supabase
+        .from("admin_notification_prefs")
+        .select(
+          "user_id, email_enabled, notify_email, admin_profiles!inner(email, active, is_owner)",
+        );
+      if (error) throw error;
+      return ((data ?? []) as unknown as RecipientRow[]).map((r) => ({
+        user_id: r.user_id,
+        email_enabled: r.email_enabled,
+        notify_email: r.notify_email,
+        account_email: r.admin_profiles?.email ?? null,
+        account_active: r.admin_profiles?.active ?? false,
+        is_owner: r.admin_profiles?.is_owner ?? false,
+      }));
+    },
+  });
+}
+
+export function useSetRecipientEnabled() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId, enabled }: { userId: string; enabled: boolean }) => {
+      // .select() so an RLS-filtered update (0 rows) is reported, not "saved".
+      const { data, error } = await supabase
+        .from("admin_notification_prefs")
+        .update({ email_enabled: enabled, updated_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .select("user_id");
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("not_updated");
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notification-recipients"] });
+      qc.invalidateQueries({ queryKey: ["notification-prefs"] });
+    },
+  });
+}

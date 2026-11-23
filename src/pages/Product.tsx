@@ -285,8 +285,8 @@ export default function Product() {
   };
 
   return (
-    <Container className="py-10">
-      <nav className="mb-6 flex items-center gap-1.5 text-xs text-muted">
+    <Container className="pb-10 pt-3 lg:pt-5">
+      <nav className="no-scrollbar mb-3 flex min-h-[1.25rem] items-center gap-1.5 overflow-x-auto whitespace-nowrap text-xs text-muted">
         <Link to="/boutique" className="hover:text-brand">
           {t("navShop")}
         </Link>
@@ -302,8 +302,8 @@ export default function Product() {
         <span className="text-ink">{name}</span>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-10">
+        <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
           <Gallery
             images={galleryImages}
             activeIndex={activeImage}
@@ -319,7 +319,7 @@ export default function Product() {
                 {lang === "ar" ? product.category.name_ar : product.category.name_fr}
               </span>
             )}
-            <h1 className="fx-display mt-1 text-3xl text-ink sm:text-4xl">{name}</h1>
+            <h1 className="fx-display mt-1 text-2xl text-ink sm:text-4xl">{name}</h1>
             <div className="mt-3 flex items-center gap-3">
               <Price value={effectivePrice} className="text-2xl font-semibold text-ink" />
               {onSale && effectiveCompareAt != null && (

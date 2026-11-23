@@ -6,7 +6,15 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { useCategories } from "@/hooks/useCategories";
 import { useI18n } from "@/i18n/LanguageProvider";
 import { childrenOf } from "@/lib/categoryTree";
-import { CONTACT_PHONE, CONTACT_PHONE_HREF, SOCIAL_LINKS } from "@/lib/contact";
+import { LEGAL_NAV_KEYS, LEGAL_ORDER } from "@/content/legal";
+import {
+  CONTACT_PHONE,
+  CONTACT_PHONE_HREF,
+  DEVELOPER_NAME,
+  DEVELOPER_URL,
+  SOCIAL_LINKS,
+} from "@/lib/contact";
+import { useConsent } from "@/store/consent";
 import { pick } from "@/lib/utils";
 
 function TikTokIcon({ size = 18 }: { size?: number }) {
@@ -19,6 +27,7 @@ function TikTokIcon({ size = 18 }: { size?: number }) {
 
 export function Footer() {
   const { t, lang } = useI18n();
+  const openCookiePanel = useConsent((s) => s.openPanel);
   const { data: categories = [] } = useCategories();
   const topCategories = childrenOf(categories, null).slice(0, 4);
   const year = new Date().getFullYear();
@@ -64,14 +73,37 @@ export function Footer() {
       </Container>
 
       <div className="border-t border-line">
-        <Container className="flex flex-col items-center justify-between gap-2 py-5 text-xs text-muted sm:flex-row">
-          <span>
-            © {year} {t("brandName")}. {t("footerRights")}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <FlowerMark className="h-3.5 w-3.5 text-brand" />
-            {t("footerMadeIn")}
-          </span>
+        <Container className="flex flex-col gap-4 py-5 text-xs text-muted">
+          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-start">
+            {LEGAL_ORDER.map((slug) => (
+              <Link key={slug} to={`/${slug}`} className="transition hover:text-brand">
+                {t(LEGAL_NAV_KEYS[slug])}
+              </Link>
+            ))}
+            <button type="button" onClick={openCookiePanel} className="transition hover:text-brand">
+              {t("footerManageCookies")}
+            </button>
+          </nav>
+          <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-start">
+            <span>
+              © {year} {t("brandName")}. {t("footerRights")}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <FlowerMark className="h-3.5 w-3.5 text-brand" />
+              {t("footerMadeIn")}
+            </span>
+            <span>
+              {t("footerDevelopedBy")}{" "}
+              <a
+                href={DEVELOPER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-ink transition hover:text-brand"
+              >
+                {DEVELOPER_NAME}
+              </a>
+            </span>
+          </div>
         </Container>
       </div>
     </footer>

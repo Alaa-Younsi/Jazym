@@ -20,6 +20,7 @@ import { checkoutSchema, type CheckoutFormValues } from "@/lib/checkoutSchema";
 import { variantSummary } from "@/lib/format";
 import { orderErrorKey } from "@/lib/orderErrors";
 import { useCart } from "@/store/cart";
+import { LegalAcceptLine } from "@/components/checkout/LegalAcceptLine";
 
 export default function Checkout() {
   const { t, lang } = useI18n();
@@ -234,6 +235,7 @@ export default function Checkout() {
               <ShieldCheck size={13} />
               {t("checkoutSecure")}
             </p>
+            <LegalAcceptLine className="mt-2" />
           </div>
         </aside>
       </form>

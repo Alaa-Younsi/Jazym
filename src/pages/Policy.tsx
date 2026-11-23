@@ -45,10 +45,8 @@ export default function Policy() {
                   )}
                 </span>
                 <div>
-                  <h2 className="fx-display text-xl text-ink">
-                    <span className="num-ltr me-2 text-muted">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
+                  <h2 className="fx-display flex items-baseline gap-2 text-xl text-ink">
+                    <span className="num-ltr text-muted">{String(i + 1).padStart(2, "0")}</span>
                     {section.title}
                   </h2>
                   <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">
